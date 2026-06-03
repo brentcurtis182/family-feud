@@ -474,7 +474,7 @@
 
 .gs-play-roster {
   position: absolute;
-  bottom: 11%;         /* down ~1 line from the previous spot */
+  bottom: 13%;         /* fine-tuned vertical */
   width: 40%;
   display: flex;
   justify-content: space-evenly;  /* one name per podium box */
@@ -483,9 +483,8 @@
   transform-origin: center;
 }
 /* slight perspective tilt to match the angled podium row (mirrored per side) */
-/* nudged back right ~half a name-width from the 3-name shift */
-.camera-play-left .gs-play-roster { left: 10%; transform: rotate(-3deg) skewX(-4deg); }
-.camera-play-right .gs-play-roster { right: 10%; transform: rotate(3deg) skewX(4deg); }
+.camera-play-left .gs-play-roster { left: 8%; transform: rotate(-3deg) skewX(-4deg); }
+.camera-play-right .gs-play-roster { right: 8%; transform: rotate(3deg) skewX(4deg); }
 .gs-play-name {
   font-family: var(--font-display);
   font-size: 1.5vw;
