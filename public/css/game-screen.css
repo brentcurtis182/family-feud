@@ -494,12 +494,18 @@
   color: #fff;
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);  /* no box — clean on the blue */
 }
-/* Per-plate fine alignment (perspective spacing). 1 "letter" ≈ 0.5em. */
-.gs-play-name:nth-child(1),
-.gs-play-name:nth-child(2),
-.gs-play-name:nth-child(3) { left: 0.5em; }   /* right ~2 chars */
-.gs-play-name:nth-child(4) { left: 0.25em; }  /* right ~1 char */
-.gs-play-name:nth-child(5) { left: -0.5em; }  /* left ~2 chars */
+/* Per-plate fine alignment (perspective spacing differs per side). */
+/* Left side (play-left) */
+.camera-play-left .gs-play-name:nth-child(1),
+.camera-play-left .gs-play-name:nth-child(2),
+.camera-play-left .gs-play-name:nth-child(3) { left: 0.5em; }   /* right ~2 chars */
+.camera-play-left .gs-play-name:nth-child(4) { left: 0.25em; }  /* right ~1 char */
+.camera-play-left .gs-play-name:nth-child(5) { left: -0.5em; }  /* left ~2 chars */
+/* Right side (play-right) — 1 char ≈ 0.5em (one letter) */
+.camera-play-right .gs-play-name:nth-child(2),
+.camera-play-right .gs-play-name:nth-child(3),
+.camera-play-right .gs-play-name:nth-child(4) { left: -1.5em; } /* back ~3 chars (left) */
+/* n1 and n5 on the right: no change (n5 was already perfect) */
 
 /* ---- GIANT buzz-in indicator ---- */
 .gs-buzzin {
