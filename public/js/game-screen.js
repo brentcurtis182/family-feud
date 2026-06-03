@@ -46,12 +46,16 @@ socket.on('camera-angle', ({ angle }) => {
 
 // Animation/sound triggers (state-sync follows for authoritative state)
 socket.on('answer-revealed', ({ position, roundBank }) => {
-  const panel = document.querySelector(`.gs-panel[data-position="${position}"]`);
-  if (panel && !panel.classList.contains('revealed')) {
-    panel.classList.add('revealed');
+  const cell = document.querySelector(`.rb-cell[data-position="${position}"]`);
+  if (cell && !cell.classList.contains('revealed')) {
+    cell.classList.add('revealed');
     Sounds.ding();
   }
-  if (roundBank !== undefined) setBank(roundBank);
+  if (roundBank !== undefined) {
+    setBank(roundBank);
+    const t = document.getElementById('rb-total');
+    if (t) t.textContent = roundBank;
+  }
 });
 
 socket.on('strike-added', ({ strikes }) => {
@@ -402,7 +406,9 @@ function setBank(value) {
   const el = document.getElementById('gs-bank');
   if (!el) return;
   el.textContent = value;
-  el.parentElement.classList.toggle('hidden', !gameState.currentQuestion);
+  // The board now shows the total in its top panel (rb-total), so keep the
+  // old standalone bank chip hidden.
+  el.parentElement.classList.add('hidden');
 }
 
 // Static strike render (for reconnects); flashStrikes animates a new one.
@@ -455,57 +461,45 @@ function renderQuestion() {
 }
 
 function renderBoard() {
-  const board = document.getElementById('gs-board');
+  const slots = document.getElementById('rb-slots');
   const q = gameState.currentQuestion;
   if (!q) {
     renderedQuestionSig = null;
-    board.innerHTML = '';
+    slots.innerHTML = '';
+    document.getElementById('rb-total').textContent = '';
     return;
   }
 
   const count = q.answerCount || q.answers.length;
   const sig = `${q.text}|${count}`;
 
-  // Rebuild panel scaffolding only when the question changes.
   if (sig !== renderedQuestionSig) {
     renderedQuestionSig = sig;
-    const rows = Math.ceil(count / 2);
-    board.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
-    board.innerHTML = q.answers.map((a, i) => panelMarkup(a, i)).join('');
+    slots.innerHTML = q.answers.map((a, i) => rbCell(a, i)).join('');
   } else {
-    // Same question — just sync revealed state (handles reconnects mid-round).
     q.answers.forEach((a, i) => {
-      const panel = board.querySelector(`.gs-panel[data-position="${i}"]`);
-      if (panel) syncPanel(panel, a);
+      const cell = slots.querySelector(`.rb-cell[data-position="${i}"]`);
+      if (cell) syncRbCell(cell, a);
     });
   }
+
+  document.getElementById('rb-total').textContent = gameState.roundBank || 0;
 }
 
-function panelMarkup(answer, position) {
+function rbCell(answer, position) {
   const revealed = answer.revealed;
   return `
-    <div class="gs-panel${revealed ? ' revealed' : ''}" data-position="${position}">
-      <div class="gs-panel-inner">
-        <div class="gs-panel-front">
-          <span class="gs-panel-rank">${position + 1}</span>
-        </div>
-        <div class="gs-panel-back">
-          <span class="gs-panel-text">${escapeHtml(answer.text || '')}</span>
-          <span class="gs-panel-points">${answer.points != null ? answer.points : ''}</span>
-        </div>
-      </div>
+    <div class="rb-cell${revealed ? ' revealed' : ''}" data-position="${position}">
+      <span class="rb-rank">${position + 1}</span>
+      <span class="rb-ans">${escapeHtml(answer.text || '')}</span>
+      <span class="rb-pts">${answer.points != null ? answer.points : ''}</span>
     </div>`;
 }
 
-function syncPanel(panel, answer) {
-  if (answer.revealed) {
-    panel.querySelector('.gs-panel-text').textContent = answer.text || '';
-    panel.querySelector('.gs-panel-points').textContent =
-      answer.points != null ? answer.points : '';
-    panel.classList.add('revealed');
-  } else {
-    panel.classList.remove('revealed');
-  }
+function syncRbCell(cell, answer) {
+  cell.querySelector('.rb-ans').textContent = answer.text || '';
+  cell.querySelector('.rb-pts').textContent = answer.points != null ? answer.points : '';
+  cell.classList.toggle('revealed', !!answer.revealed);
 }
 
 // ---- Helpers ----

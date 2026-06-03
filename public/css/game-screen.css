@@ -103,14 +103,94 @@
 }
 
 /* Answer board container */
+/* Regular-round board = scoreboard-rounds.png with our answers overlaid.
+   The slot grid + total box are positioned with the vars below — nudge these
+   four/percent values to line the overlay up with the painted slots. */
 .gs-board {
+  position: absolute;
+  inset: 0;
+  background: url('/assets/images/scoreboard-rounds.png') center / contain no-repeat;
+  /* --- alignment knobs (percent of the stage) --- */
+  --slots-left: 21%;
+  --slots-top: 31%;
+  --slots-width: 58%;
+  --slots-height: 53%;
+  --slots-colgap: 3%;
+  --slots-rowgap: 1.6%;
+}
+
+.rb-slots {
+  position: absolute;
+  left: var(--slots-left);
+  top: var(--slots-top);
+  width: var(--slots-width);
+  height: var(--slots-height);
   display: grid;
-  grid-auto-flow: column;
-  gap: 10px 16px;
-  width: 72%;
-  max-width: 900px;
-  padding: 24px;
-  perspective: 1200px;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: repeat(4, 1fr);
+  grid-auto-flow: column;          /* fill 1-4 left column, then 5-8 right */
+  column-gap: var(--slots-colgap);
+  row-gap: var(--slots-rowgap);
+}
+
+.rb-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3%;
+  overflow: hidden;
+}
+
+.rb-rank {
+  font-family: var(--font-display);
+  font-size: 2.6vw;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+.rb-cell.revealed .rb-rank { display: none; }
+
+.rb-ans, .rb-pts { display: none; }
+.rb-cell.revealed .rb-ans {
+  display: block;
+  flex: 1;
+  text-align: left;
+  font-family: var(--font-display);
+  font-size: 2vw;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  animation: rbPop 0.3s ease;
+}
+.rb-cell.revealed .rb-pts {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.6vw;
+  font-family: var(--font-display);
+  font-size: 2vw;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+@keyframes rbPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+
+/* Round total (top center panel of the board) */
+.rb-total {
+  position: absolute;
+  left: 43%;
+  top: 6.5%;
+  width: 14%;
+  height: 11%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 4vw;
+  color: #fff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
 }
 
 /* Single answer panel */
