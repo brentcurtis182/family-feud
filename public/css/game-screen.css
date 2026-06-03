@@ -474,7 +474,7 @@
 
 .gs-play-roster {
   position: absolute;
-  bottom: 15%;         /* up ~2 lines from the previous spot */
+  bottom: 11%;         /* down ~1 line from the previous spot */
   width: 40%;
   display: flex;
   justify-content: space-evenly;  /* one name per podium box */
@@ -483,9 +483,9 @@
   transform-origin: center;
 }
 /* slight perspective tilt to match the angled podium row (mirrored per side) */
-/* shifted ~3 name-widths toward the arch so name 1 lands in the 1st plate */
-.camera-play-left .gs-play-roster { left: 6%; transform: rotate(-3deg) skewX(-4deg); }
-.camera-play-right .gs-play-roster { right: 6%; transform: rotate(3deg) skewX(4deg); }
+/* nudged back right ~half a name-width from the 3-name shift */
+.camera-play-left .gs-play-roster { left: 10%; transform: rotate(-3deg) skewX(-4deg); }
+.camera-play-right .gs-play-roster { right: 10%; transform: rotate(3deg) skewX(4deg); }
 .gs-play-name {
   font-family: var(--font-display);
   font-size: 1.5vw;
@@ -597,7 +597,7 @@
   --fmb-top: 16%;
   --fmb-height: 56%;
   --fmb-colw: 37%;     /* width of each player's [answer+points] block */
-  --fmb-left: 16%;     /* left edge of player 1's block (slid right ~4 chars) */
+  --fmb-left: 14.75%;  /* player 1's block (right ~4 chars, then back ~1) */
   --fmb-right: 11%;    /* right edge of player 2's block (perfect — leave it) */
 }
 
@@ -671,7 +671,7 @@
 .fmb-total {
   position: absolute;
   bottom: 15%;
-  left: 46%;
+  left: 49%;
   transform: translateX(-50%);
   font-family: var(--font-display);
   font-size: 3.6cqw;
