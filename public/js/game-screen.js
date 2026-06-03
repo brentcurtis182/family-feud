@@ -458,8 +458,8 @@ function renderBoard() {
   if (sig !== renderedQuestionSig) {
     renderedQuestionSig = sig;
     slots.innerHTML = q.answers.map((a, i) => rbCell(a, i)).join('');
-    // Populate the rank strips one at a time with a flip sound.
-    q.answers.forEach((_, i) => setTimeout(() => Sounds.ding(), 250 + i * 130));
+    // Populate the rank strips one at a time, each with a quick whoosh.
+    q.answers.forEach((_, i) => setTimeout(() => Sounds.woosh(), 250 + i * 130));
   } else {
     q.answers.forEach((a, i) => {
       const cell = slots.querySelector(`.rb-cell[data-position="${i}"]`);

@@ -11,6 +11,7 @@ const Sounds = {
     theme: 'theme-song.mp3',
     fmDing: 'family-feud-ding.mp3',
     fmReveal: 'review-answers-fast-money-sound-ff.mp3',
+    woosh: 'woosh-sound.mp3',
   },
   cache: {},
   unlocked: false,
@@ -59,4 +60,12 @@ const Sounds = {
   clap() { this.play('clap'); },          // host applause button
   fmDingSound() { this.play('fmDing'); },   // fast money value reveal
   fmRevealSound() { this.play('fmReveal'); }, // fast money answer reveal
+
+  // Board-load whoosh. Plays a fresh clone each time so the rapid-fire whooshes
+  // (one per answer slot) layer instead of cutting each other off.
+  woosh() {
+    const a = this._get('woosh');
+    if (!a) return;
+    try { const c = a.cloneNode(true); c.play().catch(() => {}); } catch {}
+  },
 };
