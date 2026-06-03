@@ -499,13 +499,13 @@
 /* Per-plate fine alignment (perspective spacing differs per side). */
 /* Left side (play-left) */
 .camera-play-left .gs-play-name:nth-child(1),
-.camera-play-left .gs-play-name:nth-child(2),
-.camera-play-left .gs-play-name:nth-child(3) { left: 0.5em; }   /* right ~2 chars */
-.camera-play-left .gs-play-name:nth-child(4) { left: 0.25em; }  /* right ~1 char */
-.camera-play-left .gs-play-name:nth-child(5) { left: -0.5em; }  /* left ~2 chars */
+.camera-play-left .gs-play-name:nth-child(2) { left: 1em; }     /* +1 letter */
+.camera-play-left .gs-play-name:nth-child(3) { left: 0.5em; }
+.camera-play-left .gs-play-name:nth-child(4) { left: 0.25em; }
+.camera-play-left .gs-play-name:nth-child(5) { left: -0.5em; }
 /* Right side (play-right) — 1 char ≈ 0.5em (one letter) */
-.camera-play-right .gs-play-name:nth-child(1) { left: 2em; }     /* right ~4 chars */
-.camera-play-right .gs-play-name:nth-child(2) { left: 0.5em; }   /* right ~6 chars */
+.camera-play-right .gs-play-name:nth-child(1) { left: 1.5em; }   /* -1 letter */
+.camera-play-right .gs-play-name:nth-child(2) { left: 0em; }     /* -1 letter */
 .camera-play-right .gs-play-name:nth-child(3) { left: -0.5em; }  /* right ~4 chars */
 .camera-play-right .gs-play-name:nth-child(4) { left: -1.5em; }  /* good as-is */
 .camera-play-right .gs-play-name:nth-child(5) { left: -1.5em; }  /* left ~3 chars */
