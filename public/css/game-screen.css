@@ -474,8 +474,8 @@
 
 .gs-play-roster {
   position: absolute;
-  bottom: 8%;          /* down in the blue podium nameplates (full-screen coords) */
-  width: 36%;
+  bottom: 7%;          /* down in the blue podium nameplates (full-screen coords) */
+  width: 40%;
   display: flex;
   justify-content: space-evenly;  /* one name per podium box */
   flex-wrap: nowrap;
@@ -483,8 +483,8 @@
   transform-origin: center;
 }
 /* slight perspective tilt to match the angled podium row (mirrored per side) */
-.camera-play-left .gs-play-roster { left: 25%; transform: rotate(-5deg) skewX(-6deg); }
-.camera-play-right .gs-play-roster { right: 25%; transform: rotate(5deg) skewX(6deg); }
+.camera-play-left .gs-play-roster { left: 30%; transform: rotate(-3deg) skewX(-4deg); }
+.camera-play-right .gs-play-roster { right: 13%; transform: rotate(3deg) skewX(4deg); }
 .gs-play-name {
   font-family: var(--font-display);
   font-size: 1.5vw;
@@ -594,7 +594,7 @@
   z-index: 8;
   /* cell-block geometry (percent of the board) */
   --fmb-top: 16%;
-  --fmb-height: 52%;
+  --fmb-height: 56%;
   --fmb-colw: 37%;     /* width of each player's [answer+points] block */
   --fmb-left: 11%;     /* left edge of player 1's block */
   --fmb-right: 11%;    /* right edge of player 2's block */
@@ -625,13 +625,13 @@
 .fmb-ans {
   justify-content: flex-start;
   padding-left: 5%;
-  font-size: 2.7cqw;
+  font-size: 3cqw;
   letter-spacing: 0.01em;
   text-transform: uppercase;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-.fmb-pts { justify-content: center; font-size: 3cqw; }
+.fmb-pts { justify-content: center; font-size: 3.2cqw; }
 .fmb-cell.duplicate { color: var(--ff-red-glow); }
 .fmb-cell.pop { animation: rbPop 0.3s ease; }
 
