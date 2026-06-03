@@ -472,8 +472,8 @@ function renderFmDrafts() {
       <div class="fmc-draft ${i === fmCapIndex ? 'active' : ''}">
         <div class="fmc-draft-q">${i + 1}. ${escapeHtml(q.text)}</div>
         ${p1ref}
-        <input class="input fmc-draft-input" id="fmc-draft-${i}" value="${escapeHtml(fmDrafts[i])}"
-          oninput="fmDrafts[${i}]=this.value" placeholder="(answer)">
+        <textarea class="input fmc-draft-input" id="fmc-draft-${i}" rows="2"
+          oninput="fmDrafts[${i}]=this.value" placeholder="(answer)">${escapeHtml(fmDrafts[i])}</textarea>
       </div>`;
     })
     .join('');
@@ -645,9 +645,9 @@ function fmrRow(player, i, q) {
   const dup = player === 'p2'
     ? `<button class="fmr-chip fmr-dup" ${dis} onclick="fmPickDup(${i})">Duplicate</button>` : '';
 
-  // Transcript / memory aid (you can type what they said for reference)
+  // Transcript / memory aid — full text, wraps so nothing is cut off
   const transcript = `<div class="fmr-said"><span class="fmr-name">they said:</span>
-      <input class="input fmr-answer-edit" value="${escapeHtml(said)}" onchange="fmEdit('${player}',${i},this.value)" placeholder="(optional note)">
+      <textarea class="input fmr-answer-edit" rows="2" onchange="fmEdit('${player}',${i},this.value)" placeholder="(optional note)">${escapeHtml(said)}</textarea>
     </div>`;
 
   // 3-beat reveal: ① cursor → ② pick answer (words flip + chase) → ③ score
