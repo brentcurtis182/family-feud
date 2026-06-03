@@ -593,11 +593,11 @@
   background: url('/assets/images/fastmoney-bg.png') 0 0 / 100% 100% no-repeat;
   z-index: 8;
   /* cell-block geometry (percent of the board) */
-  --fmb-top: 15%;
-  --fmb-height: 60%;
-  --fmb-colw: 42%;     /* width of each player's [answer+points] block */
-  --fmb-left: 6.5%;    /* left edge of player 1's block */
-  --fmb-right: 6.5%;   /* right edge of player 2's block */
+  --fmb-top: 16%;
+  --fmb-height: 52%;
+  --fmb-colw: 37%;     /* width of each player's [answer+points] block */
+  --fmb-left: 8%;      /* left edge of player 1's block */
+  --fmb-right: 8%;     /* right edge of player 2's block */
 }
 
 .fmb-side {
@@ -606,9 +606,9 @@
   height: var(--fmb-height);
   width: var(--fmb-colw);
   display: grid;
-  grid-template-columns: 1fr 22%;   /* answer (wide) + points (narrow) */
+  grid-template-columns: 1fr 24%;   /* answer (wide) + points (narrow) */
   grid-template-rows: repeat(5, 1fr);
-  column-gap: 3%;
+  column-gap: 5%;
 }
 .fmb-left { left: var(--fmb-left); }
 .fmb-right { right: var(--fmb-right); }
@@ -624,7 +624,7 @@
 }
 .fmb-ans {
   justify-content: flex-start;
-  padding-left: 4%;
+  padding-left: 5%;
   font-size: 2.7cqw;
   letter-spacing: 0.01em;
   text-transform: uppercase;
@@ -634,6 +634,16 @@
 .fmb-pts { justify-content: center; font-size: 3cqw; }
 .fmb-cell.duplicate { color: var(--ff-red-glow); }
 .fmb-cell.pop { animation: rbPop 0.3s ease; }
+
+/* Pink reveal cursor — sits on the answer box before reveal, then jumps to the
+   score box until the host reveals the score (state-driven). */
+.fmb-cell.fm-cursor-on {
+  background: rgba(255, 45, 230, 0.55);
+  box-shadow: 0 0 14px rgba(255, 45, 230, 0.85), inset 0 0 0 2px rgba(255, 120, 245, 0.9);
+  border-radius: 3px;
+  animation: fmCursorBlink 0.7s steps(1, end) infinite;
+}
+@keyframes fmCursorBlink { 50% { background: rgba(255, 45, 230, 0.12); } }
 
 .fmb-name {
   position: absolute;
@@ -650,8 +660,8 @@
 
 .fmb-total {
   position: absolute;
-  bottom: 6%;
-  left: 50%;
+  bottom: 15%;
+  left: 44%;
   transform: translateX(-50%);
   font-family: var(--font-display);
   font-size: 3.6cqw;

@@ -312,56 +312,18 @@ function renderFastMoneyBoard() {
       if (ans) {
         ans.textContent = r.answerRevealed ? (r.duplicate ? '✗ DUPE' : (r.text || '')) : '';
         ans.classList.toggle('duplicate', !!r.duplicate);
+        // cursor sits on the answer box until the answer is revealed
+        ans.classList.toggle('fm-cursor-on', !!(r.cursor && !r.answerRevealed));
       }
-      if (pts) pts.textContent = r.scoreRevealed ? (r.duplicate ? '0' : r.points) : '';
+      if (pts) {
+        pts.textContent = r.scoreRevealed ? (r.duplicate ? '0' : r.points) : '';
+        // then jumps to the score box until the score is revealed
+        pts.classList.toggle('fm-cursor-on', !!(r.cursor && r.answerRevealed && !r.scoreRevealed));
+      }
     });
   }
 
   document.getElementById('fmb-total').textContent = fm.total;
-}
-
-// Pink cursor sweeps left→right across the answer as the words wipe in.
-function chaseReveal(cell, text) {
-  const ansEl = cell.querySelector('.fm-cell-ans');
-  const cursor = cell.querySelector('.fm-cursor');
-  if (!ansEl || !cursor) return;
-
-  ansEl.textContent = text;
-  cell.classList.add('revealed');
-
-  const dur = 650;
-  const w = ansEl.getBoundingClientRect().width;
-  const startX = ansEl.offsetLeft;
-
-  // Clip the words and park the cursor at the answer's left edge
-  ansEl.style.clipPath = 'inset(0 100% 0 0)';
-  ansEl.style.transition = 'none';
-  cursor.style.position = 'absolute';
-  cursor.style.left = startX + 'px';
-  cursor.style.transform = 'translateX(0)';
-  cursor.style.opacity = '1';
-  cursor.style.animation = 'none';
-  void cell.offsetWidth; // reflow
-
-  // Wipe the words open and chase the cursor across (chunky, like the board)
-  ansEl.style.transition = `clip-path ${dur}ms steps(16)`;
-  ansEl.style.clipPath = 'inset(0 0 0 0)';
-  cursor.style.transition = `transform ${dur}ms steps(16)`;
-  cursor.style.transform = `translateX(${w}px)`;
-
-  clearTimeout(chaseReveal._t);
-  chaseReveal._t = setTimeout(() => {
-    // Clear inline styles; let state-driven render restore the score-side cursor
-    ansEl.style.clipPath = '';
-    ansEl.style.transition = '';
-    cursor.style.position = '';
-    cursor.style.left = '';
-    cursor.style.transform = '';
-    cursor.style.transition = '';
-    cursor.style.animation = '';
-    cursor.style.opacity = '';
-    renderAll();
-  }, dur + 80);
 }
 
 function showOverlay(html) {
