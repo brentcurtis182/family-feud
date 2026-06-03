@@ -137,7 +137,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 3%;
+  padding: 0 1.2%;
+  gap: 1%;
   overflow: hidden;
 }
 
@@ -156,9 +157,9 @@
   flex: 1;
   text-align: left;
   font-family: var(--font-display);
-  font-size: 3.2vw;
+  font-size: 2vw;
   line-height: 1;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   text-transform: uppercase;
   color: #fff;
   white-space: nowrap;
@@ -171,9 +172,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 3.4vw;
+  min-width: 2.4vw;
   font-family: var(--font-display);
-  font-size: 3.2vw;
+  font-size: 2.4vw;
   line-height: 1;
   color: #fff;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
@@ -402,14 +403,18 @@
   transform: scale(1.08);
 }
 
-.camera-play-left .gs-stage {
-  transform-origin: left center;
-  transform: scale(1.12) translateX(4%);
-}
+/* Team-play shots: shrink the board into the top corner so the set's
+   podiums + team-name banners show in the backdrop behind it. */
+.camera-play-left .gs-stage,
+.camera-play-right .gs-stage { transform: none; }
 
-.camera-play-right .gs-stage {
-  transform-origin: right center;
-  transform: scale(1.12) translateX(-4%);
+.camera-play-right .gs-board {
+  transform: scale(0.5);
+  transform-origin: top right;
+}
+.camera-play-left .gs-board {
+  transform: scale(0.5);
+  transform-origin: top left;
 }
 
 /* ---- GIANT buzz-in indicator ---- */
