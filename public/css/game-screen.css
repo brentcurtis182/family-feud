@@ -116,6 +116,7 @@
   transform: translate(-50%, -50%);
   width: min(100cqw, calc(100cqh * 16 / 9));
   height: min(100cqh, calc(100cqw * 9 / 16));
+  container-type: size; /* so overlay fonts scale to the BOARD, not the viewport */
   background: url('/assets/images/scoreboard-rounds.png') 0 0 / 100% 100% no-repeat;
   /* --- alignment knobs (percent of the stage) --- */
   --slots-left: 24%;
@@ -141,17 +142,17 @@
 }
 
 .rb-cell {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 1.2%;
-  gap: 1%;
   overflow: hidden;
 }
 
 .rb-rank {
   font-family: var(--font-display);
-  font-size: 3.8vw;
+  font-size: 4.8cqw;       /* relative to the board, not the viewport */
   line-height: 1;
   color: #fff;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
@@ -161,10 +162,11 @@
 .rb-ans, .rb-pts { display: none; }
 .rb-cell.revealed .rb-ans {
   display: block;
-  flex: 1;
-  text-align: left;
+  width: 100%;
+  padding: 0 13%;            /* leave room for the points on the right */
+  text-align: center;        /* centered in the slot */
   font-family: var(--font-display);
-  font-size: 2vw;
+  font-size: 3.3cqw;
   line-height: 1;
   letter-spacing: 0.01em;
   text-transform: uppercase;
@@ -176,12 +178,12 @@
   animation: rbPop 0.3s ease;
 }
 .rb-cell.revealed .rb-pts {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 2.4vw;
+  position: absolute;
+  right: 5%;
+  top: 50%;
+  transform: translateY(-50%);
   font-family: var(--font-display);
-  font-size: 2.4vw;
+  font-size: 3.3cqw;
   line-height: 1;
   color: #fff;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
@@ -203,7 +205,7 @@
   align-items: center;
   justify-content: center;
   font-family: var(--font-display);
-  font-size: 4.6vw;
+  font-size: 5.4cqw;
   line-height: 1;
   color: #fff;
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
@@ -505,14 +507,15 @@
   transform: translate(-50%, -50%);
   width: min(100cqw, calc(100cqh * 16 / 9));
   height: min(100cqh, calc(100cqw * 9 / 16));
+  container-type: size; /* fonts scale to the board, not the viewport */
   background: url('/assets/images/fastmoney-bg.png') 0 0 / 100% 100% no-repeat;
   z-index: 8;
   /* cell-block geometry (percent of the board) */
-  --fmb-top: 14%;
-  --fmb-height: 62%;
-  --fmb-colw: 38%;     /* width of each player's [answer+points] block */
-  --fmb-left: 8%;      /* left edge of player 1's block */
-  --fmb-right: 8%;     /* right edge of player 2's block */
+  --fmb-top: 15%;
+  --fmb-height: 60%;
+  --fmb-colw: 42%;     /* width of each player's [answer+points] block */
+  --fmb-left: 6.5%;    /* left edge of player 1's block */
+  --fmb-right: 6.5%;   /* right edge of player 2's block */
 }
 
 .fmb-side {
@@ -521,9 +524,9 @@
   height: var(--fmb-height);
   width: var(--fmb-colw);
   display: grid;
-  grid-template-columns: 1fr 26%;   /* answer (wide) + points (narrow) */
+  grid-template-columns: 1fr 22%;   /* answer (wide) + points (narrow) */
   grid-template-rows: repeat(5, 1fr);
-  column-gap: 2%;
+  column-gap: 3%;
 }
 .fmb-left { left: var(--fmb-left); }
 .fmb-right { right: var(--fmb-right); }
@@ -540,13 +543,13 @@
 .fmb-ans {
   justify-content: flex-start;
   padding-left: 4%;
-  font-size: 1.8vw;
+  font-size: 2.7cqw;
   letter-spacing: 0.01em;
   text-transform: uppercase;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-.fmb-pts { justify-content: center; font-size: 2vw; }
+.fmb-pts { justify-content: center; font-size: 3cqw; }
 .fmb-cell.duplicate { color: var(--ff-red-glow); }
 .fmb-cell.pop { animation: rbPop 0.3s ease; }
 
@@ -554,7 +557,7 @@
   position: absolute;
   top: 6%;
   font-family: var(--font-display);
-  font-size: 1.6vw;
+  font-size: 2.3cqw;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--ff-yellow);
@@ -569,7 +572,7 @@
   left: 50%;
   transform: translateX(-50%);
   font-family: var(--font-display);
-  font-size: 3vw;
+  font-size: 3.6cqw;
   color: #fff;
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
 }

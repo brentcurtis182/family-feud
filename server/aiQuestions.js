@@ -87,7 +87,7 @@ function normalize(parsed, topic) {
 // (null signals the caller to fall back to the offline bank).
 // style: 'survey'  → "We asked 100 people / married women / men..." full sentence
 //        'fastmoney' → short, punchy Fast Money prompt (no survey framing)
-async function generateQuestion(topic, style) {
+async function generateQuestion(topic, style, avoid = []) {
   const c = getClient();
   if (!c) return null;
 
@@ -102,13 +102,18 @@ async function generateQuestion(topic, style) {
   // Vary the answer count so it isn't always 7.
   const count = 4 + Math.floor(Math.random() * 5); // 4..8
 
+  // Steer the model away from anything already asked this game.
+  const avoidLine = avoid && avoid.length
+    ? ` Do NOT repeat or paraphrase any of these already-asked questions — pick a clearly different subject:\n${avoid.map((q) => `- ${q}`).join('\n')}\n`
+    : '';
+
   const resp = await c.messages.create({
     model: MODEL,
     max_tokens: 1024,
     temperature: 1,
     system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
     messages: [
-      { role: 'user', content: `Topic: ${effectiveTopic}. ${styleLine} Provide EXACTLY ${count} answers. Generate one fresh, creative question now as JSON.` },
+      { role: 'user', content: `Topic: ${effectiveTopic}. ${styleLine} Provide EXACTLY ${count} answers.${avoidLine} Generate one fresh, creative question now as JSON.` },
     ],
   });
 

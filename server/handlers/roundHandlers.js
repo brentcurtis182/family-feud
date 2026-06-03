@@ -90,6 +90,7 @@ module.exports = function registerRoundHandlers(io, socket) {
 
     g.currentQuestion = question;
     g.usedQuestionHashes.add(question.hash);
+    g.recentQuestions.push(question.text);
     g.roundBank = 0;
     gameState.resetActivePlay(g);
 
@@ -125,6 +126,7 @@ module.exports = function registerRoundHandlers(io, socket) {
 
     g.currentQuestion = question;
     g.usedQuestionHashes.add(question.hash);
+    g.recentQuestions.push(question.text);
     g.roundBank = 0;
     gameState.resetActivePlay(g);
     broadcastEvent(io, g, 'question-ready', { text: question.text });
@@ -282,6 +284,7 @@ module.exports = function registerRoundHandlers(io, socket) {
     game.winner = null;
     game.fastMoney = null;
     game.usedQuestionHashes.clear(); // fresh questions after a reset
+    game.recentQuestions = [];
     gameState.resetActivePlay(game);
     gameState.resetFaceOff(game);
     game.phase = PHASES.ROUND_SETUP;

@@ -44,7 +44,10 @@ module.exports = function registerFastMoneyHandlers(io, socket) {
       seen.add(q.hash);
       qs.push(q);
     }
-    qs.forEach((q) => g.usedQuestionHashes.add(q.hash));
+    qs.forEach((q) => {
+      g.usedQuestionHashes.add(q.hash);
+      g.recentQuestions.push(q.text);
+    });
 
     gameState.initFastMoney(g, p1, p2, qs);
     g.phase = PHASES.FAST_MONEY_P1;

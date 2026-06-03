@@ -91,6 +91,7 @@ function createGame({ hostSocketId, hostMode, team1Name, team2Name, passcode }) 
 
     fastMoney: null,
     usedQuestionHashes: new Set(),
+    recentQuestions: [], // texts of questions already asked this game (to steer AI away from repeats)
   };
 
   games.set(gameId, game);
@@ -309,6 +310,7 @@ function resetForNewGame(game) {
   game.suddenDeath = false;
   game.fastMoney = null;
   game.usedQuestionHashes.clear();
+  game.recentQuestions = [];
   resetFaceOff(game);
   resetActivePlay(game);
   game.phase = PHASES.LOBBY;
