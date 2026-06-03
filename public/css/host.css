@@ -735,3 +735,45 @@
   background: var(--ff-red-gradient);
   color: var(--ff-white);
 }
+
+/* ---- Bigger fonts for host readability (large iPad) ---- */
+.host-panel { font-size: 1.15rem; }
+.host-panel h2 { font-size: 2rem; }
+.game-code { font-size: 1.3rem; }
+.round-info { font-size: 1rem; }
+.score-value { font-size: 3rem; }
+.team-name { font-size: 1.2rem; }
+
+/* Gameplay answer list */
+.gp-question { font-size: 1.7rem; }
+.gp-answer { padding: 14px 16px; }
+.gp-answer-rank { font-size: 1.5rem; }
+.gp-answer-text { font-size: 1.3rem; }
+.gp-answer-points { font-size: 1.6rem; }
+.gp-stakes { font-size: 1.2rem; }
+.gp-faceoff-banner { font-size: 1.2rem; }
+.gp-bank-value { font-size: 2.4rem; }
+.gp-strikes-display { font-size: 2.2rem; }
+.btn-strike, .gp-control-buttons .btn { font-size: 1.2rem; }
+
+/* Setup / face-off / rosters */
+.setup-label { font-size: 1.15rem; }
+.faceoff-team-name { font-size: 1.4rem; }
+.faceoff-option { font-size: 1.2rem; padding: 14px; }
+.topic-chip { font-size: 1rem; padding: 9px 16px; }
+.player-item, .roster-item { font-size: 1.1rem; }
+.lobby-buzzers { font-size: 1rem; }
+
+/* Fast Money reveal + capture */
+.fmr-qtext { font-size: 1.25rem; }
+.fmr-chip { font-size: 1.05rem; padding: 9px 13px; }
+.fmr-said { font-size: 1.1rem; }
+.fmr-total { font-size: 2rem; }
+.fmc-instr { font-size: 1rem; }
+.fmc-draft-q { font-size: 1.05rem; }
+.fmc-draft-input { font-size: 1.15rem; }
+.fmc-timer { font-size: 3rem; }
+.fmc-rec { font-size: 1.3rem; }
+
+/* Buttons a touch bigger everywhere on host */
+.host-container .btn { font-size: 1.2rem; }

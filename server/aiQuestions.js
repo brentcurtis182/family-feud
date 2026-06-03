@@ -15,17 +15,7 @@ Rules:
 - points are positive integers that sum to exactly 100 (they represent survey percentages).
 - Each answer is short: 1-3 words, distinct, and family-friendly.
 - Keep it broadly relatable and fun for a party.
-
-VARY THE PHRASING — do NOT start every question with "Name something". Rotate
-naturally among Family Feud styles, and favor the classic "We asked 100..." framing:
-  • "We asked 100 people to name a..."
-  • "We surveyed 100 married women / married men: what's..."
-  • "We asked 100 people: what's the first thing you..."
-  • "Tell me a..."  /  "Tell me something..."
-  • "What's a..."  /  "What's the..."
-  • "Name a reason..."  /  "Name the..."
-It's good when the question is a full, natural sentence (sometimes a bit longer) —
-don't make every one a terse "Name something X" prompt.`;
+- The exact question phrasing/style is specified per request.`;
 
 // Varied topic pool so "random" doesn't keep landing on the same few questions.
 const TOPIC_POOL = [
@@ -95,7 +85,9 @@ function normalize(parsed, topic) {
 
 // Generate one question via the API. Returns raw {text, topic, answers} or null
 // (null signals the caller to fall back to the offline bank).
-async function generateQuestion(topic) {
+// style: 'survey'  → "We asked 100 people / married women / men..." full sentence
+//        'fastmoney' → short, punchy Fast Money prompt (no survey framing)
+async function generateQuestion(topic, style) {
   const c = getClient();
   if (!c) return null;
 
@@ -103,13 +95,17 @@ async function generateQuestion(topic) {
   // are varied instead of converging on the same few.
   const effectiveTopic = topic && topic !== 'random' ? topic : randomTopic();
 
+  const styleLine = style === 'fastmoney'
+    ? 'Phrase it as a SHORT, punchy Fast Money prompt (e.g. "Name a...", "Name something...", "A reason..."). Keep it brief — do NOT use a "we asked 100" framing.'
+    : 'Phrase it as a survey question using a "We asked 100 people / married women / married men..." framing — a full, natural sentence.';
+
   const resp = await c.messages.create({
     model: MODEL,
     max_tokens: 1024,
     temperature: 1,
     system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
     messages: [
-      { role: 'user', content: `Topic: ${effectiveTopic}. Generate one fresh, creative question now as JSON.` },
+      { role: 'user', content: `Topic: ${effectiveTopic}. ${styleLine} Generate one fresh, creative question now as JSON.` },
     ],
   });
 

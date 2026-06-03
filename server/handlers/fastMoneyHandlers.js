@@ -25,8 +25,12 @@ module.exports = function registerFastMoneyHandlers(io, socket) {
 
     // Generate all 5 in PARALLEL (was sequential — this is the big speedup),
     // then de-dupe the batch (and against questions already used this game).
-    const reqs = Array.from({ length: SLOTS }, () =>
-      resolveQuestion(game, { topic: topic || 'random', source: source || 'ai' })
+    const reqs = Array.from({ length: SLOTS }, (_, i) =>
+      resolveQuestion(game, {
+        topic: topic || 'random',
+        source: source || 'ai',
+        style: i === 0 ? 'survey' : 'fastmoney', // first FM question is the long survey one
+      })
     );
     const settled = await Promise.all(reqs);
 

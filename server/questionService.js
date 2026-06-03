@@ -3,11 +3,11 @@ const aiQuestions = require('./aiQuestions');
 
 // Resolve one question: try AI (unless bank requested / unavailable), fall back
 // to the offline bank. Avoids repeating a question already used this game.
-async function resolveQuestion(game, { topic, source } = {}) {
+async function resolveQuestion(game, { topic, source, style } = {}) {
   if (source !== 'bank' && aiQuestions.isAvailable()) {
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
-        const raw = await aiQuestions.generateQuestion(topic);
+        const raw = await aiQuestions.generateQuestion(topic, style);
         if (raw) {
           const q = questions.buildQuestion(raw);
           if (!game.usedQuestionHashes.has(q.hash)) return q;

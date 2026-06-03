@@ -81,7 +81,7 @@ module.exports = function registerRoundHandlers(io, socket) {
     game.questionRequest = request;
     signalGenerating(io, game, request);
 
-    const question = await resolveQuestion(game, request);
+    const question = await resolveQuestion(game, { ...request, style: 'survey' });
 
     // The game may have been removed while we awaited generation.
     const g = gameState.getGame(socket.gameId);
@@ -117,7 +117,7 @@ module.exports = function registerRoundHandlers(io, socket) {
     const request = game.questionRequest || { topic: 'random', source: 'ai' };
     signalGenerating(io, game, request);
 
-    const question = await resolveQuestion(game, request);
+    const question = await resolveQuestion(game, { ...request, style: 'survey' });
 
     const g = gameState.getGame(socket.gameId);
     if (!g) return;
