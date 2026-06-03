@@ -490,8 +490,8 @@ function renderBoard() {
 // (short answers keep the full size). Returns a cqw string for --ans-fs.
 function ansFontCqw(text) {
   const len = Math.max(1, (text || '').trim().length);
-  const fs = Math.min(3.3, 33 / len); // ~fits the slot width
-  return Math.max(1.55, fs).toFixed(2) + 'cqw';
+  const fs = Math.min(3.3, 38 / len); // ~fits the slot width (condensed display font)
+  return Math.max(2.0, fs).toFixed(2) + 'cqw';
 }
 
 function rbCell(answer, position) {

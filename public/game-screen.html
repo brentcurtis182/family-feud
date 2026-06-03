@@ -55,12 +55,6 @@
         <div class="rb-slots" id="rb-slots"></div>
       </div>
 
-      <!-- Play shot: playing team name + roster overlaid on their podium side -->
-      <div class="gs-play-overlay" id="gs-play-overlay" aria-hidden="true">
-        <div class="gs-play-team" id="gs-play-team"></div>
-        <div class="gs-play-roster" id="gs-play-roster"></div>
-      </div>
-
       <!-- Round bank (running total) -->
       <div class="gs-bank-wrap hidden" id="gs-bank-wrap">
         <span class="gs-bank-label">Round Total</span>
@@ -85,6 +79,13 @@
         <div class="fm-timer-big hidden" id="fm-timer-big">20</div>
         <div class="fm-status" id="fm-status"></div>
       </div>
+    </div>
+
+    <!-- Play shot: team name + roster, in the FULL-SCREEN layer so positions
+         map to the studio set image (not the stage, which sits below the bar) -->
+    <div class="gs-play-overlay" id="gs-play-overlay" aria-hidden="true">
+      <div class="gs-play-team" id="gs-play-team"></div>
+      <div class="gs-play-roster" id="gs-play-roster"></div>
     </div>
   </div>
 
