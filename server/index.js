@@ -45,8 +45,17 @@ app.post('/api/transcribe', express.raw({ type: () => true, limit: '15mb' }), as
   }
 });
 
-// Serve static files
-app.use(express.static(path.join(__dirname, '..', 'public')));
+// Serve static files. Use no-cache (revalidate via ETag) so a deploy takes
+// effect immediately — the browser sends a conditional request and gets a tiny
+// 304 when nothing changed, or the fresh file when it did. Avoids the "clear
+// cache to see the update" problem after each deploy.
+app.use(express.static(path.join(__dirname, '..', 'public'), {
+  etag: true,
+  lastModified: true,
+  setHeaders(res) {
+    res.setHeader('Cache-Control', 'no-cache');
+  },
+}));
 
 // Register all socket handlers
 registerSocketHandlers(io);
