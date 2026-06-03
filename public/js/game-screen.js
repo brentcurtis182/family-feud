@@ -486,10 +486,18 @@ function renderBoard() {
   document.getElementById('rb-total').textContent = gameState.roundBank || 0;
 }
 
+// Shrink the answer font for longer text so it fits the slot without clipping
+// (short answers keep the full size). Returns a cqw string for --ans-fs.
+function ansFontCqw(text) {
+  const len = Math.max(1, (text || '').trim().length);
+  const fs = Math.min(3.3, 33 / len); // ~fits the slot width
+  return Math.max(1.55, fs).toFixed(2) + 'cqw';
+}
+
 function rbCell(answer, position) {
   const revealed = answer.revealed;
   return `
-    <div class="rb-cell rb-flipin${revealed ? ' revealed' : ''}" data-position="${position}" style="animation-delay:${0.25 + position * 0.13}s">
+    <div class="rb-cell rb-flipin${revealed ? ' revealed' : ''}" data-position="${position}" style="animation-delay:${0.25 + position * 0.13}s; --ans-fs:${ansFontCqw(answer.text)}">
       <span class="rb-rank">${position + 1}</span>
       <span class="rb-ans">${escapeHtml(answer.text || '')}</span>
       <span class="rb-pts">${answer.points != null ? answer.points : ''}</span>
@@ -499,6 +507,7 @@ function rbCell(answer, position) {
 function syncRbCell(cell, answer) {
   cell.querySelector('.rb-ans').textContent = answer.text || '';
   cell.querySelector('.rb-pts').textContent = answer.points != null ? answer.points : '';
+  cell.style.setProperty('--ans-fs', ansFontCqw(answer.text));
   cell.classList.toggle('revealed', !!answer.revealed);
 }
 
