@@ -45,9 +45,14 @@ socket.on('camera-angle', ({ angle }) => {
 });
 
 // Animation/sound triggers (state-sync follows for authoritative state)
-socket.on('answer-revealed', ({ position, roundBank }) => {
+socket.on('answer-revealed', ({ position, text, points, roundBank }) => {
   const cell = document.querySelector(`.rb-cell[data-position="${position}"]`);
   if (cell && !cell.classList.contains('revealed')) {
+    if (text != null) {
+      cell.querySelector('.rb-ans').textContent = text;
+      cell.style.setProperty('--ans-fs', ansFontCqw(text));
+    }
+    if (points != null) cell.querySelector('.rb-pts').textContent = points;
     cell.classList.add('revealed');
     Sounds.ding();
   }
@@ -74,10 +79,11 @@ socket.on('faceoff-strike', () => {
 });
 
 socket.on('buzzers-open', () => {
-  Sounds.unlock();
+  Sounds.stop('theme'); // intro theme ends as the face-off begins
 });
 
 socket.on('buzz-result', ({ winner, playerName, teamName }) => {
+  Sounds.stop('theme'); // make sure the intro theme isn't still bleeding through
   showBuzzIn(playerName, teamName, winner);
   Sounds.buzz();
 });
