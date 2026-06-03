@@ -474,7 +474,7 @@
 
 .gs-play-roster {
   position: absolute;
-  bottom: 13%;         /* on the row of blue podium slots (full-screen coords) */
+  bottom: 8%;          /* down in the blue podium nameplates (full-screen coords) */
   width: 36%;
   display: flex;
   justify-content: space-evenly;  /* one name per podium box */
@@ -596,8 +596,8 @@
   --fmb-top: 16%;
   --fmb-height: 52%;
   --fmb-colw: 37%;     /* width of each player's [answer+points] block */
-  --fmb-left: 8%;      /* left edge of player 1's block */
-  --fmb-right: 8%;     /* right edge of player 2's block */
+  --fmb-left: 11%;     /* left edge of player 1's block */
+  --fmb-right: 11%;    /* right edge of player 2's block */
 }
 
 .fmb-side {
@@ -606,7 +606,7 @@
   height: var(--fmb-height);
   width: var(--fmb-colw);
   display: grid;
-  grid-template-columns: 1fr 24%;   /* answer (wide) + points (narrow) */
+  grid-template-columns: 1fr 26%;   /* answer (wide) + points (narrow) */
   grid-template-rows: repeat(5, 1fr);
   column-gap: 5%;
 }
@@ -635,15 +635,24 @@
 .fmb-cell.duplicate { color: var(--ff-red-glow); }
 .fmb-cell.pop { animation: rbPop 0.3s ease; }
 
-/* Pink reveal cursor — sits on the answer box before reveal, then jumps to the
-   score box until the host reveals the score (state-driven). */
-.fmb-cell.fm-cursor-on {
-  background: rgba(255, 45, 230, 0.55);
-  box-shadow: 0 0 14px rgba(255, 45, 230, 0.85), inset 0 0 0 2px rgba(255, 120, 245, 0.9);
-  border-radius: 3px;
-  animation: fmCursorBlink 0.7s steps(1, end) infinite;
+/* Pink reveal cursor — a small one-character block (like the show). Sits at the
+   start of the answer box before reveal, then jumps into the score box until the
+   host reveals the score (state-driven). */
+.fmb-cell.fm-cursor-on { position: relative; }
+.fmb-cell.fm-cursor-on::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 1.8cqw;
+  height: 2.8cqw;
+  background: #ff3df0;
+  box-shadow: 0 0 8px rgba(255, 61, 240, 0.9);
+  border-radius: 2px;
+  animation: fmCursorBlink 0.6s steps(1, end) infinite;
 }
-@keyframes fmCursorBlink { 50% { background: rgba(255, 45, 230, 0.12); } }
+.fmb-ans.fm-cursor-on::before { left: 5%; transform: translateY(-50%); }
+.fmb-pts.fm-cursor-on::before { left: 50%; transform: translate(-50%, -50%); }
+@keyframes fmCursorBlink { 50% { opacity: 0; } }
 
 .fmb-name {
   position: absolute;
@@ -661,7 +670,7 @@
 .fmb-total {
   position: absolute;
   bottom: 15%;
-  left: 44%;
+  left: 52%;
   transform: translateX(-50%);
   font-family: var(--font-display);
   font-size: 3.6cqw;
