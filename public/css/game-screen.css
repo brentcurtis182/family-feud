@@ -486,16 +486,20 @@
 .camera-play-left .gs-play-roster { left: 8%; transform: rotate(-3deg) skewX(-4deg); }
 .camera-play-right .gs-play-roster { right: 8%; transform: rotate(3deg) skewX(4deg); }
 .gs-play-name {
+  position: relative;            /* allow per-name nudges */
   font-family: var(--font-display);
   font-size: 1.5vw;
   text-transform: uppercase;
   white-space: nowrap;
   color: #fff;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
-  background: rgba(0, 0, 0, 0.28);
-  padding: 0.15em 0.5em;
-  border-radius: 4px;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);  /* no box — clean on the blue */
 }
+/* Per-plate fine alignment (perspective spacing). 1 "letter" ≈ 0.5em. */
+.gs-play-name:nth-child(1),
+.gs-play-name:nth-child(2),
+.gs-play-name:nth-child(3) { left: 0.5em; }   /* right ~2 chars */
+.gs-play-name:nth-child(4) { left: 0.25em; }  /* right ~1 char */
+.gs-play-name:nth-child(5) { left: -0.5em; }  /* left ~2 chars */
 
 /* ---- GIANT buzz-in indicator ---- */
 .gs-buzzin {
