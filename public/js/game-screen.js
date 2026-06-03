@@ -115,14 +115,17 @@ socket.on('game-over', () => {
 socket.on('tv-sound', ({ name }) => { Sounds.play(name); });
 socket.on('tv-sound-stop', ({ name }) => { Sounds.stop(name); });
 
-// Fast Money answer reveal — pink cursor "chases" across the words (no ding in FM)
+// Fast Money answer reveal — pink cursor "chases" across the words with beeps
 socket.on('fm-answer-revealed', ({ player, index, text }) => {
   const cell = document.querySelector(`.fm-cell[data-slot="${player}-${index}"]`);
   if (cell) chaseReveal(cell, text || '');
+  // Bleeping beeps as the word populates (placeholder until a dedicated sound)
+  [0, 200, 400].forEach((d) => setTimeout(() => Sounds.fmDingSound(), d));
 });
 
 socket.on('fm-score-revealed', ({ duplicate, total, won }) => {
   if (duplicate) Sounds.duplicateSound();
+  else Sounds.fmDingSound(); // ding for each revealed value
   const totalEl = document.getElementById('fm-total');
   if (totalEl) totalEl.textContent = total;
   if (won) Sounds.fanfare();
@@ -148,7 +151,11 @@ socket.on('fm-timer', ({ duration }) => {
   fmTimerInt = setInterval(() => {
     left--;
     el.textContent = Math.max(0, left);
-    if (left <= 0) { clearInterval(fmTimerInt); fmTimerInt = null; el.classList.add('times-up'); }
+    if (left <= 0) {
+      clearInterval(fmTimerInt); fmTimerInt = null;
+      el.classList.add('times-up');
+      Sounds.buzzer(); // strike sound when the Fast Money timer runs out
+    }
   }, 1000);
 });
 

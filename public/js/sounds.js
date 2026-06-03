@@ -9,6 +9,7 @@ const Sounds = {
     duplicate: 'fast-money-duplicate-answer-sound.mp3',
     strike: 'strike-sound.mp3',
     theme: 'theme-song.mp3',
+    fmDing: 'family-feud-ding.mp3',
   },
   cache: {},
   unlocked: false,
@@ -55,4 +56,5 @@ const Sounds = {
   duplicateSound() { this.play('duplicate'); }, // fast money duplicate
   themeSong() { this.play('theme'); },    // start of game
   clap() { this.play('clap'); },          // host applause button
+  fmDingSound() { this.play('fmDing'); }, // fast money value reveal
 };
