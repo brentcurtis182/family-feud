@@ -67,6 +67,11 @@
   border-color: var(--ff-red-glow);
   background: rgba(204, 34, 34, 0.2);
 }
+.btn-reset.active {
+  border-color: var(--ff-yellow);
+  background: rgba(245, 197, 24, 0.25);
+  color: var(--ff-yellow);
+}
 
 /* Scoreboard */
 .host-scoreboard {

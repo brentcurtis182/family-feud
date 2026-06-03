@@ -247,6 +247,18 @@ module.exports = function registerRoundHandlers(io, socket) {
     broadcastState(io, game);
   });
 
+  // Host plays/stops a sound on the TV (theme, applause).
+  socket.on('play-sound', ({ name } = {}) => {
+    const game = gameState.getGame(socket.gameId);
+    if (!canControl(game, socket)) return;
+    io.to(`game:${game.gameId}:gamescreen`).emit('tv-sound', { name });
+  });
+  socket.on('stop-sound', ({ name } = {}) => {
+    const game = gameState.getGame(socket.gameId);
+    if (!canControl(game, socket)) return;
+    io.to(`game:${game.gameId}:gamescreen`).emit('tv-sound-stop', { name });
+  });
+
   // Manual camera control — host cuts the TV to any shot on demand.
   socket.on('set-camera', ({ angle } = {}) => {
     const game = gameState.getGame(socket.gameId);

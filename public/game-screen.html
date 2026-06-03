@@ -11,6 +11,9 @@
 <body>
 
   <div class="game-screen" id="game-stage">
+    <!-- Studio backdrop (changes with the camera shot) -->
+    <div class="gs-backdrop" id="gs-backdrop"></div>
+
     <!-- Scoreboard bar -->
     <div class="gs-scoreboard">
       <div class="gs-team gs-team1">
@@ -42,6 +45,9 @@
 
       <!-- Face-off status -->
       <div class="gs-faceoff hidden" id="gs-faceoff"></div>
+
+      <!-- GIANT buzz-in indicator -->
+      <div class="gs-buzzin hidden" id="gs-buzzin"></div>
 
       <!-- Answer board (hidden until a question is in play) -->
       <div class="gs-board hidden" id="gs-board">

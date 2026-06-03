@@ -93,6 +93,10 @@ socket.on('phase-changed', ({ phase, round, roundMultiplier }) => {
 // ---- Actions ----
 function startGame() {
   socket.emit('start-game');
+  // Server auto-plays the theme on the TV — reflect that on the toggle.
+  themeOn = true;
+  const t = document.getElementById('btn-theme');
+  if (t) t.classList.add('active');
 }
 
 function loadQuestion() {
@@ -165,6 +169,19 @@ function advanceRound() {
 
 function setCamera(angle) {
   socket.emit('set-camera', { angle });
+}
+
+// Theme + Applause toggles (play on the TV; click again to stop)
+let themeOn = false, applauseOn = false;
+function toggleTheme() {
+  themeOn = !themeOn;
+  socket.emit(themeOn ? 'play-sound' : 'stop-sound', { name: 'theme' });
+  document.getElementById('btn-theme').classList.toggle('active', themeOn);
+}
+function toggleApplause() {
+  applauseOn = !applauseOn;
+  socket.emit(applauseOn ? 'play-sound' : 'stop-sound', { name: 'clap' });
+  document.getElementById('btn-applause').classList.toggle('active', applauseOn);
 }
 
 function resetRound() {

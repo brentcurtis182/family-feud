@@ -77,12 +77,18 @@ socket.on('buzzers-open', () => {
   Sounds.unlock();
 });
 
-socket.on('buzz-result', ({ playerName, teamName }) => {
-  const el = document.getElementById('gs-faceoff');
-  el.className = 'gs-faceoff winner';
-  el.textContent = `⚡ ${playerName} (${teamName}) buzzed first!`;
+socket.on('buzz-result', ({ winner, playerName, teamName }) => {
+  showBuzzIn(playerName, teamName, winner);
   Sounds.buzz();
 });
+
+function showBuzzIn(playerName, teamName, team) {
+  const el = document.getElementById('gs-buzzin');
+  if (!el) return;
+  el.className = 'gs-buzzin ' + (team || '');
+  el.textContent = `⚡ ${(playerName || teamName || '').toUpperCase()} — IN!`;
+  el.classList.remove('hidden');
+}
 
 socket.on('steal-setup', ({ teamName }) => {
   Sounds.buzz();
@@ -105,22 +111,25 @@ socket.on('game-over', () => {
   Sounds.fanfare();
 });
 
-// Answer reveal — pink cursor "chases" across the words as they appear
+// Host can play/stop sounds on the TV (theme, applause, etc.)
+socket.on('tv-sound', ({ name }) => { Sounds.play(name); });
+socket.on('tv-sound-stop', ({ name }) => { Sounds.stop(name); });
+
+// Fast Money answer reveal — pink cursor "chases" across the words (no ding in FM)
 socket.on('fm-answer-revealed', ({ player, index, text }) => {
-  Sounds.ding(); // placeholder; production word-reveal sound goes here
   const cell = document.querySelector(`.fm-cell[data-slot="${player}-${index}"]`);
   if (cell) chaseReveal(cell, text || '');
 });
 
 socket.on('fm-score-revealed', ({ duplicate, total, won }) => {
-  if (duplicate) Sounds.buzzer(); else Sounds.ding();
+  if (duplicate) Sounds.duplicateSound();
   const totalEl = document.getElementById('fm-total');
   if (totalEl) totalEl.textContent = total;
   if (won) Sounds.fanfare();
 });
 
 socket.on('fm-dup-buzz', () => {
-  Sounds.buzzer();
+  Sounds.duplicateSound();
   const el = document.getElementById('fm-status');
   if (!el) return;
   const prev = el.textContent;
@@ -172,9 +181,26 @@ function renderAll() {
 
   renderBoard();
   renderFaceoff();
+  renderBuzzIn();
   setBank(gameState.roundBank || 0);
   renderStrikes(gameState.activePlay ? gameState.activePlay.strikes : 0);
   renderEndState();
+}
+
+// Giant buzz-in banner — shown while the buzz winner answers (FACE_OFF_ANSWER)
+function renderBuzzIn() {
+  const el = document.getElementById('gs-buzzin');
+  if (!el) return;
+  const fo = gameState.faceOff || {};
+  if (gameState.phase === 'FACE_OFF_ANSWER' && fo.winner) {
+    const c = fo[`${fo.winner}Player`];
+    const who = c ? c.playerName : gameState.teams[fo.winner].name;
+    el.className = 'gs-buzzin ' + fo.winner;
+    el.textContent = `⚡ ${(who || '').toUpperCase()} — IN!`;
+    el.classList.remove('hidden');
+  } else {
+    el.classList.add('hidden');
+  }
 }
 
 // Round-end / game-over overlays (driven by authoritative phase)
@@ -476,6 +502,8 @@ function renderBoard() {
   if (sig !== renderedQuestionSig) {
     renderedQuestionSig = sig;
     slots.innerHTML = q.answers.map((a, i) => rbCell(a, i)).join('');
+    // Populate the rank strips one at a time with a flip sound.
+    q.answers.forEach((_, i) => setTimeout(() => Sounds.ding(), 250 + i * 130));
   } else {
     q.answers.forEach((a, i) => {
       const cell = slots.querySelector(`.rb-cell[data-position="${i}"]`);
@@ -489,7 +517,7 @@ function renderBoard() {
 function rbCell(answer, position) {
   const revealed = answer.revealed;
   return `
-    <div class="rb-cell${revealed ? ' revealed' : ''}" data-position="${position}">
+    <div class="rb-cell rb-flipin${revealed ? ' revealed' : ''}" data-position="${position}" style="animation-delay:${0.25 + position * 0.13}s">
       <span class="rb-rank">${position + 1}</span>
       <span class="rb-ans">${escapeHtml(answer.text || '')}</span>
       <span class="rb-pts">${answer.points != null ? answer.points : ''}</span>

@@ -200,6 +200,8 @@ module.exports = function registerLobbyHandlers(io, socket) {
     io.to(`game:${game.gameId}:gamescreen`).emit('camera-angle', {
       angle: 'wide',
     });
+    // Kick off the theme song on the TV at game start.
+    io.to(`game:${game.gameId}:gamescreen`).emit('tv-sound', { name: 'theme' });
 
     console.log(`Game ${game.gameId} started — Round ${game.round}`);
   });

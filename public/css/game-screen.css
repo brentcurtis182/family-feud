@@ -111,11 +111,11 @@
   inset: 0;
   background: url('/assets/images/scoreboard-rounds.png') center / contain no-repeat;
   /* --- alignment knobs (percent of the stage) --- */
-  --slots-left: 21%;
+  --slots-left: 24%;
   --slots-top: 31%;
-  --slots-width: 58%;
+  --slots-width: 52%;
   --slots-height: 53%;
-  --slots-colgap: 3%;
+  --slots-colgap: 6%;
   --slots-rowgap: 1.6%;
 }
 
@@ -143,7 +143,8 @@
 
 .rb-rank {
   font-family: var(--font-display);
-  font-size: 2.6vw;
+  font-size: 3.8vw;
+  line-height: 1;
   color: #fff;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
 }
@@ -155,7 +156,8 @@
   flex: 1;
   text-align: left;
   font-family: var(--font-display);
-  font-size: 2vw;
+  font-size: 3.2vw;
+  line-height: 1;
   letter-spacing: 0.02em;
   text-transform: uppercase;
   color: #fff;
@@ -169,26 +171,32 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 2.6vw;
+  min-width: 3.4vw;
   font-family: var(--font-display);
-  font-size: 2vw;
+  font-size: 3.2vw;
+  line-height: 1;
   color: #fff;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
 }
 @keyframes rbPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
 
+/* One-at-a-time board populate (rank strips flip in on question load) */
+@keyframes rbFlipIn { from { opacity: 0; transform: scaleY(0.1); } to { opacity: 1; transform: scaleY(1); } }
+.rb-cell.rb-flipin { animation: rbFlipIn 0.28s ease backwards; }
+
 /* Round total (top center panel of the board) */
 .rb-total {
   position: absolute;
-  left: 43%;
-  top: 6.5%;
-  width: 14%;
-  height: 11%;
+  left: 41%;
+  top: 7.5%;
+  width: 18%;
+  height: 12%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-display);
-  font-size: 4vw;
+  font-size: 4.6vw;
+  line-height: 1;
   color: #fff;
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
 }
@@ -271,6 +279,7 @@
 
 /* Face-off status line (below the question) */
 .gs-faceoff {
+  display: none; /* face-off text removed from the TV — top board box is the round total only */
   position: absolute;
   top: 84px;
   left: 50%;
@@ -349,9 +358,10 @@
 
 .gs-strike-x {
   font-family: var(--font-display);
-  font-size: 8rem;
+  font-size: 26vw;
+  line-height: 0.9;
   color: var(--ff-red-glow);
-  text-shadow: var(--red-glow);
+  text-shadow: 0 0 30px rgba(255,68,68,0.9), 0 0 60px rgba(255,68,68,0.5);
   opacity: 0;
   transform: scale(2);
 }
@@ -365,6 +375,23 @@
   60% { opacity: 1; transform: scale(0.9); }
   100% { opacity: 1; transform: scale(1); }
 }
+
+/* ---- Studio backdrop (changes with the camera shot) ---- */
+.gs-backdrop {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+  transition: opacity 0.4s ease;
+}
+.gs-scoreboard, .gs-stage { position: relative; z-index: 1; }
+
+.camera-wide .gs-backdrop { background-image: url('/assets/images/set-wide.png'); }
+.camera-faceoff .gs-backdrop { background-image: url('/assets/images/set-right.png'); }
+.camera-play-right .gs-backdrop { background-image: url('/assets/images/set-right.png'); }
+/* No set-left.png — mirror set-right horizontally for the left shot */
+.camera-play-left .gs-backdrop { background-image: url('/assets/images/set-right.png'); transform: scaleX(-1); }
 
 /* Camera angles — applied via class on .game-screen */
 .camera-wide .gs-stage {
@@ -384,6 +411,28 @@
   transform-origin: right center;
   transform: scale(1.12) translateX(-4%);
 }
+
+/* ---- GIANT buzz-in indicator ---- */
+.gs-buzzin {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 25;
+  text-align: center;
+  padding: 2vh 2vw;
+  font-family: var(--font-display);
+  font-size: 7vw;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  color: #fff;
+  background: linear-gradient(180deg, rgba(0,0,0,0.85), rgba(0,0,0,0));
+  text-shadow: 0 0 20px var(--ff-yellow), 0 4px 8px #000;
+  animation: buzzInPop 0.35s cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+.gs-buzzin.team1 { color: var(--ff-yellow); }
+.gs-buzzin.team2 { color: var(--ff-yellow-light); }
+@keyframes buzzInPop { from { opacity: 0; transform: translateY(-20%) scale(0.8); } to { opacity: 1; transform: none; } }
 
 /* Round-end / game-over overlay */
 .gs-overlay {

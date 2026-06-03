@@ -1,61 +1,58 @@
-// Lightweight synthesized sound effects (no asset files needed).
-// Phase 9 can replace these with real samples behind the same API.
+// Real sound effects (MP3 files in /assets/sound-effects).
+// Primed on first user gesture so later programmatic playback isn't blocked.
 const Sounds = {
-  ctx: null,
+  base: '/assets/sound-effects/',
+  map: {
+    buzzIn: 'buzzer-in-sound.mp3',
+    ding: 'correct-answer-ding.mp3',
+    clap: 'family-feud-clap.mp3',
+    duplicate: 'fast-money-duplicate-answer-sound.mp3',
+    strike: 'strike-sound.mp3',
+    theme: 'theme-song.mp3',
+  },
+  cache: {},
+  unlocked: false,
 
-  _ensure() {
-    if (!this.ctx) {
-      const AC = window.AudioContext || window.webkitAudioContext;
-      if (AC) this.ctx = new AC();
+  _get(name) {
+    const file = this.map[name];
+    if (!file) return null;
+    if (!this.cache[name]) {
+      const a = new Audio(this.base + file);
+      a.preload = 'auto';
+      this.cache[name] = a;
     }
-    // Browsers suspend audio until a user gesture; resume opportunistically.
-    if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
-    return this.ctx;
+    return this.cache[name];
   },
 
-  // Call once from a user gesture (e.g. host button) to unlock audio.
+  // Call from a user gesture to unlock audio (primes each clip).
   unlock() {
-    this._ensure();
+    if (this.unlocked) return;
+    this.unlocked = true;
+    Object.keys(this.map).forEach((name) => {
+      const a = this._get(name);
+      if (!a) return;
+      a.muted = true;
+      a.play().then(() => { a.pause(); a.currentTime = 0; a.muted = false; }).catch(() => { a.muted = false; });
+    });
   },
 
-  _tone({ freq, type = 'sine', start = 0, dur = 0.2, gain = 0.3, sweepTo = null }) {
-    const ctx = this._ensure();
-    if (!ctx) return;
-    const t0 = ctx.currentTime + start;
-    const osc = ctx.createOscillator();
-    const g = ctx.createGain();
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, t0);
-    if (sweepTo) osc.frequency.exponentialRampToValueAtTime(sweepTo, t0 + dur);
-    g.gain.setValueAtTime(0.0001, t0);
-    g.gain.exponentialRampToValueAtTime(gain, t0 + 0.01);
-    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-    osc.connect(g).connect(ctx.destination);
-    osc.start(t0);
-    osc.stop(t0 + dur + 0.02);
+  play(name) {
+    const a = this._get(name);
+    if (!a) return;
+    try { a.currentTime = 0; const p = a.play(); if (p) p.catch(() => {}); } catch {}
   },
 
-  // Correct-answer reveal: bright two-note "ding!"
-  ding() {
-    this._tone({ freq: 880, type: 'sine', dur: 0.12, gain: 0.35 });
-    this._tone({ freq: 1320, type: 'sine', start: 0.1, dur: 0.25, gain: 0.3 });
+  stop(name) {
+    const a = this.cache[name];
+    if (a) { try { a.pause(); a.currentTime = 0; } catch {} }
   },
 
-  // Strike: harsh descending buzzer.
-  buzzer() {
-    this._tone({ freq: 220, type: 'sawtooth', dur: 0.5, gain: 0.35, sweepTo: 110 });
-    this._tone({ freq: 160, type: 'square', dur: 0.5, gain: 0.2, sweepTo: 90 });
-  },
-
-  // Buzz-in (face-off): short rising blip — used in Phase 4.
-  buzz() {
-    this._tone({ freq: 440, type: 'square', dur: 0.18, gain: 0.3, sweepTo: 660 });
-  },
-
-  // Win fanfare: quick ascending arpeggio — used in Phase 5/9.
-  fanfare() {
-    [523, 659, 784, 1047].forEach((f, i) =>
-      this._tone({ freq: f, type: 'triangle', start: i * 0.12, dur: 0.2, gain: 0.3 })
-    );
-  },
+  // ---- Named helpers (used across the app) ----
+  ding() { this.play('ding'); },          // correct answer flip (regular game)
+  buzzer() { this.play('strike'); },      // strike / wrong answer
+  buzz() { this.play('buzzIn'); },        // face-off buzz-in
+  fanfare() { this.play('clap'); },       // round/game win
+  duplicateSound() { this.play('duplicate'); }, // fast money duplicate
+  themeSong() { this.play('theme'); },    // start of game
+  clap() { this.play('clap'); },          // host applause button
 };
