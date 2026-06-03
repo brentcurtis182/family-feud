@@ -392,8 +392,8 @@ function initFmCapture() {
 function updateNextBtn() {
   const b = document.getElementById('fmc-next');
   if (!b) return;
-  if (!fmTimerStarted) b.textContent = '▶ Next Question (starts clock)';
-  else b.textContent = fmCapIndex < 4 ? `▶ Next Question (now Q${fmCapIndex + 1})` : '✓ Last question — tap Done above';
+  if (!fmTimerStarted) b.textContent = '▶ Start Clock (stay on Q1)';
+  else b.textContent = fmCapIndex < 4 ? `▶ Next Question (on Q${fmCapIndex + 1})` : '✓ On Q5 — tap Done above';
 }
 
 // ---- Cloud STT capture (MediaRecorder → /api/transcribe) ----
@@ -533,15 +533,21 @@ async function fmStartRecording() {
   renderFmP1Ref();
 }
 
-// BOTTOM button: move to the next question; the FIRST press starts the clock.
+// BOTTOM button:
+//   1st press = start the clock, STAY on Q1 (player answers Q1)
+//   later presses = advance to the next question
 function fmNextQuestion() {
   if (!fmCaptureActive) fmStartRecording(); // safety if they hit Next first
+
   if (!fmTimerStarted) {
     fmTimerStarted = true;
     const dur = fmCapPlayer === 'p2' ? 25 : 20;
     socket.emit('fastmoney-timer-start', { player: fmCapPlayer, duration: dur });
     startFmTimer(dur);
+    updateNextBtn();
+    return; // stay on Q1
   }
+
   if (fmCapIndex < 4) {
     fmCapIndex++;
     if (fmUseCloud) { stopMediaClip(); startMediaClip(); }
