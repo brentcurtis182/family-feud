@@ -393,7 +393,7 @@ function initFmCapture() {
   stopFmRecognition();
   if (fmTimerInt) { clearInterval(fmTimerInt); fmTimerInt = null; }
 
-  const dur = fmCapPlayer === 'p2' ? 25 : 20;
+  const dur = fmCapPlayer === 'p2' ? 30 : 25;
   document.getElementById('fmc-title').textContent =
     `${fm.contestants[fmCapPlayer]} — ${fmCapPlayer === 'p2' ? 'Player 2' : 'Player 1'}`;
   document.getElementById('fmc-timer').textContent = `0:${String(dur).padStart(2, '0')}`;
@@ -520,7 +520,7 @@ async function fmRecordSlot(i) {
     fmCaptureActive = true;
     if (!fmTimerStarted) {
       fmTimerStarted = true;
-      const dur = fmCapPlayer === 'p2' ? 25 : 20;
+      const dur = fmCapPlayer === 'p2' ? 30 : 25;
       socket.emit('fastmoney-timer-start', { player: fmCapPlayer, duration: dur });
       startFmTimer(dur);
     }
@@ -566,7 +566,7 @@ function fmNextQuestion() {
 
   if (!fmTimerStarted) {
     fmTimerStarted = true;
-    const dur = fmCapPlayer === 'p2' ? 25 : 20;
+    const dur = fmCapPlayer === 'p2' ? 30 : 25;
     socket.emit('fastmoney-timer-start', { player: fmCapPlayer, duration: dur });
     startFmTimer(dur);
     updateNextBtn();

@@ -157,7 +157,7 @@ let fmTimerInt = null;
 socket.on('fm-timer', ({ duration }) => {
   const el = document.getElementById('fm-timer-big');
   el.classList.remove('hidden', 'times-up');
-  let left = duration || 20;
+  let left = duration || 25;
   el.textContent = left;
   if (fmTimerInt) clearInterval(fmTimerInt);
   fmTimerInt = setInterval(() => {

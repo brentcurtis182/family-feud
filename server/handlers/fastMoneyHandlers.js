@@ -61,7 +61,7 @@ module.exports = function registerFastMoneyHandlers(io, socket) {
   socket.on('fastmoney-timer-start', ({ player, duration } = {}) => {
     const game = gameState.getGame(socket.gameId);
     if (!isHostOrJudge(game, socket)) return;
-    broadcastEvent(io, game, 'fm-timer', { player, duration: duration || (player === 'p2' ? 25 : 20) });
+    broadcastEvent(io, game, 'fm-timer', { player, duration: duration || (player === 'p2' ? 30 : 25) });
   });
 
   // Live duplicate buzz during P2's turn (P2 repeated one of P1's answers).
