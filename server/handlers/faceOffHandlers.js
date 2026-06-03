@@ -80,6 +80,14 @@ module.exports = function registerFaceOffHandlers(io, socket) {
     }
   });
 
+  // Wrong answer on the face-off buzz-in — flash a strike (transient; does NOT
+  // count toward the playing team's 3 strikes).
+  socket.on('faceoff-strike', () => {
+    const game = gameState.getGame(socket.gameId);
+    if (!isHostOrJudge(game, socket)) return;
+    broadcastEvent(io, game, 'faceoff-strike', {});
+  });
+
   // Reset the face-off (host) — e.g. to re-pick contestants.
   socket.on('reset-faceoff', () => {
     const game = gameState.getGame(socket.gameId);

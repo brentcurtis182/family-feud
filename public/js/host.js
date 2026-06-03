@@ -149,7 +149,10 @@ function revealAnswer(position) {
 }
 
 function addStrike() {
-  socket.emit('add-strike');
+  // During the face-off answer a wrong buzz-in is a transient strike, not a
+  // round strike; everywhere else it's a real strike.
+  if (gameState && gameState.phase === 'FACE_OFF_ANSWER') socket.emit('faceoff-strike');
+  else socket.emit('add-strike');
 }
 
 function choosePlay(team) {
@@ -230,6 +233,8 @@ function renderPhase() {
       break;
     case 'FACE_OFF_BUZZER':
       document.getElementById('panel-faceoff-buzzer').classList.remove('hidden');
+      document.getElementById('fob-question').textContent =
+        gameState.currentQuestion ? gameState.currentQuestion.text : '';
       break;
     case 'TEAM_PLAY':
     case 'STEAL_ATTEMPT':
@@ -853,9 +858,12 @@ function renderGameplay() {
     actions.classList.add('hidden');
   }
 
-  // Strike button: hidden during face-off answer, relabeled during steal
+  // Strike button: face-off wrong answer, normal strike, or steal-fail
   const strikeBtn = document.getElementById('btn-strike');
-  if (phase === 'TEAM_PLAY') {
+  if (phase === 'FACE_OFF_ANSWER') {
+    strikeBtn.textContent = '✗ Strike (wrong answer)';
+    strikeBtn.classList.remove('hidden');
+  } else if (phase === 'TEAM_PLAY') {
     strikeBtn.textContent = 'Strike';
     strikeBtn.classList.remove('hidden');
   } else if (phase === 'STEAL_ATTEMPT') {

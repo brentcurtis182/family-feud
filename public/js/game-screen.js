@@ -63,6 +63,12 @@ socket.on('strikes-cleared', () => {
   document.getElementById('gs-strikes').innerHTML = '';
 });
 
+// Face-off buzz-in wrong answer: transient X + buzzer (auto-clears).
+socket.on('faceoff-strike', () => {
+  flashStrikes(1);
+  Sounds.buzzer();
+});
+
 socket.on('buzzers-open', () => {
   Sounds.unlock();
 });
@@ -157,9 +163,9 @@ function renderAll() {
   const inGame = gameState.phase !== 'LOBBY';
   document.getElementById('gs-waiting').classList.toggle('hidden', inGame);
   document.getElementById('gs-board').classList.toggle('hidden', !inGame || !gameState.currentQuestion);
-  document.getElementById('gs-question').classList.toggle('hidden', !gameState.currentQuestion);
+  // Question text is NEVER shown on the TV — players listen to the host only.
+  document.getElementById('gs-question').classList.add('hidden');
 
-  renderQuestion();
   renderBoard();
   renderFaceoff();
   setBank(gameState.roundBank || 0);
