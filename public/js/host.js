@@ -373,8 +373,11 @@ function initFmCapture() {
     `${fm.contestants[fmCapPlayer]} — ${fmCapPlayer === 'p2' ? 'Player 2' : 'Player 1'}`;
   document.getElementById('fmc-timer').textContent = `0:${String(dur).padStart(2, '0')}`;
   document.getElementById('fmc-transcript').textContent = '';
-  document.getElementById('fmc-capture').textContent = '● Start Recording';
-  document.getElementById('fmc-capture').classList.remove('recording');
+  const recBtn = document.getElementById('fmc-rec-btn');
+  recBtn.textContent = '● Start Recording';
+  recBtn.classList.remove('recording');
+  recBtn.disabled = false;
+  updateNextBtn();
   document.getElementById('fmc-mic-status').textContent = Voice.supported()
     ? '🎤 Tap Start, then read Q1. Mic keeps recording until you tap Done. (You can also type.)'
     : '⌨️ Voice not supported here — type each answer in the boxes below.';
@@ -386,12 +389,11 @@ function initFmCapture() {
   renderFmP1Ref();
 }
 
-function updateCaptureBtn() {
-  const btn = document.getElementById('fmc-capture');
-  if (!btn) return;
-  if (!fmCaptureActive) { btn.textContent = '▶ Start (read Q1)'; btn.classList.remove('recording'); return; }
-  btn.classList.add('recording');
-  btn.textContent = fmCapIndex < 4 ? `▶ Next Question (on Q${fmCapIndex + 1})` : 'Q5 — tap Done when finished';
+function updateNextBtn() {
+  const b = document.getElementById('fmc-next');
+  if (!b) return;
+  if (!fmTimerStarted) b.textContent = '▶ Next Question (starts clock)';
+  else b.textContent = fmCapIndex < 4 ? `▶ Next Question (now Q${fmCapIndex + 1})` : '✓ Last question — tap Done above';
 }
 
 // ---- Cloud STT capture (MediaRecorder → /api/transcribe) ----
@@ -506,35 +508,46 @@ async function fmRecordSlot(i) {
   } else {
     startFmRecognition();
   }
-  updateCaptureBtn();
+  updateNextBtn();
   renderFmDrafts();
   renderFmP1Ref();
   document.getElementById('fmc-mic-status').textContent = `🎤 Recording answer ${i + 1}…`;
 }
 
-// One button: first tap = Start (begins continuous recording + timer);
-// each later tap = move to the next question's slot (keeps recording).
-async function fmCaptureNext() {
-  if (!fmCaptureActive) {
-    fmCaptureActive = true;
-    fmCapIndex = 0;
-    if (!fmTimerStarted) {
-      fmTimerStarted = true;
-      const dur = fmCapPlayer === 'p2' ? 25 : 20;
-      socket.emit('fastmoney-timer-start', { player: fmCapPlayer, duration: dur });
-      startFmTimer(dur);
-    }
-    if (fmUseCloud) {
-      try { await fmEnsureStream(); fmMime = fmPickMime(); startMediaClip(); }
-      catch { document.getElementById('fmc-mic-status').textContent = '🚫 Mic needs HTTPS + permission — type answers below.'; }
-    } else {
-      startFmRecognition(); // SpeechRecognition fallback (Chrome); typing always works
-    }
-  } else if (fmCapIndex < 4) {
-    if (fmUseCloud) { stopMediaClip(); fmCapIndex++; startMediaClip(); }
-    else { fmCapIndex++; startFmRecognition(); }
+// TOP button: just start recording the whole turn (no clock, no advancing).
+async function fmStartRecording() {
+  if (fmCaptureActive) return;
+  fmCaptureActive = true;
+  fmCapIndex = 0;
+  if (fmUseCloud) {
+    try { await fmEnsureStream(); fmMime = fmPickMime(); startMediaClip(); }
+    catch { document.getElementById('fmc-mic-status').textContent = '🚫 Mic needs HTTPS + permission — type answers below.'; }
+  } else {
+    startFmRecognition(); // SpeechRecognition fallback (Chrome); typing always works
   }
-  updateCaptureBtn();
+  const rec = document.getElementById('fmc-rec-btn');
+  if (rec) { rec.textContent = '● Recording…'; rec.classList.add('recording'); rec.disabled = true; }
+  document.getElementById('fmc-mic-status').textContent =
+    '🎤 Recording — read Q1, then tap the big Next Question button.';
+  renderFmDrafts();
+  renderFmP1Ref();
+}
+
+// BOTTOM button: move to the next question; the FIRST press starts the clock.
+function fmNextQuestion() {
+  if (!fmCaptureActive) fmStartRecording(); // safety if they hit Next first
+  if (!fmTimerStarted) {
+    fmTimerStarted = true;
+    const dur = fmCapPlayer === 'p2' ? 25 : 20;
+    socket.emit('fastmoney-timer-start', { player: fmCapPlayer, duration: dur });
+    startFmTimer(dur);
+  }
+  if (fmCapIndex < 4) {
+    fmCapIndex++;
+    if (fmUseCloud) { stopMediaClip(); startMediaClip(); }
+    else { startFmRecognition(); }
+  }
+  updateNextBtn();
   document.getElementById('fmc-transcript').textContent = fmDrafts[fmCapIndex] || '';
   renderFmDrafts();
   renderFmP1Ref();

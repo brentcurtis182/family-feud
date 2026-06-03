@@ -206,10 +206,11 @@
     <div id="panel-fastmoney-capture" class="host-panel hidden">
       <h2 id="fmc-title">Player 1</h2>
       <div class="fmc-timer" id="fmc-timer">0:20</div>
-      <p class="fmc-instr">Read a question aloud, tap <b>Capture</b>, let them answer. Tap <b>Capture</b> again for the next question. (Captured text is just a reference — you can also type it.)</p>
+      <p class="fmc-instr">1) Tap <b>Start Recording</b> (it records the whole turn). 2) Read each question — tap the big <b>Next Question</b> button at the bottom to move on; that starts the clock. 3) Tap <b>Done</b> when finished.</p>
 
-      <div class="fmc-mic-row">
-        <button class="fmc-rec" id="fmc-capture" onclick="fmCaptureNext()">🎤 Capture Answer 1</button>
+      <div class="fmc-top-row">
+        <button class="fmc-rec" id="fmc-rec-btn" onclick="fmStartRecording()">● Start Recording</button>
+        <button class="btn btn-primary" id="fmc-submit" onclick="fmSubmitCapture()">Done / Review →</button>
       </div>
       <div class="fmc-status" id="fmc-mic-status"></div>
       <div class="fmc-p1ref hidden" id="fmc-p1ref"></div>
@@ -218,7 +219,7 @@
 
       <div class="fmc-list" id="fmc-list"></div>
 
-      <button class="btn btn-primary" id="fmc-submit" onclick="fmSubmitCapture()">Done — Review →</button>
+      <button class="fmc-next-big" id="fmc-next" onclick="fmNextQuestion()">▶ Next Question (starts clock)</button>
     </div>
 
     <!-- Fast Money: Player 2 hand-off -->

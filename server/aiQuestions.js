@@ -14,8 +14,18 @@ Rules:
 - Order answers from most to least popular (descending points).
 - points are positive integers that sum to exactly 100 (they represent survey percentages).
 - Each answer is short: 1-3 words, distinct, and family-friendly.
-- Phrase the question like a survey prompt, e.g. "Name something...", "Name a...", "We asked 100 people...".
-- Keep it broadly relatable and fun for a party.`;
+- Keep it broadly relatable and fun for a party.
+
+VARY THE PHRASING — do NOT start every question with "Name something". Rotate
+naturally among Family Feud styles, and favor the classic "We asked 100..." framing:
+  • "We asked 100 people to name a..."
+  • "We surveyed 100 married women / married men: what's..."
+  • "We asked 100 people: what's the first thing you..."
+  • "Tell me a..."  /  "Tell me something..."
+  • "What's a..."  /  "What's the..."
+  • "Name a reason..."  /  "Name the..."
+It's good when the question is a full, natural sentence (sometimes a bit longer) —
+don't make every one a terse "Name something X" prompt.`;
 
 // Varied topic pool so "random" doesn't keep landing on the same few questions.
 const TOPIC_POOL = [
