@@ -25,6 +25,13 @@ const SocketClient = {
       showToast(data.message, 'error');
     });
 
+    // If the current game is deleted, leave gracefully (back to the start).
+    this.socket.on('game-deleted', () => {
+      this.clearSession();
+      showToast('This game was ended by the host.', 'error');
+      setTimeout(() => { window.location.href = '/'; }, 1500);
+    });
+
     return this.socket;
   },
 

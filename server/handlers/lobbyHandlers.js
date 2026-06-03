@@ -46,6 +46,20 @@ module.exports = function registerLobbyHandlers(io, socket) {
     socket.emit('games-list', list);
   });
 
+  // Delete a game (cleanup of unfinished games during testing)
+  socket.on('delete-game', ({ gameId }) => {
+    const game = gameState.getGame(gameId);
+    if (!game) {
+      socket.emit('game-deleted-ok', { gameId });
+      return;
+    }
+    // Tell anyone still connected to that game it's gone, then remove it.
+    io.to(`game:${gameId}`).emit('game-deleted', {});
+    gameState.deleteGame(gameId);
+    socket.emit('game-deleted-ok', { gameId });
+    console.log(`Game ${gameId} deleted`);
+  });
+
   // Verify a passcode up front (so we can stop the user before role selection)
   socket.on('verify-passcode', ({ gameId, passcode }) => {
     const game = gameState.getGame(gameId);

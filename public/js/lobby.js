@@ -70,8 +70,8 @@ SocketClient.on('games-list', (games) => {
   container.innerHTML = games
     .map(
       (g) => `
-    <div class="game-item" onclick="selectGame('${g.gameId}', '${escapeHtml(g.team1Name)}', '${escapeHtml(g.team2Name)}', '${g.hostMode}')">
-      <div>
+    <div class="game-item">
+      <div class="game-item-main" onclick="selectGame('${g.gameId}', '${escapeHtml(g.team1Name)}', '${escapeHtml(g.team2Name)}', '${g.hostMode}')">
         <div class="game-item-teams">
           <span>${escapeHtml(g.team1Name)}</span>
           <span class="game-item-vs">VS</span>
@@ -79,10 +79,37 @@ SocketClient.on('games-list', (games) => {
         </div>
         <div class="game-item-players">${g.playerCount} player${g.playerCount !== 1 ? 's' : ''} joined</div>
       </div>
+      <button class="game-delete" title="Delete game"
+        onclick="askDeleteGame('${g.gameId}', '${escapeHtml(g.team1Name)} vs ${escapeHtml(g.team2Name)}')">&times;</button>
     </div>
   `
     )
     .join('');
+});
+
+// ---- Delete game (cleanup) ----
+let pendingDeleteId = null;
+
+function askDeleteGame(gameId, label) {
+  pendingDeleteId = gameId;
+  document.getElementById('delete-modal-text').textContent =
+    `"${label}" will be ended for anyone connected. This can't be undone.`;
+  document.getElementById('delete-modal').classList.remove('hidden');
+}
+
+function closeDeleteModal() {
+  pendingDeleteId = null;
+  document.getElementById('delete-modal').classList.add('hidden');
+}
+
+function confirmDelete() {
+  if (pendingDeleteId) SocketClient.emit('delete-game', { gameId: pendingDeleteId });
+  closeDeleteModal();
+}
+
+SocketClient.on('game-deleted-ok', () => {
+  showToast('Game deleted.', 'success');
+  refreshGames();
 });
 
 function selectGame(gameId, team1Name, team2Name, hostMode) {

@@ -110,6 +110,54 @@
       transition: all var(--transition-fast);
     }
 
+    .game-item-main { flex: 1; }
+
+    .game-delete {
+      flex: 0 0 auto;
+      margin-left: 12px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--ff-gray);
+      font-size: 1.1rem;
+      line-height: 1;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+    .game-delete:hover {
+      border-color: var(--ff-red-glow);
+      background: rgba(204, 34, 34, 0.25);
+      color: var(--ff-white);
+    }
+
+    /* Confirmation modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 24px;
+    }
+    .modal-box {
+      background: var(--ff-blue-mid);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: var(--border-radius-lg);
+      padding: 24px;
+      max-width: 360px;
+      width: 100%;
+      text-align: center;
+    }
+    .modal-box h3 { color: var(--ff-yellow); margin-bottom: 10px; }
+    .modal-box p { color: var(--ff-white); margin-bottom: 20px; line-height: 1.4; }
+    .modal-buttons { display: flex; gap: 12px; }
+    .modal-buttons .btn { flex: 1; }
+    .btn-danger { background: var(--ff-red-gradient); color: var(--ff-white); }
+
     .game-item:hover {
       background: rgba(245, 197, 24, 0.1);
       border-color: var(--ff-yellow);
@@ -305,6 +353,18 @@
       </p>
       <div class="team-select-buttons" id="team-buttons"></div>
       <div class="back-link" onclick="showScreen('role')">&#8592; Back</div>
+    </div>
+  </div>
+
+  <!-- Delete-game confirmation modal -->
+  <div id="delete-modal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h3>Delete this game?</h3>
+      <p id="delete-modal-text">This will end the game for anyone connected.</p>
+      <div class="modal-buttons">
+        <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+        <button class="btn btn-danger" onclick="confirmDelete()">Delete</button>
+      </div>
     </div>
   </div>
 
