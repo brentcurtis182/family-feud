@@ -476,10 +476,12 @@
   position: absolute;
   bottom: 13%;         /* fine-tuned vertical */
   width: 40%;
-  display: flex;
-  justify-content: space-evenly;  /* one name per podium box */
-  flex-wrap: nowrap;
-  gap: 0.4em;
+  /* Fixed 5-slot grid so names land in the SAME spots no matter the count
+     (2 or 3 players fill slots 1..N, matching the 5-player layout). */
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  justify-items: center;
+  align-items: center;
   transform-origin: center;
 }
 /* slight perspective tilt to match the angled podium row (mirrored per side) */
@@ -502,9 +504,9 @@
 .camera-play-left .gs-play-name:nth-child(4) { left: 0.25em; }  /* right ~1 char */
 .camera-play-left .gs-play-name:nth-child(5) { left: -0.5em; }  /* left ~2 chars */
 /* Right side (play-right) — 1 char ≈ 0.5em (one letter) */
+.camera-play-right .gs-play-name:nth-child(4) { left: -1.5em; }  /* back ~3 chars */
 .camera-play-right .gs-play-name:nth-child(2),
-.camera-play-right .gs-play-name:nth-child(3),
-.camera-play-right .gs-play-name:nth-child(4) { left: -1.5em; } /* back ~3 chars (left) */
+.camera-play-right .gs-play-name:nth-child(3) { left: -2.5em; }  /* ~2 more letters left */
 /* n1 and n5 on the right: no change (n5 was already perfect) */
 
 /* ---- GIANT buzz-in indicator ---- */
