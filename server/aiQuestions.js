@@ -100,7 +100,7 @@ async function generateQuestion(topic, style) {
     : 'Phrase it as a survey question using a "We asked 100 people / married women / married men..." framing — a full, natural sentence.';
 
   // Vary the answer count so it isn't always 7.
-  const count = 5 + Math.floor(Math.random() * 4); // 5..8
+  const count = 4 + Math.floor(Math.random() * 5); // 4..8
 
   const resp = await c.messages.create({
     model: MODEL,

@@ -112,17 +112,27 @@ socket.on('game-over', () => {
 socket.on('tv-sound', ({ name }) => { Sounds.play(name); });
 socket.on('tv-sound-stop', ({ name }) => { Sounds.stop(name); });
 
-// Fast Money answer reveal — pink cursor "chases" across the words with beeps
-socket.on('fm-answer-revealed', ({ player, index, text }) => {
-  const cell = document.querySelector(`.fm-cell[data-slot="${player}-${index}"]`);
-  if (cell) chaseReveal(cell, text || '');
-  Sounds.fmRevealSound(); // dedicated fast money answer-reveal sound
+// Fast Money answer reveal — fill the answer cell with a pop + reveal sound
+socket.on('fm-answer-revealed', ({ player, index, text, duplicate }) => {
+  const cell = document.querySelector(`.fmb-cell[data-slot="${player}-ans-${index}"]`);
+  if (cell) {
+    cell.textContent = duplicate ? '✗ DUPE' : (text || '');
+    cell.classList.toggle('duplicate', !!duplicate);
+    cell.classList.add('pop');
+    setTimeout(() => cell.classList.remove('pop'), 350);
+  }
+  Sounds.fmRevealSound();
 });
 
-socket.on('fm-score-revealed', ({ duplicate, total, won }) => {
-  if (duplicate) Sounds.duplicateSound();
-  else Sounds.fmDingSound(); // ding for each revealed value
-  const totalEl = document.getElementById('fm-total');
+socket.on('fm-score-revealed', ({ player, index, points, duplicate, total, won }) => {
+  const cell = document.querySelector(`.fmb-cell[data-slot="${player}-pts-${index}"]`);
+  if (cell) {
+    cell.textContent = duplicate ? '0' : points;
+    cell.classList.add('pop');
+    setTimeout(() => cell.classList.remove('pop'), 350);
+  }
+  if (duplicate) Sounds.duplicateSound(); else Sounds.fmDingSound();
+  const totalEl = document.getElementById('fmb-total');
   if (totalEl) totalEl.textContent = total;
   if (won) Sounds.fanfare();
 });
@@ -226,11 +236,20 @@ function renderEndState() {
 // ---- Fast Money board (single active player, two-stage reveal) ----
 let fmGridBuiltKey = '';
 
-function fmActivePlayer() {
-  const phase = gameState.phase;
-  if (phase === 'FAST_MONEY_P2' || phase === 'FAST_MONEY_REVEAL') return 'p2';
-  if (phase === 'FAST_MONEY_P2_WAIT') return gameState.fastMoney && gameState.fastMoney.remindP1 ? 'p1' : null;
-  return 'p1'; // P1 capture / reveal
+// Build a player's 5-row side (answer + points cells) once.
+const fmSideBuilt = {};
+function buildFmSide(elId, player, slots) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const key = `${player}-${slots}`;
+  if (fmSideBuilt[elId] === key) return;
+  fmSideBuilt[elId] = key;
+  let html = '';
+  for (let i = 0; i < slots; i++) {
+    html += `<div class="fmb-cell fmb-ans" data-slot="${player}-ans-${i}"></div>`;
+    html += `<div class="fmb-cell fmb-pts" data-slot="${player}-pts-${i}"></div>`;
+  }
+  el.innerHTML = html;
 }
 
 function renderFastMoneyBoard() {
@@ -239,104 +258,44 @@ function renderFastMoneyBoard() {
   const statusEl = document.getElementById('fm-status');
   const names = fm ? fm.contestants : { p1: 'Player 1', p2: 'Player 2' };
 
-  // Timer only visible during the capture phases
+  // Timer only during capture phases
   const capturing = phase === 'FAST_MONEY_P1' || phase === 'FAST_MONEY_P2';
   if (!capturing) {
-    const t = document.getElementById('fm-timer-big');
-    t.classList.add('hidden');
+    document.getElementById('fm-timer-big').classList.add('hidden');
     if (fmTimerInt) { clearInterval(fmTimerInt); fmTimerInt = null; }
   }
 
-  const status = {
+  statusEl.textContent = {
     FAST_MONEY_P1: `${names.p1} — answer all five!`,
     FAST_MONEY_P1_REVEAL: fm && fm.won ? '🎉 WINNER!' : `${names.p1}'s answers…`,
     FAST_MONEY_P2_WAIT: (fm && fm.remindP1) ? `Reminder — ${names.p1}'s answers` : `${names.p2}, get ready!`,
     FAST_MONEY_P2: `${names.p2} — answer all five!`,
-    FAST_MONEY_REVEAL: fm && fm.won ? '🎉 WINNERS!' : `${names.p2}'s answers…`,
+    FAST_MONEY_REVEAL: fm && fm.won ? '🎉 WINNERS!' : 'And the answers…',
   }[phase] || '';
-  statusEl.textContent = status;
   statusEl.classList.toggle('win', !!(fm && fm.won));
 
   if (!fm) return;
   const slots = fm.questions.length;
-  const grid = document.getElementById('fm-grid');
 
-  // Final reveal shows BOTH players side by side; other phases show one column.
-  const twoCol = phase === 'FAST_MONEY_REVEAL';
-  const cols = twoCol ? ['p1', 'p2'] : [fmActivePlayer()].filter(Boolean);
-  const key = `${twoCol ? '2' : '1'}-${cols.join(',')}-${slots}`;
+  document.getElementById('fmb-name-l').textContent = names.p1;
+  document.getElementById('fmb-name-r').textContent = names.p2;
 
-  if (fmGridBuiltKey !== key) {
-    fmGridBuiltKey = key;
-    grid.classList.toggle('fm-grid-2col', twoCol);
-    if (!cols.length) {
-      grid.innerHTML = '';
-    } else {
-      let html = '';
-      if (twoCol) {
-        html += `<div class="fm-col-head">${escapeHtml(names.p1)}</div><div class="fm-col-head">${escapeHtml(names.p2)}</div>`;
-      }
-      for (let i = 0; i < slots; i++) {
-        for (const p of cols) html += fmCellMarkup(p, i);
-      }
-      grid.innerHTML = html;
-    }
-  }
+  buildFmSide('fmb-left', 'p1', slots);
+  buildFmSide('fmb-right', 'p2', slots);
 
-  // Sync cells from authoritative state
-  for (const p of cols) {
+  for (const p of ['p1', 'p2']) {
     fm.reveal[p].forEach((r, i) => {
-      const cell = grid.querySelector(`.fm-cell[data-slot="${p}-${i}"]`);
-      if (!cell) return;
-      cell.querySelector('.fm-cell-ans').textContent =
-        r.answerRevealed ? (r.duplicate ? '✗' : (r.text || '—')) : '';
-      cell.querySelector('.fm-cell-pts').textContent = r.scoreRevealed ? r.points : '';
-      cell.classList.toggle('revealed', r.answerRevealed);
-      cell.classList.toggle('duplicate', !!r.duplicate);
-      // cursor: visible/blinking from placement until the score lands;
-      // sits at the LEFT (answer slot) until the answer shows, then at the right (score).
-      cell.classList.toggle('cursor-on', r.cursor && !r.scoreRevealed);
-      cell.classList.toggle('cursor-left', r.cursor && !r.answerRevealed);
+      const ans = document.querySelector(`.fmb-cell[data-slot="${p}-ans-${i}"]`);
+      const pts = document.querySelector(`.fmb-cell[data-slot="${p}-pts-${i}"]`);
+      if (ans) {
+        ans.textContent = r.answerRevealed ? (r.duplicate ? '✗ DUPE' : (r.text || '')) : '';
+        ans.classList.toggle('duplicate', !!r.duplicate);
+      }
+      if (pts) pts.textContent = r.scoreRevealed ? (r.duplicate ? '0' : r.points) : '';
     });
   }
 
-  renderFmPlayers(cols, names);
-
-  // Combined total + P1 subtotal chip during player 2's portion
-  document.getElementById('fm-total').textContent = fm.total;
-  const p1chip = document.getElementById('fm-p1total');
-  const showP1chip = ['FAST_MONEY_P2_WAIT', 'FAST_MONEY_P2'].includes(phase);
-  p1chip.classList.toggle('hidden', !showP1chip);
-  if (showP1chip) p1chip.textContent = `${names.p1}: ${fm.totals.p1}`;
-}
-
-function fmInitials(name) {
-  const parts = (name || '').trim().split(/\s+/).filter(Boolean);
-  if (!parts.length) return '?';
-  return (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
-}
-
-function renderFmPlayers(cols, names) {
-  const el = document.getElementById('fm-players');
-  if (!el) return;
-  el.classList.toggle('two', cols.length === 2);
-  el.innerHTML = cols
-    .map((p) => {
-      const name = names[p] || (p === 'p1' ? 'Player 1' : 'Player 2');
-      return `<div class="fm-player-head">
-          <div class="fm-avatar">${fmInitials(name)}</div>
-          <div class="fm-pname">${escapeHtml(name)}</div>
-        </div>`;
-    })
-    .join('');
-}
-
-function fmCellMarkup(player, index) {
-  return `<div class="fm-cell" data-slot="${player}-${index}">
-      <span class="fm-cell-ans"></span>
-      <span class="fm-cursor"></span>
-      <span class="fm-cell-pts"></span>
-    </div>`;
+  document.getElementById('fmb-total').textContent = fm.total;
 }
 
 // Pink cursor sweeps left→right across the answer as the words wipe in.
