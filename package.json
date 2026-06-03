@@ -1,0 +1,33 @@
+{
+  "name": "family-feud-app",
+  "version": "1.0.0",
+  "description": "Real-time multiplayer Family Feud game",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "test:phase3": "node test-phase3.js",
+    "test:phase4": "node test-phase4.js",
+    "test:phase5": "node test-phase5.js",
+    "test:phase6": "node test-phase6.js",
+    "test:phase7": "node test-phase7.js",
+    "test:phase8": "node test-phase8.js",
+    "test:reset": "node test-reset.js",
+    "test:fixes": "node test-fixes.js"
+  },
+  "keywords": [],
+  "author": "Brent Curtis",
+  "license": "ISC",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.100.1",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "socket.io-client": "^4.8.3"
+  }
+}

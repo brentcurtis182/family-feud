@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Family Feud — Host</title>
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/common.css">
+  <link rel="stylesheet" href="/css/host.css">
+</head>
+<body>
+
+  <div class="host-container">
+    <!-- Header -->
+    <div class="host-header">
+      <div class="host-title">
+        <h1 class="ff-logo" style="font-size:1.8rem">Family Feud</h1>
+        <span class="badge">HOST</span>
+      </div>
+      <div class="game-info">
+        <span id="game-code" class="game-code"></span>
+        <span id="round-info" class="round-info"></span>
+        <button id="btn-fastmoney" class="btn-reset hidden" onclick="showFastMoneySetup()">🏁 Fast Money</button>
+        <button id="btn-reset-round" class="btn-reset hidden" onclick="resetRound()">↺ Reset Round</button>
+      </div>
+    </div>
+
+    <!-- Scoreboard -->
+    <div class="host-scoreboard">
+      <div class="team-score team1-score">
+        <div class="team-name" id="team1-name">Team 1</div>
+        <div class="score-value" id="team1-score">0</div>
+      </div>
+      <div class="score-divider">
+        <span class="vs-text">VS</span>
+      </div>
+      <div class="team-score team2-score">
+        <div class="team-name" id="team2-name">Team 2</div>
+        <div class="score-value" id="team2-score">0</div>
+      </div>
+    </div>
+
+    <!-- Lobby Panel -->
+    <div id="panel-lobby" class="host-panel">
+      <h2>Lobby</h2>
+      <p class="text-center" style="color:var(--ff-gray); margin-bottom:16px; font-size:0.9rem">
+        Add each team's players below. Phones join as team buzzers (no name needed).
+      </p>
+      <div class="lobby-teams">
+        <div class="lobby-team">
+          <h3 id="lobby-team1-name" class="text-yellow">Team 1</h3>
+          <div class="lobby-buzzers" id="lobby-team1-buzzers">0 buzzers connected</div>
+          <ul id="lobby-team1-roster" class="player-list"></ul>
+          <div class="roster-add">
+            <input id="roster-input-team1" class="input" placeholder="Add player" maxlength="24"
+              onkeydown="if(event.key==='Enter')addRoster('team1')">
+            <button class="btn btn-secondary" onclick="addRoster('team1')">Add</button>
+          </div>
+        </div>
+        <div class="lobby-team">
+          <h3 id="lobby-team2-name" class="text-yellow">Team 2</h3>
+          <div class="lobby-buzzers" id="lobby-team2-buzzers">0 buzzers connected</div>
+          <ul id="lobby-team2-roster" class="player-list"></ul>
+          <div class="roster-add">
+            <input id="roster-input-team2" class="input" placeholder="Add player" maxlength="24"
+              onkeydown="if(event.key==='Enter')addRoster('team2')">
+            <button class="btn btn-secondary" onclick="addRoster('team2')">Add</button>
+          </div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <p class="text-center" style="color:var(--ff-gray); margin-bottom:16px">
+        Share the game code so phones can join as buzzers
+      </p>
+      <button class="btn btn-primary" id="btn-start-game" onclick="startGame()">
+        Start Game
+      </button>
+    </div>
+
+    <!-- Round Setup Panel -->
+    <div id="panel-round-setup" class="host-panel hidden">
+      <h2>Round <span id="setup-round-num">1</span> — Face-Off</h2>
+
+      <div class="setup-section">
+        <h3 class="setup-label">1. Pick a contestant from each team</h3>
+        <div class="faceoff-pickers">
+          <div class="faceoff-team">
+            <div class="faceoff-team-name text-yellow" id="fo-team1-name">Team 1</div>
+            <div class="faceoff-options" id="fo-team1-options"></div>
+          </div>
+          <div class="faceoff-team">
+            <div class="faceoff-team-name text-yellow" id="fo-team2-name">Team 2</div>
+            <div class="faceoff-options" id="fo-team2-options"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="setup-section">
+        <h3 class="setup-label">2. Load a question</h3>
+        <div class="q-source-row hidden" id="q-source-row">
+          <span class="q-source-label">Source:</span>
+          <div class="toggle-group">
+            <button class="toggle-option active" data-source="ai" onclick="selectSource(this)">AI</button>
+            <button class="toggle-option" data-source="bank" onclick="selectSource(this)">Bank</button>
+          </div>
+        </div>
+        <div class="topic-chips" id="topic-chips"></div>
+        <div id="setup-question-display" class="setup-question hidden"></div>
+        <div id="q-loading" class="q-loading hidden">Generating question…</div>
+        <div class="setup-actions">
+          <button class="btn btn-secondary" id="btn-load-q" onclick="loadQuestion()">Load Question</button>
+          <button class="btn btn-secondary hidden" id="btn-reroll-q" onclick="rerollQuestion()">Re-roll</button>
+        </div>
+      </div>
+
+      <div class="setup-section">
+        <h3 class="setup-label">3. Open the buzzers</h3>
+        <button class="btn btn-primary" id="btn-open-buzzers" onclick="openBuzzers()" disabled>
+          Open Buzzers
+        </button>
+        <p class="setup-hint" id="setup-hint">Pick both contestants and load a question first.</p>
+      </div>
+    </div>
+
+    <!-- Face-Off Buzzer Panel -->
+    <div id="panel-faceoff-buzzer" class="host-panel hidden">
+      <h2>Buzzers Open!</h2>
+      <p class="text-center" style="color:var(--ff-gray)">Waiting for a contestant to buzz in...</p>
+      <div class="buzzer-live" id="buzzer-live">⚡</div>
+      <div class="setup-actions">
+        <button class="btn btn-secondary" onclick="resetFaceoff()">Cancel / Re-pick</button>
+      </div>
+    </div>
+
+    <!-- Gameplay Panel -->
+    <div id="panel-gameplay" class="host-panel hidden">
+      <div class="gp-stakes hidden" id="gp-stakes"></div>
+      <div class="gp-faceoff-banner hidden" id="gp-faceoff-banner"></div>
+      <div class="gp-question" id="gp-question">Question</div>
+      <div class="gp-answers" id="gp-answers"></div>
+
+      <!-- Phase-specific actions (play-or-pass buttons, etc.) -->
+      <div class="gp-actions hidden" id="gp-actions"></div>
+
+      <div class="gp-controls">
+        <div class="gp-strikes-display" id="gp-strikes"></div>
+        <div class="gp-bank">
+          <span class="gp-bank-label">Round Bank</span>
+          <span class="gp-bank-value" id="gp-bank">0</span>
+        </div>
+        <div class="gp-control-buttons">
+          <button class="btn btn-strike" id="btn-strike" onclick="addStrike()">Strike</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Round End Panel -->
+    <div id="panel-round-end" class="host-panel hidden">
+      <h2>Round Over</h2>
+      <div class="round-end-result" id="round-end-result"></div>
+      <button class="btn btn-primary" id="btn-advance" onclick="advanceRound()">Next Round</button>
+    </div>
+
+    <!-- Game Over Panel -->
+    <div id="panel-game-over" class="host-panel hidden">
+      <h2>🏆 Game Over!</h2>
+      <div class="game-over-winner" id="game-over-winner"></div>
+      <div class="game-over-scores" id="game-over-scores"></div>
+      <button class="btn btn-primary" onclick="restartGame()">🔄 Run It Back (same teams)</button>
+      <button class="btn btn-secondary mt-2" onclick="showFastMoneySetup()">Play Fast Money</button>
+      <button class="btn btn-secondary mt-2" onclick="window.location.href='/'">Brand New Game</button>
+    </div>
+
+    <!-- Fast Money: Setup -->
+    <div id="panel-fastmoney-setup" class="host-panel hidden">
+      <h2>🏁 Fast Money Setup</h2>
+      <div class="setup-section">
+        <h3 class="setup-label">Pick two contestants</h3>
+        <div class="faceoff-pickers">
+          <div class="faceoff-team">
+            <div class="faceoff-team-name text-yellow">Player 1</div>
+            <div class="faceoff-options" id="fm-p1-options"></div>
+          </div>
+          <div class="faceoff-team">
+            <div class="faceoff-team-name text-yellow">Player 2</div>
+            <div class="faceoff-options" id="fm-p2-options"></div>
+          </div>
+        </div>
+      </div>
+      <div class="setup-section">
+        <h3 class="setup-label">Question source</h3>
+        <div class="q-source-row" id="fm-source-row">
+          <span class="q-source-label">Source:</span>
+          <div class="toggle-group">
+            <button class="toggle-option active" data-source="ai" onclick="fmSelectSource(this)">AI</button>
+            <button class="toggle-option" data-source="bank" onclick="fmSelectSource(this)">Bank</button>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="fm-start-btn" onclick="startFastMoney()" disabled>Start Fast Money</button>
+      <div id="fm-gen-loading" class="q-loading hidden">Generating 5 questions…</div>
+      <div class="setup-hint" id="fm-setup-hint">Pick both contestants first.</div>
+    </div>
+
+    <!-- Fast Money: Capture (continuous mic + Next Question stepper) -->
+    <div id="panel-fastmoney-capture" class="host-panel hidden">
+      <h2 id="fmc-title">Player 1</h2>
+      <div class="fmc-timer" id="fmc-timer">0:20</div>
+      <p class="fmc-instr">Read a question aloud, tap <b>Capture</b>, let them answer. Tap <b>Capture</b> again for the next question. (Captured text is just a reference — you can also type it.)</p>
+
+      <div class="fmc-mic-row">
+        <button class="fmc-rec" id="fmc-capture" onclick="fmCaptureNext()">🎤 Capture Answer 1</button>
+      </div>
+      <div class="fmc-status" id="fmc-mic-status"></div>
+      <div class="fmc-p1ref hidden" id="fmc-p1ref"></div>
+      <button class="btn btn-strike hidden" id="fmc-dup" onclick="fmDupBuzz()">🔁 Duplicate — Buzz!</button>
+      <div class="fmc-transcript" id="fmc-transcript"></div>
+
+      <div class="fmc-list" id="fmc-list"></div>
+
+      <button class="btn btn-primary" id="fmc-submit" onclick="fmSubmitCapture()">Done — Review →</button>
+    </div>
+
+    <!-- Fast Money: Player 2 hand-off -->
+    <div id="panel-fastmoney-p2wait" class="host-panel hidden">
+      <h2>Player 2's Turn</h2>
+      <div class="fmr-total"><span id="fmw-p1total">0</span> pts so far — needs <span id="fmw-need">200</span> to win</div>
+      <p class="text-center" style="color:var(--ff-gray)">Have <b id="fmw-p2name">Player 2</b> face away from the TV. Use “Remind” to re-show Player 1’s answers to the room, then start.</p>
+      <div class="setup-actions">
+        <button class="btn btn-secondary" id="fmw-remind" onclick="fmToggleRemind()">👀 Remind: Show P1 Answers</button>
+        <button class="btn btn-primary" onclick="startFastMoneyP2()">Start Player 2 →</button>
+      </div>
+    </div>
+
+    <!-- Fast Money: Reveal (two-click per row) -->
+    <div id="panel-fastmoney-reveal" class="host-panel hidden">
+      <h2 id="fmr-title">Reveal — Player 1</h2>
+      <div class="fmr-total">Total: <span id="fmr-total">0</span> / 200 <span id="fmr-won" class="hidden">🎉 WIN!</span></div>
+      <div id="fmr-questions"></div>
+      <button class="btn btn-primary hidden" id="fmr-to-p2" onclick="fmToP2()">Continue to Player 2 →</button>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/socket-client.js"></script>
+  <script src="/js/sounds.js"></script>
+  <script src="/js/voice.js"></script>
+  <script src="/js/host.js"></script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Family Feud — Player</title>
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/common.css">
+  <style>
+    .player-container {
+      width: 100%;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+      overscroll-behavior: none;
+    }
+    /* When entering Fast Money, the tall form scrolls from the top */
+    .player-container.scroll {
+      justify-content: flex-start;
+      overflow-y: auto;
+    }
+
+    .player-team-badge {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      letter-spacing: 0.1em;
+      padding: 6px 16px;
+      border-radius: 4px;
+      background: var(--ff-yellow);
+      color: var(--ff-blue-dark);
+      margin-bottom: 12px;
+    }
+
+    .player-name-display {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      color: var(--ff-white);
+      margin-bottom: 4px;
+    }
+
+    .player-score-row {
+      color: var(--ff-gray);
+      font-size: 0.85rem;
+      margin-bottom: 24px;
+    }
+    .player-score-row b { color: var(--ff-yellow); font-size: 1rem; }
+
+    /* Status view */
+    .player-status {
+      color: var(--ff-white);
+      font-size: 1.1rem;
+      max-width: 320px;
+      line-height: 1.5;
+    }
+
+    /* Buzzer view */
+    #view-buzzer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .buzz-btn {
+      width: min(70vw, 260px);
+      height: min(70vw, 260px);
+      border-radius: 50%;
+      border: 6px solid rgba(255, 255, 255, 0.2);
+      background: linear-gradient(180deg, #555 0%, #333 100%);
+      color: rgba(255, 255, 255, 0.5);
+      font-family: var(--font-display);
+      font-size: 2.4rem;
+      letter-spacing: 0.05em;
+      cursor: not-allowed;
+      transition: transform 0.05s ease, box-shadow var(--transition-fast);
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .buzz-btn.armed {
+      background: var(--ff-red-gradient);
+      border-color: var(--ff-red-glow);
+      color: var(--ff-white);
+      cursor: pointer;
+      box-shadow: 0 0 40px rgba(255, 68, 68, 0.6), inset 0 4px 12px rgba(255,255,255,0.2);
+      animation: buzzPulse 1s ease-in-out infinite;
+    }
+
+    .buzz-btn.armed:active {
+      transform: scale(0.94);
+      box-shadow: 0 0 60px rgba(255, 68, 68, 0.9);
+    }
+
+    @keyframes buzzPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+    }
+
+    /* Fast Money entry */
+    #view-fastmoney { width: 100%; max-width: 480px; }
+    .fm-head {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      color: var(--ff-yellow);
+      text-align: center;
+      margin-bottom: 4px;
+    }
+    .fm-sub { color: var(--ff-gray); font-size: 0.85rem; text-align: center; margin-bottom: 16px; }
+    .fm-q {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: var(--border-radius);
+      padding: 12px;
+      margin-bottom: 12px;
+      text-align: left;
+    }
+    .fm-q-text { font-size: 0.95rem; margin-bottom: 8px; }
+    .fm-input-row { display: flex; gap: 8px; }
+    .fm-input-row .input { flex: 1; }
+    .fm-mic {
+      width: 48px; min-width: 48px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: var(--border-radius);
+      background: rgba(255,255,255,0.08);
+      color: var(--ff-white);
+      font-size: 1.3rem;
+      cursor: pointer;
+    }
+    .fm-mic.listening {
+      border-color: var(--ff-red-glow);
+      background: rgba(204,34,34,0.3);
+      animation: buzzPulse 1s ease-in-out infinite;
+    }
+    #fm-submit { width: 100%; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="player-container">
+    <div class="player-team-badge" id="team-badge">Team</div>
+    <div class="player-name-display" id="player-name">Player</div>
+    <div class="player-score-row">Team Score: <b id="team-score">0</b></div>
+
+    <!-- Status view -->
+    <div id="view-status">
+      <div class="player-status" id="player-status">Connecting...</div>
+    </div>
+
+    <!-- Buzzer view -->
+    <div id="view-buzzer" class="hidden">
+      <button class="buzz-btn" id="buzz-btn" disabled onclick="buzz()">BUZZ!</button>
+    </div>
+
+    <!-- Fast Money entry view -->
+    <div id="view-fastmoney" class="hidden">
+      <div class="fm-head">Fast Money</div>
+      <div class="fm-sub" id="fm-sub">Answer all 5 — quick!</div>
+      <div id="fm-q-list"></div>
+      <button class="btn btn-primary" id="fm-submit" onclick="submitFastMoney()">Submit Answers</button>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/socket-client.js"></script>
+  <script src="/js/sounds.js"></script>
+  <script src="/js/voice.js"></script>
+  <script src="/js/player.js"></script>
+</body>
+</html>

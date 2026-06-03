@@ -1,0 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Anton&family=Poppins:wght@400;600;700&display=swap');
+
+:root {
+  /* Family Feud color palette */
+  --ff-blue-dark: #0a1628;
+  --ff-blue-mid: #122244;
+  --ff-blue-light: #1a3366;
+  --ff-blue-glow: #2a5caa;
+  --ff-yellow: #f5c518;
+  --ff-yellow-light: #ffe066;
+  --ff-gold: #daa520;
+  --ff-white: #ffffff;
+  --ff-red: #cc2222;
+  --ff-red-glow: #ff4444;
+  --ff-green: #22cc44;
+  --ff-green-glow: #44ff66;
+  --ff-gray: #8899aa;
+  --ff-dark-overlay: rgba(0, 0, 0, 0.6);
+
+  /* Gradients */
+  --ff-bg-gradient: linear-gradient(180deg, #0a1628 0%, #122244 40%, #1a3366 100%);
+  --ff-board-gradient: linear-gradient(180deg, #0d1f3c 0%, #162d5a 50%, #1a3366 100%);
+  --ff-panel-gradient: linear-gradient(180deg, #1a3366 0%, #244488 100%);
+  --ff-button-gradient: linear-gradient(180deg, #f5c518 0%, #daa520 100%);
+  --ff-button-hover: linear-gradient(180deg, #ffe066 0%, #f5c518 100%);
+  --ff-red-gradient: linear-gradient(180deg, #cc2222 0%, #991111 100%);
+
+  /* Typography */
+  --font-display: 'Bebas Neue', 'Anton', sans-serif;
+  --font-body: 'Poppins', sans-serif;
+
+  /* Sizing */
+  --border-radius: 8px;
+  --border-radius-lg: 16px;
+  --glow-spread: 0 0 20px rgba(42, 92, 170, 0.5);
+  --gold-glow: 0 0 20px rgba(245, 197, 24, 0.4);
+  --red-glow: 0 0 20px rgba(204, 34, 34, 0.5);
+
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-medium: 0.4s ease;
+  --transition-camera: 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Family Feud — Judge</title>
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/common.css">
+  <link rel="stylesheet" href="/css/host.css">
+  <style>
+    .judge-badge {
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      padding: 4px 10px;
+      border-radius: 4px;
+      background: var(--ff-red);
+      color: var(--ff-white);
+    }
+    .judge-waiting {
+      text-align: center;
+      color: var(--ff-gray);
+      font-size: 1.1rem;
+      padding: 48px 16px;
+      line-height: 1.5;
+    }
+    .judge-end {
+      text-align: center;
+      padding: 40px 16px;
+    }
+    .judge-end-title {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      color: var(--ff-yellow);
+      margin-bottom: 8px;
+    }
+    .judge-end-sub { color: var(--ff-gray); }
+  </style>
+</head>
+<body>
+  <div class="host-container">
+    <!-- Header -->
+    <div class="host-header">
+      <div class="host-title">
+        <h1 class="ff-logo" style="font-size:1.8rem">Family Feud</h1>
+        <span class="judge-badge">JUDGE</span>
+      </div>
+      <div class="game-info">
+        <span id="game-code" class="game-code"></span>
+        <span id="round-info" class="round-info"></span>
+      </div>
+    </div>
+
+    <!-- Scoreboard -->
+    <div class="host-scoreboard">
+      <div class="team-score">
+        <div class="team-name" id="j-team1-name">Team 1</div>
+        <div class="score-value" id="j-team1-score">0</div>
+      </div>
+      <div class="score-divider"><span class="vs-text">VS</span></div>
+      <div class="team-score">
+        <div class="team-name" id="j-team2-name">Team 2</div>
+        <div class="score-value" id="j-team2-score">0</div>
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div class="host-panel">
+      <div id="judge-waiting" class="judge-waiting">Connecting…</div>
+
+      <div id="judge-gameplay" class="hidden">
+        <div class="gp-faceoff-banner hidden" id="j-banner"></div>
+        <div class="gp-question" id="j-question">Question</div>
+        <div class="gp-answers" id="j-answers"></div>
+        <div class="gp-controls">
+          <div class="gp-strikes-display" id="j-strikes"></div>
+          <div class="gp-bank">
+            <span class="gp-bank-label">Round Bank</span>
+            <span class="gp-bank-value" id="j-bank">0</span>
+          </div>
+          <div class="gp-control-buttons">
+            <button class="btn btn-strike" id="j-strike" onclick="addStrike()">Strike</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="judge-end" class="judge-end hidden"></div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/socket-client.js"></script>
+  <script src="/js/judge.js"></script>
+</body>
+</html>

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Family Feud</title>
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/common.css">
+  <style>
+    .landing {
+      width: 100%;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .logo-container {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .logo-stars {
+      font-size: 1.5rem;
+      color: var(--ff-yellow);
+      letter-spacing: 0.5em;
+      margin-bottom: 8px;
+      text-shadow: 0 0 10px rgba(245, 197, 24, 0.4);
+    }
+
+    .ff-logo {
+      font-size: clamp(3rem, 10vw, 5rem);
+    }
+
+    .main-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+      max-width: 360px;
+    }
+
+    .main-buttons .btn {
+      width: 100%;
+      padding: 18px 32px;
+      font-size: 1.5rem;
+    }
+
+    /* ---- Create Game Panel ---- */
+    .panel {
+      width: 100%;
+      max-width: 420px;
+      animation: panelFadeIn 0.3s ease;
+    }
+
+    @keyframes panelFadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .panel h2 {
+      font-size: 1.8rem;
+      color: var(--ff-yellow);
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .panel .btn {
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 16px;
+      color: var(--ff-gray);
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-align: center;
+      width: 100%;
+      transition: color var(--transition-fast);
+    }
+
+    .back-link:hover {
+      color: var(--ff-white);
+    }
+
+    /* ---- Join Game Panel ---- */
+    .games-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .game-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--border-radius);
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .game-item:hover {
+      background: rgba(245, 197, 24, 0.1);
+      border-color: var(--ff-yellow);
+    }
+
+    .game-item-teams {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      letter-spacing: 0.03em;
+    }
+
+    .game-item-vs {
+      color: var(--ff-yellow);
+      margin: 0 8px;
+    }
+
+    .game-item-players {
+      font-size: 0.8rem;
+      color: var(--ff-gray);
+    }
+
+    .no-games {
+      text-align: center;
+      color: var(--ff-gray);
+      padding: 32px 0;
+      font-size: 0.95rem;
+    }
+
+    /* ---- Passcode Entry ---- */
+    .passcode-game-title {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    /* ---- Role Selection ---- */
+    .role-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .role-btn {
+      padding: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      border-radius: var(--border-radius);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--ff-white);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      text-align: left;
+    }
+
+    .role-btn:hover {
+      border-color: var(--ff-yellow);
+      background: rgba(245, 197, 24, 0.1);
+    }
+
+    .role-btn-title {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      letter-spacing: 0.05em;
+    }
+
+    .role-btn-desc {
+      font-size: 0.8rem;
+      color: var(--ff-gray);
+      margin-top: 4px;
+    }
+
+    /* ---- Team Selection ---- */
+    .team-select-buttons {
+      display: flex;
+      gap: 12px;
+    }
+
+    .team-btn {
+      flex: 1;
+      padding: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      border-radius: var(--border-radius);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--ff-white);
+      cursor: pointer;
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      text-align: center;
+      letter-spacing: 0.05em;
+      transition: all var(--transition-fast);
+    }
+
+    .team-btn:hover {
+      border-color: var(--ff-yellow);
+      background: rgba(245, 197, 24, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .team-btn.selected {
+      border-color: var(--ff-yellow);
+      background: rgba(245, 197, 24, 0.15);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen: Landing -->
+  <div id="screen-landing" class="landing">
+    <div class="logo-container">
+      <div class="logo-stars">&#9733; &#9733; &#9733;</div>
+      <h1 class="ff-logo">Family Feud</h1>
+      <p class="ff-logo-sub">Game Night Edition</p>
+    </div>
+    <div class="main-buttons">
+      <button class="btn btn-primary" onclick="showScreen('create')">Start a Game</button>
+      <button class="btn btn-secondary" onclick="showScreen('join')">Join a Game</button>
+    </div>
+  </div>
+
+  <!-- Screen: Create Game -->
+  <div id="screen-create" class="landing hidden">
+    <div class="panel card">
+      <h2>Start a Game</h2>
+
+      <div class="form-group">
+        <label class="label">Host Mode</label>
+        <div class="toggle-group">
+          <button class="toggle-option active" data-mode="host-judge" onclick="selectHostMode(this)">Host + Judge</button>
+          <button class="toggle-option" data-mode="host-only" onclick="selectHostMode(this)">Host Only</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="label">Team 1 Name</label>
+        <input type="text" id="create-team1" class="input" placeholder="e.g., The Johnsons" maxlength="30">
+      </div>
+
+      <div class="form-group">
+        <label class="label">Team 2 Name</label>
+        <input type="text" id="create-team2" class="input" placeholder="e.g., The Browns" maxlength="30">
+      </div>
+
+      <div class="form-group">
+        <label class="label">Game Passcode</label>
+        <input type="text" id="create-passcode" class="input" placeholder="e.g., turtle" maxlength="20">
+      </div>
+
+      <button class="btn btn-primary" onclick="createGame()">Create Game</button>
+      <div class="back-link" onclick="showScreen('landing')">&#8592; Back</div>
+    </div>
+  </div>
+
+  <!-- Screen: Join Game (list) -->
+  <div id="screen-join" class="landing hidden">
+    <div class="panel card">
+      <h2>Join a Game</h2>
+      <div id="games-list" class="games-list">
+        <div class="no-games">Looking for games...</div>
+      </div>
+      <button class="btn btn-secondary mt-2" onclick="refreshGames()" style="width:100%">Refresh</button>
+      <div class="back-link" onclick="showScreen('landing')">&#8592; Back</div>
+    </div>
+  </div>
+
+  <!-- Screen: Enter Passcode -->
+  <div id="screen-passcode" class="landing hidden">
+    <div class="panel card">
+      <h2>Enter Passcode</h2>
+      <div id="passcode-game-title" class="passcode-game-title"></div>
+      <div class="form-group">
+        <input type="text" id="join-passcode" class="input" placeholder="Enter game passcode" maxlength="20">
+      </div>
+      <button class="btn btn-primary" onclick="submitPasscode()">Enter</button>
+      <div class="back-link" onclick="showScreen('join')">&#8592; Back</div>
+    </div>
+  </div>
+
+  <!-- Screen: Role Selection -->
+  <div id="screen-role" class="landing hidden">
+    <div class="panel card">
+      <h2>Choose Your Role</h2>
+      <div id="role-buttons" class="role-buttons"></div>
+      <div class="back-link" onclick="showScreen('join')">&#8592; Back</div>
+    </div>
+  </div>
+
+  <!-- Screen: Player Setup (pick a team — you're a buzzer for that team) -->
+  <div id="screen-player-setup" class="landing hidden">
+    <div class="panel card">
+      <h2>Pick Your Team</h2>
+      <p class="text-center" style="color:var(--ff-gray); margin-bottom:16px; font-size:0.9rem">
+        Tap your team — your phone becomes a buzzer for them. (The host adds player names.)
+      </p>
+      <div class="team-select-buttons" id="team-buttons"></div>
+      <div class="back-link" onclick="showScreen('role')">&#8592; Back</div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/socket-client.js"></script>
+  <script src="/js/lobby.js"></script>
+</body>
+</html>
