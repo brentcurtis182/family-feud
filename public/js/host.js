@@ -262,12 +262,9 @@ function renderPhase() {
     case 'TEAM_PLAY':
     case 'STEAL_ATTEMPT':
     case 'FACE_OFF_ANSWER':
+    case 'ROUND_END':
       document.getElementById('panel-gameplay').classList.remove('hidden');
       renderGameplay();
-      break;
-    case 'ROUND_END':
-      document.getElementById('panel-round-end').classList.remove('hidden');
-      renderRoundEnd();
       break;
     case 'GAME_OVER':
       document.getElementById('panel-game-over').classList.remove('hidden');
@@ -704,6 +701,8 @@ function renderFmReveal() {
 
   // "Continue to Player 2" only after P1's reveal
   document.getElementById('fmr-to-p2').classList.toggle('hidden', gameState.phase !== 'FAST_MONEY_P1_REVEAL');
+  // After the final (P2) reveal, offer Run It Back regardless of win/lose.
+  document.getElementById('fmr-runback').classList.toggle('hidden', gameState.phase !== 'FAST_MONEY_REVEAL');
 }
 
 function fmrRow(player, i, q) {
@@ -714,8 +713,15 @@ function fmrRow(player, i, q) {
   // Step 2 = pick the matching answer (chips clickable only once the cursor is placed)
   const pickStep = r.cursor && !r.answerRevealed;
   const dis = pickStep ? '' : 'disabled';
+  // For P2, grey out the answer P1 already took (that would be a duplicate).
+  const p1Took = player === 'p2' ? (fm.reveal.p1[i] && fm.reveal.p1[i].text) : null;
   const chips = q.answers
-    .map((a, ai) => `<button class="fmr-chip" ${dis} onclick="fmPickChip('${player}',${i},${ai})">${escapeHtml(a.text)} <b>${a.points}</b></button>`)
+    .map((a, ai) => {
+      const taken = p1Took && a.text === p1Took;
+      const cls = taken ? 'fmr-chip taken' : 'fmr-chip';
+      const d = (taken || !pickStep) ? 'disabled' : '';
+      return `<button class="${cls}" ${d} onclick="fmPickChip('${player}',${i},${ai})">${escapeHtml(a.text)} <b>${a.points}</b></button>`;
+    })
     .join('');
   const zero = `<button class="fmr-chip fmr-zero" ${dis} onclick="fmPickNoMatch('${player}',${i})">No match (0)</button>`;
   const dup = player === 'p2'
@@ -865,16 +871,24 @@ function renderGameplay() {
   } else if (phase === 'STEAL_ATTEMPT' && ap.stealingTeam) {
     banner.textContent = `🎯 ${gameState.teams[ap.stealingTeam].name} STEAL — reveal if right, or hit "Steal Failed"`;
     banner.classList.remove('hidden');
+  } else if (phase === 'ROUND_END' && gameState.lastRoundResult) {
+    const r = gameState.lastRoundResult;
+    banner.textContent = `🏆 ${r.teamName} won the round (+${r.points})! Reveal any remaining answers, then Next Round.`;
+    banner.classList.remove('hidden');
   } else {
     banner.classList.add('hidden');
   }
 
-  // Phase actions (play-or-pass during the face-off answer)
+  // Phase actions (play-or-pass during the face-off answer; Next Round at end)
   const actions = document.getElementById('gp-actions');
   if (phase === 'FACE_OFF_ANSWER') {
     actions.innerHTML =
       `<button class="btn btn-primary" onclick="choosePlay('team1')">${escapeHtml(gameState.teams.team1.name)} plays</button>` +
       `<button class="btn btn-primary" onclick="choosePlay('team2')">${escapeHtml(gameState.teams.team2.name)} plays</button>`;
+    actions.classList.remove('hidden');
+  } else if (phase === 'ROUND_END') {
+    actions.innerHTML =
+      `<button class="btn btn-primary" onclick="advanceRound()">${gameState.round >= gameState.totalRounds ? 'Final Tally →' : 'Next Round →'}</button>`;
     actions.classList.remove('hidden');
   } else {
     actions.innerHTML = '';

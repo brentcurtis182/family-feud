@@ -225,12 +225,14 @@
       </div>
       <div class="fmc-status" id="fmc-mic-status"></div>
       <div class="fmc-p1ref hidden" id="fmc-p1ref"></div>
-      <button class="btn btn-strike hidden" id="fmc-dup" onclick="fmDupBuzz()">🔁 Duplicate — Buzz!</button>
       <div class="fmc-transcript" id="fmc-transcript"></div>
 
       <div class="fmc-list" id="fmc-list"></div>
 
-      <button class="fmc-next-big" id="fmc-next" onclick="fmNextQuestion()">▶ Next Question (starts clock)</button>
+      <div class="fmc-bottom-row">
+        <button class="fmc-next-big" id="fmc-next" onclick="fmNextQuestion()">▶ Next Question (starts clock)</button>
+        <button class="fmc-dup-big hidden" id="fmc-dup" onclick="fmDupBuzz()">🔁 Duplicate</button>
+      </div>
     </div>
 
     <!-- Fast Money: Player 2 hand-off -->
@@ -250,6 +252,7 @@
       <div class="fmr-total">Total: <span id="fmr-total">0</span> / 200 <span id="fmr-won" class="hidden">🎉 WIN!</span></div>
       <div id="fmr-questions"></div>
       <button class="btn btn-primary hidden" id="fmr-to-p2" onclick="fmToP2()">Continue to Player 2 →</button>
+      <button class="btn btn-secondary hidden mt-2" id="fmr-runback" onclick="restartGame()">🔄 Run It Back (new game)</button>
     </div>
   </div>
 

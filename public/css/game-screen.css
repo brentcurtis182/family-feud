@@ -71,6 +71,7 @@
   align-items: center;
   justify-content: center;
   position: relative;
+  container-type: size; /* lets the board size itself to the stage as true 16:9 */
   transition: all var(--transition-camera);
 }
 
@@ -107,9 +108,15 @@
    The slot grid + total box are positioned with the vars below — nudge these
    four/percent values to line the overlay up with the painted slots. */
 .gs-board {
+  /* True 16:9 box that fits the stage, with the board image filling it exactly
+     (100% 100%) so the % overlay coords always map to the same spots. */
   position: absolute;
-  inset: 0;
-  background: url('/assets/images/scoreboard-rounds.png') center / contain no-repeat;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(100cqw, calc(100cqh * 16 / 9));
+  height: min(100cqh, calc(100cqw * 9 / 16));
+  background: url('/assets/images/scoreboard-rounds.png') 0 0 / 100% 100% no-repeat;
   /* --- alignment knobs (percent of the stage) --- */
   --slots-left: 24%;
   --slots-top: 31%;
@@ -403,19 +410,8 @@
   transform: scale(1.08);
 }
 
-/* Team-play shots: shrink the board into the top corner so the set's
-   podiums + team-name banners show in the backdrop behind it. */
 .camera-play-left .gs-stage,
 .camera-play-right .gs-stage { transform: none; }
-
-.camera-play-right .gs-board {
-  transform: scale(0.5);
-  transform-origin: top right;
-}
-.camera-play-left .gs-board {
-  transform: scale(0.5);
-  transform-origin: top left;
-}
 
 /* ---- GIANT buzz-in indicator ---- */
 .gs-buzzin {

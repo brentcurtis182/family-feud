@@ -99,13 +99,16 @@ async function generateQuestion(topic, style) {
     ? 'Phrase it as a SHORT, punchy Fast Money prompt (e.g. "Name a...", "Name something...", "A reason..."). Keep it brief — do NOT use a "we asked 100" framing.'
     : 'Phrase it as a survey question using a "We asked 100 people / married women / married men..." framing — a full, natural sentence.';
 
+  // Vary the answer count so it isn't always 7.
+  const count = 5 + Math.floor(Math.random() * 4); // 5..8
+
   const resp = await c.messages.create({
     model: MODEL,
     max_tokens: 1024,
     temperature: 1,
     system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
     messages: [
-      { role: 'user', content: `Topic: ${effectiveTopic}. ${styleLine} Generate one fresh, creative question now as JSON.` },
+      { role: 'user', content: `Topic: ${effectiveTopic}. ${styleLine} Provide EXACTLY ${count} answers. Generate one fresh, creative question now as JSON.` },
     ],
   });
 

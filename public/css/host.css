@@ -516,12 +516,16 @@
 .fmc-top-row { display: flex; gap: 10px; margin-bottom: 8px; }
 .fmc-top-row > * { flex: 1; }
 
-/* Big thumb-friendly Next Question button, stuck to the bottom of the panel */
-.fmc-next-big {
+/* Thumb-friendly bottom row: Next Question (+ Duplicate for P2) */
+.fmc-bottom-row {
   position: sticky;
   bottom: 0;
-  width: 100%;
+  display: flex;
+  gap: 10px;
   margin-top: 12px;
+}
+.fmc-next-big {
+  flex: 2;
   padding: 22px;
   font-family: var(--font-display);
   font-size: 1.6rem;
@@ -534,6 +538,22 @@
   box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.4);
 }
 .fmc-next-big:active { transform: scale(0.99); }
+.fmc-dup-big {
+  flex: 1;
+  padding: 22px;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  border: none;
+  border-radius: var(--border-radius);
+  background: var(--ff-red-gradient);
+  color: var(--ff-white);
+  cursor: pointer;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.4);
+}
+.fmc-dup-big:active { transform: scale(0.99); }
+
+/* Greyed-out chip (answer already taken by P1) */
+.fmr-chip.taken { opacity: 0.35; text-decoration: line-through; cursor: default; }
 .fmc-status { font-size: 0.85rem; color: var(--ff-gray); }
 .fmc-current { text-align: center; margin: 8px 0; }
 .fmc-p1ref {

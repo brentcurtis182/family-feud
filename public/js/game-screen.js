@@ -90,21 +90,18 @@ function showBuzzIn(playerName, teamName, team) {
   el.classList.remove('hidden');
 }
 
-socket.on('steal-setup', ({ teamName }) => {
-  Sounds.buzz();
+socket.on('steal-setup', () => {
+  // (no extra sound — the strike sound already played on the 3rd strike)
 });
 
-socket.on('steal-result', ({ success, teamName }) => {
-  if (success) Sounds.ding(); else Sounds.buzzer();
+socket.on('steal-result', ({ success }) => {
+  if (success) Sounds.ding(); // steal success = correct answer; failure already struck
 });
 
-socket.on('round-ended', ({ teamName, points, gameOver, winnerName, scores }) => {
+socket.on('round-ended', () => {
+  // Applause; the board stays up so the host can reveal the remaining answers.
+  // (The big winner overlay only appears on GAME_OVER — see renderEndState.)
   Sounds.fanfare();
-  if (!gameOver) {
-    showOverlay(`<div class="ov-team">${escapeHtml(teamName)}</div>` +
-                `<div class="ov-points">+${points}</div>` +
-                `<div class="ov-sub">wins the round</div>`);
-  }
 });
 
 socket.on('game-over', () => {
@@ -220,14 +217,8 @@ function renderEndState() {
       `<div class="ov-sub">WINS!</div>` +
       `<div class="ov-scores">${escapeHtml(gameState.teams.team1.name)} ${gameState.teams.team1.score} — ${gameState.teams.team2.name} ${gameState.teams.team2.score}</div>`
     );
-  } else if (phase === 'ROUND_END' && gameState.lastRoundResult) {
-    const r = gameState.lastRoundResult;
-    showOverlay(
-      `<div class="ov-team">${escapeHtml(r.teamName)}</div>` +
-      `<div class="ov-points">+${r.points}</div>` +
-      `<div class="ov-sub">wins the round</div>`
-    );
   } else {
+    // ROUND_END keeps the board visible so the host can reveal the rest.
     hideOverlay();
   }
 }

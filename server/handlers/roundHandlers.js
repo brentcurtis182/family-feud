@@ -50,8 +50,9 @@ function endRound(io, game, winningTeam) {
     points,
   };
 
-  // Reveal any remaining answers for the final board (does not change score).
-  game.currentQuestion.answers.forEach((a) => { a.revealed = true; });
+  // Clear strikes so the board is clean — the host reveals any remaining
+  // answers one-by-one during ROUND_END, then advances.
+  game.activePlay.strikes = 0;
 
   const winner = gameState.checkWinCondition(game);
   game.phase = winner ? PHASES.GAME_OVER : PHASES.ROUND_END;
