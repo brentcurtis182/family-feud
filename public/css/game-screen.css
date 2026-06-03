@@ -597,8 +597,8 @@
   --fmb-top: 16%;
   --fmb-height: 56%;
   --fmb-colw: 37%;     /* width of each player's [answer+points] block */
-  --fmb-left: 11%;     /* left edge of player 1's block */
-  --fmb-right: 11%;    /* right edge of player 2's block */
+  --fmb-left: 16%;     /* left edge of player 1's block (slid right ~4 chars) */
+  --fmb-right: 11%;    /* right edge of player 2's block (perfect — leave it) */
 }
 
 .fmb-side {
