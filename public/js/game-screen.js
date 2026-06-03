@@ -195,6 +195,7 @@ function renderAll() {
   renderBoard();
   renderFaceoff();
   renderBuzzIn();
+  renderPlayOverlay();
   setBank(gameState.roundBank || 0);
   renderStrikes(gameState.activePlay ? gameState.activePlay.strikes : 0);
   renderEndState();
@@ -214,6 +215,21 @@ function renderBuzzIn() {
   } else {
     el.classList.add('hidden');
   }
+}
+
+// Play shot: name of the team currently on the board + their roster, shown over
+// the studio podiums. Visibility is driven by the camera-play-* class (CSS).
+function renderPlayOverlay() {
+  const teamEl = document.getElementById('gs-play-team');
+  const rosterEl = document.getElementById('gs-play-roster');
+  if (!teamEl || !rosterEl) return;
+  const ap = gameState.activePlay || {};
+  const active = ap.isStealing ? ap.stealingTeam : ap.playingTeam;
+  const t = active && gameState.teams ? gameState.teams[active] : null;
+  if (!t) { teamEl.textContent = ''; rosterEl.innerHTML = ''; return; }
+  teamEl.textContent = (t.name || '').toUpperCase();
+  const names = (t.roster || []).slice(0, 5);
+  rosterEl.innerHTML = names.map((n) => `<span class="gs-play-name">${escapeHtml(n)}</span>`).join('');
 }
 
 // Round-end / game-over overlays (driven by authoritative phase)
