@@ -163,6 +163,10 @@ function advanceRound() {
   socket.emit('advance-round');
 }
 
+function setCamera(angle) {
+  socket.emit('set-camera', { angle });
+}
+
 function resetRound() {
   if (confirm('Reset this round? Clears the question, board, strikes and face-off picks (scores stay).')) {
     socket.emit('reset-round');
@@ -199,6 +203,8 @@ function renderPhase() {
   if (resetBtn) resetBtn.classList.toggle('hidden', gameState.phase === 'LOBBY');
   const fmBtn = document.getElementById('btn-fastmoney');
   if (fmBtn) fmBtn.classList.toggle('hidden', gameState.phase === 'LOBBY' || isFM);
+  const camRow = document.getElementById('host-camera');
+  if (camRow) camRow.classList.toggle('hidden', gameState.phase === 'LOBBY' || isFM);
 
   // Once Fast Money actually starts, close the local setup overlay
   if (isFM) fmSetupOpen = false;

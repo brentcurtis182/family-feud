@@ -40,6 +40,15 @@
       </div>
     </div>
 
+    <!-- Manual camera control (cut the TV to any shot) -->
+    <div class="host-camera hidden" id="host-camera">
+      <span class="cam-label">🎥</span>
+      <button onclick="setCamera('wide')">Wide</button>
+      <button onclick="setCamera('faceoff')">Face-off</button>
+      <button onclick="setCamera('play-left')">◀ Left</button>
+      <button onclick="setCamera('play-right')">Right ▶</button>
+    </div>
+
     <!-- Lobby Panel -->
     <div id="panel-lobby" class="host-panel">
       <h2>Lobby</h2>

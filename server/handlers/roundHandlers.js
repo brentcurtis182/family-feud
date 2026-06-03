@@ -247,6 +247,15 @@ module.exports = function registerRoundHandlers(io, socket) {
     broadcastState(io, game);
   });
 
+  // Manual camera control — host cuts the TV to any shot on demand.
+  socket.on('set-camera', ({ angle } = {}) => {
+    const game = gameState.getGame(socket.gameId);
+    if (!canControl(game, socket)) return;
+    const allowed = ['wide', 'faceoff', 'play-left', 'play-right'];
+    if (!allowed.includes(angle)) return;
+    io.to(`game:${game.gameId}:gamescreen`).emit('camera-angle', { angle });
+  });
+
   // Reset the CURRENT round back to setup (clears question/board/strikes/face-off).
   // Keeps scores and the round number — handy for testing questions quickly.
   socket.on('reset-round', () => {
