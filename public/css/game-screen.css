@@ -474,7 +474,7 @@
 
 .gs-play-roster {
   position: absolute;
-  bottom: 7%;          /* down in the blue podium nameplates (full-screen coords) */
+  bottom: 15%;         /* up ~2 lines from the previous spot */
   width: 40%;
   display: flex;
   justify-content: space-evenly;  /* one name per podium box */
@@ -483,8 +483,9 @@
   transform-origin: center;
 }
 /* slight perspective tilt to match the angled podium row (mirrored per side) */
-.camera-play-left .gs-play-roster { left: 30%; transform: rotate(-3deg) skewX(-4deg); }
-.camera-play-right .gs-play-roster { right: 13%; transform: rotate(3deg) skewX(4deg); }
+/* shifted ~3 name-widths toward the arch so name 1 lands in the 1st plate */
+.camera-play-left .gs-play-roster { left: 6%; transform: rotate(-3deg) skewX(-4deg); }
+.camera-play-right .gs-play-roster { right: 6%; transform: rotate(3deg) skewX(4deg); }
 .gs-play-name {
   font-family: var(--font-display);
   font-size: 1.5vw;
