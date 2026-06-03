@@ -273,12 +273,35 @@ function renderFastMoneyBoard() {
     });
   }
 
+  renderFmPlayers(cols, names);
+
   // Combined total + P1 subtotal chip during player 2's portion
   document.getElementById('fm-total').textContent = fm.total;
   const p1chip = document.getElementById('fm-p1total');
   const showP1chip = ['FAST_MONEY_P2_WAIT', 'FAST_MONEY_P2'].includes(phase);
   p1chip.classList.toggle('hidden', !showP1chip);
   if (showP1chip) p1chip.textContent = `${names.p1}: ${fm.totals.p1}`;
+}
+
+function fmInitials(name) {
+  const parts = (name || '').trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return '?';
+  return (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
+}
+
+function renderFmPlayers(cols, names) {
+  const el = document.getElementById('fm-players');
+  if (!el) return;
+  el.classList.toggle('two', cols.length === 2);
+  el.innerHTML = cols
+    .map((p) => {
+      const name = names[p] || (p === 'p1' ? 'Player 1' : 'Player 2');
+      return `<div class="fm-player-head">
+          <div class="fm-avatar">${fmInitials(name)}</div>
+          <div class="fm-pname">${escapeHtml(name)}</div>
+        </div>`;
+    })
+    .join('');
 }
 
 function fmCellMarkup(player, index) {

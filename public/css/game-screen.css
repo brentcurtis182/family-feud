@@ -475,6 +475,36 @@
   transition: opacity var(--transition-medium), border-color var(--transition-medium);
 }
 
+/* Fast Money player headers (avatar + name) */
+.fm-players {
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+  margin-bottom: 12px;
+}
+.fm-players.two { gap: 0; justify-content: space-around; width: 85%; max-width: 920px; }
+.fm-player-head { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.fm-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--ff-panel-gradient);
+  border: 3px solid var(--ff-yellow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  color: var(--ff-yellow);
+  box-shadow: var(--gold-glow);
+}
+.fm-pname {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  letter-spacing: 0.03em;
+  color: var(--ff-white);
+}
+
 /* Two-column board (final reveal: P1 | P2 side by side) */
 .fm-grid.fm-grid-2col { grid-template-columns: 1fr 1fr; width: 85%; max-width: 920px; }
 .fm-grid.fm-grid-2col .fm-col-head {
