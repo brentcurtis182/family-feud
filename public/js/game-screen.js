@@ -119,8 +119,7 @@ socket.on('tv-sound-stop', ({ name }) => { Sounds.stop(name); });
 socket.on('fm-answer-revealed', ({ player, index, text }) => {
   const cell = document.querySelector(`.fm-cell[data-slot="${player}-${index}"]`);
   if (cell) chaseReveal(cell, text || '');
-  // Bleeping beeps as the word populates (placeholder until a dedicated sound)
-  [0, 200, 400].forEach((d) => setTimeout(() => Sounds.fmDingSound(), d));
+  Sounds.fmRevealSound(); // dedicated fast money answer-reveal sound
 });
 
 socket.on('fm-score-revealed', ({ duplicate, total, won }) => {
