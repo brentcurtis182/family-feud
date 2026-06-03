@@ -426,9 +426,10 @@
   font-family: var(--font-body);
 }
 /* Capture draft answers — wrap + show everything heard */
+.fmc-draft-row { display: flex; gap: 6px; align-items: stretch; }
 .fmc-draft-input {
   display: block;
-  width: 100%;
+  flex: 1;
   resize: vertical;
   min-height: 2.6em;
   line-height: 1.35;
@@ -436,6 +437,16 @@
   word-break: break-word;
   font-family: var(--font-body);
 }
+.fmc-slot-mic {
+  min-width: 44px;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-radius: var(--border-radius);
+  background: rgba(255,255,255,0.08);
+  color: var(--ff-white);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+.fmc-slot-mic:hover { border-color: var(--ff-red-glow); background: rgba(204,34,34,0.25); }
 /* Live transcript box — let it grow + scroll instead of clipping */
 .fmc-transcript {
   white-space: pre-wrap;

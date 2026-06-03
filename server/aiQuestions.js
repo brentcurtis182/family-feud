@@ -17,6 +17,20 @@ Rules:
 - Phrase the question like a survey prompt, e.g. "Name something...", "Name a...", "We asked 100 people...".
 - Keep it broadly relatable and fun for a party.`;
 
+// Varied topic pool so "random" doesn't keep landing on the same few questions.
+const TOPIC_POOL = [
+  'food', 'fast food', 'breakfast', 'desserts', 'drinks', 'animals', 'pets', 'the zoo',
+  'around the house', 'the kitchen', 'the bathroom', 'chores', 'technology', 'phones',
+  'travel', 'the beach', 'camping', 'vacations', 'school', 'the office', 'jobs', 'money',
+  'sports', 'the gym', 'holidays', 'Christmas', 'weddings', 'dating', 'marriage', 'kids',
+  'weather', 'music', 'movies', 'TV', 'cars', 'driving', 'clothing', 'bad habits',
+  'superheroes', 'the grocery store', 'birthdays', 'mornings', 'sleep', 'the doctor',
+];
+
+function randomTopic() {
+  return TOPIC_POOL[Math.floor(Math.random() * TOPIC_POOL.length)];
+}
+
 let client = null;
 
 function isAvailable() {
@@ -75,17 +89,17 @@ async function generateQuestion(topic) {
   const c = getClient();
   if (!c) return null;
 
-  const topicLine =
-    topic && topic !== 'random'
-      ? `Topic: ${topic}.`
-      : 'Pick any fun, broad, everyday topic.';
+  // For "random", pick a concrete topic from the pool so successive questions
+  // are varied instead of converging on the same few.
+  const effectiveTopic = topic && topic !== 'random' ? topic : randomTopic();
 
   const resp = await c.messages.create({
     model: MODEL,
     max_tokens: 1024,
+    temperature: 1,
     system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
     messages: [
-      { role: 'user', content: `${topicLine} Generate one question now as JSON.` },
+      { role: 'user', content: `Topic: ${effectiveTopic}. Generate one fresh, creative question now as JSON.` },
     ],
   });
 

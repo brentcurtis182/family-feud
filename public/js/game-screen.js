@@ -255,7 +255,8 @@ function renderFastMoneyBoard() {
     fm.reveal[p].forEach((r, i) => {
       const cell = grid.querySelector(`.fm-cell[data-slot="${p}-${i}"]`);
       if (!cell) return;
-      cell.querySelector('.fm-cell-ans').textContent = r.answerRevealed ? (r.text || '—') : '';
+      cell.querySelector('.fm-cell-ans').textContent =
+        r.answerRevealed ? (r.duplicate ? '✗' : (r.text || '—')) : '';
       cell.querySelector('.fm-cell-pts').textContent = r.scoreRevealed ? r.points : '';
       cell.classList.toggle('revealed', r.answerRevealed);
       cell.classList.toggle('duplicate', !!r.duplicate);

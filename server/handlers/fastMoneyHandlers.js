@@ -1,4 +1,5 @@
 const gameState = require('../gameState');
+const questions = require('../questions');
 const { resolveQuestion } = require('../questionService');
 const { broadcastState, broadcastEvent } = require('../broadcast');
 
@@ -22,15 +23,24 @@ module.exports = function registerFastMoneyHandlers(io, socket) {
 
     broadcastEvent(io, game, 'fastmoney-generating', {});
 
-    const qs = [];
-    for (let i = 0; i < SLOTS; i++) {
-      const q = await resolveQuestion(game, { topic: topic || 'random', source: source || 'ai' });
-      game.usedQuestionHashes.add(q.hash);
-      qs.push(q);
-    }
+    // Generate all 5 in PARALLEL (was sequential — this is the big speedup),
+    // then de-dupe the batch (and against questions already used this game).
+    const reqs = Array.from({ length: SLOTS }, () =>
+      resolveQuestion(game, { topic: topic || 'random', source: source || 'ai' })
+    );
+    const settled = await Promise.all(reqs);
 
     const g = gameState.getGame(socket.gameId);
     if (!g) return;
+
+    const seen = new Set(g.usedQuestionHashes);
+    const qs = [];
+    for (let q of settled) {
+      if (!q || seen.has(q.hash)) q = questions.getSampleQuestion(seen); // replace dup/null
+      seen.add(q.hash);
+      qs.push(q);
+    }
+    qs.forEach((q) => g.usedQuestionHashes.add(q.hash));
 
     gameState.initFastMoney(g, p1, p2, qs);
     g.phase = PHASES.FAST_MONEY_P1;

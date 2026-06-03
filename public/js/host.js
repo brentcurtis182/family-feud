@@ -472,8 +472,11 @@ function renderFmDrafts() {
       <div class="fmc-draft ${i === fmCapIndex ? 'active' : ''}">
         <div class="fmc-draft-q">${i + 1}. ${escapeHtml(q.text)}</div>
         ${p1ref}
-        <textarea class="input fmc-draft-input" id="fmc-draft-${i}" rows="2"
-          oninput="fmDrafts[${i}]=this.value" placeholder="(answer)">${escapeHtml(fmDrafts[i])}</textarea>
+        <div class="fmc-draft-row">
+          <textarea class="input fmc-draft-input" id="fmc-draft-${i}" rows="2"
+            oninput="fmDrafts[${i}]=this.value" placeholder="(answer)">${escapeHtml(fmDrafts[i])}</textarea>
+          <button class="fmc-slot-mic" onclick="fmRecordSlot(${i})" title="Record / re-record this answer">🎤</button>
+        </div>
       </div>`;
     })
     .join('');
@@ -481,6 +484,32 @@ function renderFmDrafts() {
 
 function fmDupBuzz() {
   socket.emit('fastmoney-dup-buzz');
+}
+
+// Record (or re-record) a specific answer slot — e.g. a question the player
+// passed on and wants to come back to. Each tap is a fresh gesture session.
+async function fmRecordSlot(i) {
+  if (!fmCaptureActive) {
+    fmCaptureActive = true;
+    if (!fmTimerStarted) {
+      fmTimerStarted = true;
+      const dur = fmCapPlayer === 'p2' ? 25 : 20;
+      socket.emit('fastmoney-timer-start', { player: fmCapPlayer, duration: dur });
+      startFmTimer(dur);
+    }
+  }
+  fmCapIndex = i;
+  if (fmUseCloud) {
+    stopMediaClip();
+    try { await fmEnsureStream(); fmMime = fmPickMime(); startMediaClip(); }
+    catch { document.getElementById('fmc-mic-status').textContent = '🚫 Mic needs HTTPS + permission — type it instead.'; }
+  } else {
+    startFmRecognition();
+  }
+  updateCaptureBtn();
+  renderFmDrafts();
+  renderFmP1Ref();
+  document.getElementById('fmc-mic-status').textContent = `🎤 Recording answer ${i + 1}…`;
 }
 
 // One button: first tap = Start (begins continuous recording + timer);
@@ -681,12 +710,11 @@ function fmPickChip(player, qIndex, ansIndex) {
   socket.emit('fastmoney-pick', { player, index: qIndex, text: a.text, points: a.points, duplicate: false });
 }
 function fmPickNoMatch(player, index) {
-  const said = gameState.fastMoney.input[player][index] || '—';
-  socket.emit('fastmoney-pick', { player, index, text: said, points: 0, duplicate: false });
+  // Blank board entry (a dash) — never dump the raw transcript onto the board.
+  socket.emit('fastmoney-pick', { player, index, text: '—', points: 0, duplicate: false });
 }
 function fmPickDup(index) {
-  const said = gameState.fastMoney.input.p2[index] || '—';
-  socket.emit('fastmoney-pick', { player: 'p2', index, text: said, points: 0, duplicate: true });
+  socket.emit('fastmoney-pick', { player: 'p2', index, text: '—', points: 0, duplicate: true });
 }
 
 function fmRevealScore(player, index) {
