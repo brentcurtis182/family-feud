@@ -671,7 +671,7 @@
 .fmb-total {
   position: absolute;
   bottom: 15%;
-  left: 52%;
+  left: 46%;
   transform: translateX(-50%);
   font-family: var(--font-display);
   font-size: 3.6cqw;
