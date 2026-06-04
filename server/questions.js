@@ -354,6 +354,11 @@ function getSampleQuestion(usedHashes = new Set(), topic = null, opts = {}) {
     const fm = pool.filter(isFmFriendly);
     if (fm.length) pool = fm;
   }
+  // Sudden death wants an "obvious" question — a dominant #1 answer.
+  if (opts.suddenDeath) {
+    const obvious = pool.filter((q) => q.answers[0] && q.answers[0].points >= 40);
+    if (obvious.length) pool = obvious;
+  }
   let available = pool.filter((q) => !usedHashes.has(hashQuestion(q.text)));
   // If this topic is exhausted, fall back to any unused question, then anything.
   if (!available.length) {

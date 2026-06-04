@@ -207,6 +207,13 @@ function checkWinCondition(game) {
   return null;
 }
 
+// End the game outright with a declared winner (used by sudden death, where the
+// win is decided by the top answer rather than crossing 300).
+function endGameWith(game, winner) {
+  game.winner = winner;
+  game.phase = PHASES.GAME_OVER;
+}
+
 function otherTeam(team) {
   return team === 'team1' ? 'team2' : 'team1';
 }
@@ -453,6 +460,7 @@ module.exports = {
   calculateRoundBank,
   awardPoints,
   checkWinCondition,
+  endGameWith,
   otherTeam,
   allAnswersRevealed,
   resetForNewGame,

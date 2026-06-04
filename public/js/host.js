@@ -226,7 +226,9 @@ function renderPhase() {
   if (!gameState) return;
 
   // Update round info
-  if (gameState.round > 0) {
+  if (gameState.suddenDeath) {
+    document.getElementById('round-info').textContent = '🟥 Sudden Death';
+  } else if (gameState.round > 0) {
     const multiplierText = gameState.roundMultiplier > 1 ? ` (${gameState.roundMultiplier}x)` : '';
     document.getElementById('round-info').textContent = `Round ${gameState.round}${multiplierText}`;
   }
@@ -333,7 +335,8 @@ function renderGameOver() {
   const w = gameState.winner;
   const winnerName = w ? gameState.teams[w].name : '';
   document.getElementById('game-over-winner').innerHTML =
-    `<span class="text-yellow">${escapeHtml(winnerName)}</span> wins!`;
+    `<span class="text-yellow">${escapeHtml(winnerName)}</span> wins!` +
+    (gameState.suddenDeath ? ' <span style="color:var(--ff-red-glow)">(Sudden Death)</span>' : '');
   document.getElementById('game-over-scores').innerHTML =
     `${escapeHtml(gameState.teams.team1.name)}: ${gameState.teams.team1.score}<br>` +
     `${escapeHtml(gameState.teams.team2.name)}: ${gameState.teams.team2.score}`;
@@ -893,8 +896,14 @@ function renderGameplay() {
     stakesEl.classList.add('hidden');
   }
 
+  const sd = gameState.suddenDeath;
   const banner = document.getElementById('gp-faceoff-banner');
-  if (phase === 'FACE_OFF_ANSWER' && fo.winner) {
+  if (phase === 'FACE_OFF_ANSWER' && fo.winner && sd) {
+    const teamName = gameState.teams[fo.winner].name;
+    const otherName = gameState.teams[fo.winner === 'team1' ? 'team2' : 'team1'].name;
+    banner.textContent = `🟥 SUDDEN DEATH — ${teamName} buzzed. Reveal the #1 answer if they got it (they win), or hit "Missed it" (${otherName} wins).`;
+    banner.classList.remove('hidden');
+  } else if (phase === 'FACE_OFF_ANSWER' && fo.winner) {
     const c = fo[`${fo.winner}Player`];
     const teamName = gameState.teams[fo.winner].name;
     banner.textContent = `⚡ ${c ? c.playerName : teamName} (${teamName}) buzzed first — reveal their answer, then pick who plays`;
@@ -913,9 +922,10 @@ function renderGameplay() {
     banner.classList.add('hidden');
   }
 
-  // Phase actions (play-or-pass during the face-off answer; Next Round at end)
+  // Phase actions (play-or-pass during the face-off answer; Next Round at end).
+  // Sudden death has no play-or-pass — the win is decided by the top answer.
   const actions = document.getElementById('gp-actions');
-  if (phase === 'FACE_OFF_ANSWER') {
+  if (phase === 'FACE_OFF_ANSWER' && !sd) {
     actions.innerHTML =
       `<button class="btn btn-primary" onclick="choosePlay('team1')">${escapeHtml(gameState.teams.team1.name)} plays</button>` +
       `<button class="btn btn-primary" onclick="choosePlay('team2')">${escapeHtml(gameState.teams.team2.name)} plays</button>`;
@@ -931,7 +941,11 @@ function renderGameplay() {
 
   // Strike button: face-off wrong answer, normal strike, or steal-fail
   const strikeBtn = document.getElementById('btn-strike');
-  if (phase === 'FACE_OFF_ANSWER') {
+  if (phase === 'FACE_OFF_ANSWER' && sd) {
+    const otherName = fo.winner ? gameState.teams[fo.winner === 'team1' ? 'team2' : 'team1'].name : 'other team';
+    strikeBtn.textContent = `✗ Missed it — ${otherName} wins`;
+    strikeBtn.classList.remove('hidden');
+  } else if (phase === 'FACE_OFF_ANSWER') {
     strikeBtn.textContent = '✗ Strike (wrong answer)';
     strikeBtn.classList.remove('hidden');
   } else if (phase === 'TEAM_PLAY') {

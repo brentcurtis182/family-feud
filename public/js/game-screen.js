@@ -258,7 +258,7 @@ function renderEndState() {
     showOverlay(
       `<div class="ov-trophy">🏆</div>` +
       `<div class="ov-team">${escapeHtml(name)}</div>` +
-      `<div class="ov-sub">WINS!</div>` +
+      `<div class="ov-sub">WINS!${gameState.suddenDeath ? ' — SUDDEN DEATH' : ''}</div>` +
       `<div class="ov-scores">${escapeHtml(gameState.teams.team1.name)} ${gameState.teams.team1.score} — ${gameState.teams.team2.name} ${gameState.teams.team2.score}</div>`
     );
   } else {
@@ -434,6 +434,8 @@ function renderRoundIndicator() {
   const el = document.querySelector('.gs-round-text');
   if (gameState.phase === 'LOBBY') {
     el.textContent = 'FAMILY FEUD';
+  } else if (gameState.suddenDeath) {
+    el.textContent = 'SUDDEN DEATH';
   } else {
     const mult = gameState.roundMultiplier > 1 ? ` — ${gameState.roundMultiplier}x` : '';
     el.textContent = `ROUND ${gameState.round}${mult}`;

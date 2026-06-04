@@ -40,7 +40,7 @@ function render() {
   document.getElementById('game-code').textContent = `Code: ${gameState.gameId}`;
   const mult = gameState.roundMultiplier > 1 ? ` (${gameState.roundMultiplier}x)` : '';
   document.getElementById('round-info').textContent =
-    gameState.round > 0 ? `Round ${gameState.round}${mult}` : '';
+    gameState.suddenDeath ? '🟥 Sudden Death' : (gameState.round > 0 ? `Round ${gameState.round}${mult}` : '');
 
   // Scores
   document.getElementById('j-team1-name').textContent = gameState.teams.team1.name;
@@ -75,9 +75,15 @@ function renderGameplay() {
   const phase = gameState.phase;
   const ap = gameState.activePlay || {};
 
+  const sd = gameState.suddenDeath;
   // Banner
   const banner = document.getElementById('j-banner');
-  if (phase === 'FACE_OFF_ANSWER' && gameState.faceOff.winner) {
+  if (phase === 'FACE_OFF_ANSWER' && gameState.faceOff.winner && sd) {
+    const w = gameState.faceOff.winner;
+    const otherName = gameState.teams[w === 'team1' ? 'team2' : 'team1'].name;
+    banner.textContent = `🟥 SUDDEN DEATH — reveal the #1 answer if ${gameState.teams[w].name} got it (they win), or Strike (${otherName} wins).`;
+    banner.classList.remove('hidden');
+  } else if (phase === 'FACE_OFF_ANSWER' && gameState.faceOff.winner) {
     const w = gameState.faceOff.winner;
     const c = gameState.faceOff[`${w}Player`];
     banner.textContent = `⚡ ${c ? c.playerName : ''} (${gameState.teams[w].name}) answers first — reveal if it's on the board`;
@@ -117,8 +123,9 @@ function renderGameplay() {
   document.getElementById('j-bank').textContent = gameState.roundBank || 0;
 
   // Play-or-pass buttons (face-off winner decides) — same option the host has.
+  // Sudden death has no play-or-pass (top answer decides the game).
   const actions = document.getElementById('j-actions');
-  if (phase === 'FACE_OFF_ANSWER') {
+  if (phase === 'FACE_OFF_ANSWER' && !sd) {
     actions.innerHTML =
       `<button class="btn btn-primary" onclick="choosePlay('team1')">${escapeHtml(gameState.teams.team1.name)} plays</button>` +
       `<button class="btn btn-primary" onclick="choosePlay('team2')">${escapeHtml(gameState.teams.team2.name)} plays</button>`;
@@ -130,7 +137,12 @@ function renderGameplay() {
 
   // Strike button label
   const strikeBtn = document.getElementById('j-strike');
-  strikeBtn.textContent = phase === 'STEAL_ATTEMPT' ? 'Steal Failed' : 'Strike';
+  if (sd && phase === 'FACE_OFF_ANSWER' && gameState.faceOff.winner) {
+    const w = gameState.faceOff.winner;
+    strikeBtn.textContent = `Missed — ${gameState.teams[w === 'team1' ? 'team2' : 'team1'].name} wins`;
+  } else {
+    strikeBtn.textContent = phase === 'STEAL_ATTEMPT' ? 'Steal Failed' : 'Strike';
+  }
 }
 
 function renderEnd() {

@@ -82,7 +82,7 @@ module.exports = function registerRoundHandlers(io, socket) {
     game.questionRequest = request;
     signalGenerating(io, game, request);
 
-    const question = await resolveQuestion(game, { ...request, style: 'survey' });
+    const question = await resolveQuestion(game, { ...request, style: 'survey', suddenDeath: game.suddenDeath });
 
     // The game may have been removed while we awaited generation.
     const g = gameState.getGame(socket.gameId);
@@ -119,7 +119,7 @@ module.exports = function registerRoundHandlers(io, socket) {
     const request = game.questionRequest || { topic: 'random', source: 'ai' };
     signalGenerating(io, game, request);
 
-    const question = await resolveQuestion(game, { ...request, style: 'survey' });
+    const question = await resolveQuestion(game, { ...request, style: 'survey', suddenDeath: game.suddenDeath });
 
     const g = gameState.getGame(socket.gameId);
     if (!g) return;
@@ -177,6 +177,24 @@ module.exports = function registerRoundHandlers(io, socket) {
       points: answer.points,
       roundBank: game.roundBank,
     });
+
+    // Sudden death: the buzzed team revealing the #1 answer wins the game.
+    if (game.suddenDeath && game.phase === PHASES.FACE_OFF_ANSWER) {
+      if (position === 0 && game.faceOff.winner) {
+        const winner = game.faceOff.winner;
+        gameState.endGameWith(game, winner);
+        broadcastEvent(io, game, 'game-over', {
+          winner,
+          winnerName: game.teams[winner].name,
+          scores: { team1: game.teams.team1.score, team2: game.teams.team2.score },
+          suddenDeath: true,
+        });
+        broadcastState(io, game);
+      } else {
+        broadcastState(io, game); // a non-top answer doesn't win; just show it
+      }
+      return;
+    }
 
     // A correct answer during a steal wins the whole bank for the stealing team.
     if (game.phase === PHASES.STEAL_ATTEMPT) {
