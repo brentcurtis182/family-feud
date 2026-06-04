@@ -788,6 +788,14 @@
   background: rgba(34, 204, 68, 0.12);
 }
 
+/* Concealed answers (host hasn't tapped "Display Answers") — non-interactive */
+.gp-answer.concealed { cursor: default; opacity: 0.6; }
+.gp-answer.concealed:hover { border-color: rgba(255, 255, 255, 0.12); background: rgba(255, 255, 255, 0.05); }
+.gp-answer.concealed .gp-answer-text { color: var(--ff-gray); letter-spacing: 0.3em; }
+
+/* "Display / Hide Answers" toggle on the gameplay panel */
+.gp-toggle-answers { display: block; margin: 0 auto 14px; padding: 8px 18px; font-size: 0.95rem; }
+
 .gp-answer-rank {
   font-family: var(--font-display);
   font-size: 1.2rem;

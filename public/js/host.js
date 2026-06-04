@@ -15,6 +15,10 @@ let fmRecording = false;     // SR mic running (best-effort)
 let fmCaptureActive = false; // capture session started (independent of mic)
 let fmTimerInt = null;
 let fmTimerStarted = false;
+// Host answer visibility: null until first gameplay render, then defaults to
+// hidden in host-only mode (the separate judge reveals) / shown in host+judge
+// mode. The "Display Answers" button toggles it; the choice persists this session.
+let showHostAnswers = null;
 // Cloud STT (MediaRecorder → /api/transcribe) — preferred when configured
 let fmUseCloud = false;
 let fmStream = null, fmMediaRec = null, fmChunks = [], fmMime = '';
@@ -91,9 +95,11 @@ socket.on('phase-changed', ({ phase, round, roundMultiplier }) => {
 });
 
 // ---- Actions ----
-// Logo → main menu (lobby only; ignored once the game is underway).
+// Logo → main menu. Instant from the lobby / game-over; mid-game it confirms
+// first (you can always jump back via "Resume Hosting" on the main menu).
 function goHome() {
-  if (!gameState || gameState.phase !== 'LOBBY') return;
+  const midGame = gameState && gameState.phase !== 'LOBBY' && gameState.phase !== 'GAME_OVER';
+  if (midGame && !confirm('Go to the main menu? The game keeps running — return any time via "Resume Hosting".')) return;
   window.location.href = '/';
 }
 
@@ -156,6 +162,12 @@ function resetFaceoff() {
 
 function revealAnswer(position) {
   socket.emit('reveal-answer', { position });
+}
+
+// Toggle the host's own answer visibility (does not affect the TV or the judge).
+function toggleHostAnswers() {
+  showHostAnswers = !showHostAnswers;
+  renderGameplay();
 }
 
 function addStrike() {
@@ -229,10 +241,9 @@ function renderPhase() {
   // Roster editor is reachable in every phase once the game has started.
   const playersBtn = document.getElementById('btn-players');
   if (playersBtn) playersBtn.classList.toggle('hidden', gameState.phase === 'LOBBY');
-  // Logo links back to the main menu only in the lobby (before the game is
-  // underway) — leaving mid-game would drop host control of the game.
+  // Logo is always a link back to the main menu (Resume Hosting gets you back).
   const logo = document.getElementById('host-logo');
-  if (logo) logo.classList.toggle('logo-link', gameState.phase === 'LOBBY');
+  if (logo) logo.classList.add('logo-link');
   // Keep the overlay live if it's open while state changes come in.
   if (rosterEditorOpen) renderRosterEditor();
   const camRow = document.getElementById('host-camera');
@@ -935,17 +946,26 @@ function renderGameplay() {
 
   document.getElementById('gp-question').textContent = q.text;
 
-  // Answer list (host sees everything; click an unrevealed answer to reveal it)
+  // First time in gameplay, pick the default: hidden when a separate judge is
+  // handling reveals (host-only), shown when the host is also the judge.
+  if (showHostAnswers === null) showHostAnswers = gameState.hostMode === 'host-judge';
+  const toggleBtn = document.getElementById('btn-toggle-answers');
+  if (toggleBtn) toggleBtn.textContent = showHostAnswers ? '🙈 Hide Answers' : '👁 Display Answers';
+
+  // Answer list. Revealed answers always show; unrevealed ones are concealed
+  // unless the host has chosen to display them (then they're clickable to reveal).
   document.getElementById('gp-answers').innerHTML = q.answers
     .map((a, i) => {
-      const revealed = a.revealed ? ' revealed' : '';
-      const onclick = a.revealed ? '' : ` onclick="revealAnswer(${i})"`;
-      const check = a.revealed ? '&#10003;' : '';
+      const isRev = !!a.revealed;
+      const visible = isRev || showHostAnswers;
+      const clickable = !isRev && showHostAnswers; // only reveal what you can see
+      const onclick = clickable ? ` onclick="revealAnswer(${i})"` : '';
+      const check = isRev ? '&#10003;' : '';
       return `
-        <div class="gp-answer${revealed}"${onclick}>
+        <div class="gp-answer${isRev ? ' revealed' : ''}${visible ? '' : ' concealed'}"${onclick}>
           <span class="gp-answer-rank">${i + 1}</span>
-          <span class="gp-answer-text">${escapeHtml(a.text)}</span>
-          <span class="gp-answer-points">${a.points}</span>
+          <span class="gp-answer-text">${visible ? escapeHtml(a.text) : '• • •'}</span>
+          <span class="gp-answer-points">${visible ? a.points : ''}</span>
           <span class="gp-answer-check">${check}</span>
         </div>`;
     })
