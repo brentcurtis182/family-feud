@@ -95,8 +95,17 @@ async function generateQuestion(topic, style, avoid = []) {
   // are varied instead of converging on the same few.
   const effectiveTopic = topic && topic !== 'random' ? topic : randomTopic();
 
+  // Fast Money prompts should keep mixing it up — sometimes a classic "name..."
+  // prompt, sometimes a numeric/scale opener like the real show throws in.
+  const FM_FRAMINGS = [
+    'Phrase it as a SHORT, punchy Fast Money prompt (e.g. "Name a...", "Name something...", "A reason..."). Keep it brief.',
+    'Phrase it as a SHORT Fast Money prompt that asks for a NUMBER as the answer (e.g. "How many...", "At what age...", "What time...") — the answers should be specific numbers/ranges with survey percentages.',
+    'Phrase it as a Fast Money "on a scale of 1 to 10" style prompt (e.g. "On a scale of 1 to 10, how..."). The answers should be the numbers people picked most (each a number 1-10) with survey percentages.',
+    'Phrase it as a SHORT "fill in the blank" Fast Money prompt (e.g. "Complete the phrase: ___", "Name the first word that comes to mind when you hear ___"). Keep it brief.',
+    'Phrase it as a SHORT comparison Fast Money prompt (e.g. "Name something more likely to happen on a Monday than a Friday"). Keep it brief.',
+  ];
   const styleLine = style === 'fastmoney'
-    ? 'Phrase it as a SHORT, punchy Fast Money prompt (e.g. "Name a...", "Name something...", "A reason..."). Keep it brief — do NOT use a "we asked 100" framing.'
+    ? FM_FRAMINGS[Math.floor(Math.random() * FM_FRAMINGS.length)] + ' Do NOT use a "we asked 100" framing.'
     : 'Phrase it as a survey question using a "We asked 100 people / married women / married men..." framing — a full, natural sentence.';
 
   // Vary the answer count so it isn't always 7.

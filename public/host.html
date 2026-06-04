@@ -111,8 +111,8 @@
         <div class="q-source-row hidden" id="q-source-row">
           <span class="q-source-label">Source:</span>
           <div class="toggle-group">
-            <button class="toggle-option active" data-source="ai" onclick="selectSource(this)">AI</button>
-            <button class="toggle-option" data-source="bank" onclick="selectSource(this)">Bank</button>
+            <button class="toggle-option" data-source="ai" onclick="selectSource(this)">AI</button>
+            <button class="toggle-option active" data-source="bank" onclick="selectSource(this)">Bank</button>
           </div>
         </div>
         <div class="topic-chips" id="topic-chips"></div>
@@ -130,6 +130,37 @@
           Open Buzzers
         </button>
         <p class="setup-hint" id="setup-hint">Pick both contestants and load a question first.</p>
+      </div>
+
+      <div class="setup-section">
+        <button class="setup-collapse" onclick="toggleEditPlayers()">
+          <span id="setup-roster-caret">▸</span> Edit Players
+        </button>
+        <div id="setup-roster-body" class="setup-roster hidden">
+          <p class="text-center" style="color:var(--ff-gray); font-size:0.85rem; margin:4px 0 12px">
+            Add, rename, remove, or ⇄ move players between teams on the fly.
+          </p>
+          <div class="lobby-teams">
+            <div class="lobby-team">
+              <h3 id="setup-roster-team1-name" class="text-yellow">Team 1</h3>
+              <ul id="setup-roster-team1-list" class="player-list"></ul>
+              <div class="roster-add">
+                <input id="setup-roster-input-team1" class="input" placeholder="Add player" maxlength="24"
+                  onkeydown="if(event.key==='Enter')addRoster('team1','setup-roster-input-team1')">
+                <button class="btn btn-secondary" onclick="addRoster('team1','setup-roster-input-team1')">Add</button>
+              </div>
+            </div>
+            <div class="lobby-team">
+              <h3 id="setup-roster-team2-name" class="text-yellow">Team 2</h3>
+              <ul id="setup-roster-team2-list" class="player-list"></ul>
+              <div class="roster-add">
+                <input id="setup-roster-input-team2" class="input" placeholder="Add player" maxlength="24"
+                  onkeydown="if(event.key==='Enter')addRoster('team2','setup-roster-input-team2')">
+                <button class="btn btn-secondary" onclick="addRoster('team2','setup-roster-input-team2')">Add</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -203,8 +234,8 @@
         <div class="q-source-row" id="fm-source-row">
           <span class="q-source-label">Source:</span>
           <div class="toggle-group">
-            <button class="toggle-option active" data-source="ai" onclick="fmSelectSource(this)">AI</button>
-            <button class="toggle-option" data-source="bank" onclick="fmSelectSource(this)">Bank</button>
+            <button class="toggle-option" data-source="ai" onclick="fmSelectSource(this)">AI</button>
+            <button class="toggle-option active" data-source="bank" onclick="fmSelectSource(this)">Bank</button>
           </div>
         </div>
       </div>

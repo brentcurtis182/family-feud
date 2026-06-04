@@ -40,7 +40,7 @@ module.exports = function registerFastMoneyHandlers(io, socket) {
     const seen = new Set(g.usedQuestionHashes);
     const qs = [];
     for (let q of settled) {
-      if (!q || seen.has(q.hash)) q = questions.getSampleQuestion(seen); // replace dup/null
+      if (!q || seen.has(q.hash)) q = questions.getSampleQuestion(seen, null, { fmFriendly: true }); // replace dup/null
       seen.add(q.hash);
       qs.push(q);
     }

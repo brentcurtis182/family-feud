@@ -224,6 +224,39 @@
 .roster-add .input { flex: 1; padding: 8px 10px; font-size: 0.9rem; }
 .roster-add .btn { padding: 8px 14px; }
 
+/* Editable roster rows (lobby + round-setup) */
+.roster-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.roster-actions { display: flex; gap: 2px; flex-shrink: 0; }
+.roster-btn {
+  background: none;
+  border: none;
+  color: var(--ff-white);
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  opacity: 0.75;
+}
+.roster-btn:hover, .roster-btn:active { opacity: 1; background: rgba(255, 255, 255, 0.1); }
+.roster-btn.roster-x { color: var(--ff-red-glow); }
+
+/* "Edit Players" collapsible in round-setup */
+.setup-collapse {
+  width: 100%;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius);
+  color: var(--ff-white);
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+.setup-collapse:hover { background: rgba(255, 255, 255, 0.08); }
+.setup-roster { margin-top: 12px; }
+
 /* Stakes banner */
 .gp-stakes {
   background: rgba(204, 34, 34, 0.15);
@@ -581,8 +614,27 @@
   border-radius: var(--border-radius);
   padding: 8px 10px;
 }
-.fmc-draft.active { border-color: var(--ff-yellow); }
-.fmc-draft-q { font-size: 0.85rem; color: var(--ff-gray); margin-bottom: 4px; }
+.fmc-draft.active { border-color: var(--ff-yellow); background: rgba(245, 197, 24, 0.08); }
+.fmc-draft-q {
+  font-size: 0.85rem;
+  color: var(--ff-gray);
+  margin-bottom: 4px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.fmc-draft.active .fmc-draft-q { color: var(--ff-white); }
+.fmc-tap-hint { flex-shrink: 0; font-size: 0.7rem; color: var(--ff-gray); opacity: 0.7; }
+.fmc-rec-here {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ff-red-glow);
+  animation: fmcRecBlink 1s steps(1) infinite;
+}
+@keyframes fmcRecBlink { 50% { opacity: 0.3; } }
 .fmc-p1inline { font-size: 0.8rem; color: var(--ff-yellow); margin-bottom: 4px; }
 .fmc-draft-input { width: 100%; }
 #fmc-submit { width: 100%; }

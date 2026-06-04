@@ -4,3 +4,7 @@ node_modules/
 .DS_Store
 *.log
 npm-debug.log*
+
+# Raw dataset download used to (re)build the question bank — large, regenerable
+# via scripts/build-bank.js. The generated server/questionBank.json IS committed.
+protoqa_train.jsonl

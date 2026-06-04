@@ -19,7 +19,7 @@ async function resolveQuestion(game, { topic, source, style } = {}) {
       }
     }
   }
-  return questions.getSampleQuestion(game.usedQuestionHashes, topic);
+  return questions.getSampleQuestion(game.usedQuestionHashes, topic, { fmFriendly: style === 'fastmoney' });
 }
 
 module.exports = { resolveQuestion };

@@ -90,6 +90,44 @@ module.exports = function registerLobbyHandlers(io, socket) {
     }
   });
 
+  // Rename a player in place (host fixing a typo / nickname).
+  socket.on('roster-rename', ({ team, oldName, newName }) => {
+    const game = gameState.getGame(socket.gameId);
+    if (!game || socket.id !== game.hostSocketId) return;
+    if (team !== 'team1' && team !== 'team2') return;
+    const next = (newName || '').trim();
+    if (!next) return;
+    const roster = game.teams[team].roster;
+    const idx = roster.indexOf(oldName);
+    if (idx === -1) return;
+    roster[idx] = next;
+    // Keep any face-off / fast-money pick referencing the old name in sync.
+    const fo = game.faceOff || {};
+    for (const k of ['team1Player', 'team2Player']) {
+      if (fo[k] && fo[k].playerName === oldName) fo[k].playerName = next;
+    }
+    broadcastState(io, game);
+  });
+
+  // Move a player to the other team (mix-and-match rosters on the fly).
+  socket.on('roster-move', ({ fromTeam, name }) => {
+    const game = gameState.getGame(socket.gameId);
+    if (!game || socket.id !== game.hostSocketId) return;
+    if (fromTeam !== 'team1' && fromTeam !== 'team2') return;
+    const toTeam = fromTeam === 'team1' ? 'team2' : 'team1';
+    const from = game.teams[fromTeam].roster;
+    const idx = from.indexOf(name);
+    if (idx === -1) return;
+    from.splice(idx, 1);
+    if (!game.teams[toTeam].roster.includes(name)) game.teams[toTeam].roster.push(name);
+    // If this player was a face-off pick for the old team, clear that pick.
+    const fo = game.faceOff || {};
+    if (fo[`${fromTeam}Player`] && fo[`${fromTeam}Player`].playerName === name) {
+      fo[`${fromTeam}Player`] = null;
+    }
+    broadcastState(io, game);
+  });
+
   // "Run it back" — full reset keeping teams, rosters and connected devices
   socket.on('restart-game', () => {
     const game = gameState.getGame(socket.gameId);

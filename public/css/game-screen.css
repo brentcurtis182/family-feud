@@ -183,7 +183,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
-  animation: rbPop 0.3s ease;
+  animation: rbPop 0.18s ease;
 }
 .rb-cell.revealed .rb-pts {
   position: absolute;
@@ -385,12 +385,14 @@
 }
 
 .gs-strike-x.show {
-  animation: strikeSlam 0.4s ease forwards;
+  animation: strikeSlam 0.28s ease forwards;
 }
 
+/* The X is fully visible from frame 0 so it lands WITH the buzzer sound
+   (previously it faded in, so the sound beat the graphic on-screen). */
 @keyframes strikeSlam {
-  0% { opacity: 0; transform: scale(2.5); }
-  60% { opacity: 1; transform: scale(0.9); }
+  0% { opacity: 1; transform: scale(2.2); }
+  45% { opacity: 1; transform: scale(0.85); }
   100% { opacity: 1; transform: scale(1); }
 }
 
@@ -646,7 +648,7 @@
 }
 .fmb-pts { justify-content: center; font-size: 3.2cqw; }
 .fmb-cell.duplicate { color: var(--ff-red-glow); }
-.fmb-cell.pop { animation: rbPop 0.3s ease; }
+.fmb-cell.pop { animation: rbPop 0.18s ease; }
 
 /* Pink reveal cursor — a small one-character block (like the show). Sits at the
    start of the answer box before reveal, then jumps into the score box until the

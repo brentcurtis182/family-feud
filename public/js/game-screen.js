@@ -305,25 +305,32 @@ function renderFastMoneyBoard() {
   buildFmSide('fmb-left', 'p1', slots);
   buildFmSide('fmb-right', 'p2', slots);
 
+  // During the hand-off and P2's turn, conceal P1's answers/points so P2 can't
+  // peek at the TV — unless the host hits "Remind" (re-reveal) in the room.
+  const hideP1 = (phase === 'FAST_MONEY_P2_WAIT' || phase === 'FAST_MONEY_P2') && !fm.remindP1;
+
   for (const p of ['p1', 'p2']) {
+    const conceal = p === 'p1' && hideP1;
     fm.reveal[p].forEach((r, i) => {
       const ans = document.querySelector(`.fmb-cell[data-slot="${p}-ans-${i}"]`);
       const pts = document.querySelector(`.fmb-cell[data-slot="${p}-pts-${i}"]`);
       if (ans) {
-        ans.textContent = r.answerRevealed ? (r.duplicate ? '✗ DUPE' : (r.text || '')) : '';
-        ans.classList.toggle('duplicate', !!r.duplicate);
+        ans.textContent = conceal ? '' : (r.answerRevealed ? (r.duplicate ? '✗ DUPE' : (r.text || '')) : '');
+        ans.classList.toggle('duplicate', !conceal && !!r.duplicate);
         // cursor sits on the answer box until the answer is revealed
-        ans.classList.toggle('fm-cursor-on', !!(r.cursor && !r.answerRevealed));
+        ans.classList.toggle('fm-cursor-on', !conceal && !!(r.cursor && !r.answerRevealed));
       }
       if (pts) {
-        pts.textContent = r.scoreRevealed ? (r.duplicate ? '0' : r.points) : '';
+        pts.textContent = conceal ? '' : (r.scoreRevealed ? (r.duplicate ? '0' : r.points) : '');
         // then jumps to the score box until the score is revealed
-        pts.classList.toggle('fm-cursor-on', !!(r.cursor && r.answerRevealed && !r.scoreRevealed));
+        pts.classList.toggle('fm-cursor-on', !conceal && !!(r.cursor && r.answerRevealed && !r.scoreRevealed));
       }
     });
   }
 
-  document.getElementById('fmb-total').textContent = fm.total;
+  // Hide the running total too while P1's board is concealed (it would give the
+  // score away), otherwise show it.
+  document.getElementById('fmb-total').textContent = hideP1 ? '' : fm.total;
 }
 
 function showOverlay(html) {

@@ -1,10 +1,10 @@
 // ---- State ----
 let gameState = null;
 let selectedTopic = 'random';
-let selectedSource = 'ai';
+let selectedSource = 'bank'; // default to the (now large) real-question bank
 let generatingQuestion = false;
 let fmSetupOpen = false;
-let fmP1 = null, fmP2 = null, fmSource = 'ai';
+let fmP1 = null, fmP2 = null, fmSource = 'bank';
 // Fast Money capture state (host iPad mic)
 let fmCapInitedFor = null;   // which phase the capture UI was initialized for
 let fmCapPlayer = null;      // 'p1' | 'p2'
@@ -495,9 +495,17 @@ function renderFmDrafts() {
     .map((q, i) => {
       const p1ref = isP2
         ? `<div class="fmc-p1inline">P1: "${escapeHtml(fm.input.p1[i] || '')}"</div>` : '';
+      const active = i === fmCapIndex;
+      // Tap the question (or the 🎤) to jump here and record into this slot —
+      // handy when a player says "pass" and you circle back to it later.
+      const badge = active && fmCaptureActive
+        ? '<span class="fmc-rec-here">● recording</span>'
+        : '<span class="fmc-tap-hint">🎤 tap to record</span>';
       return `
-      <div class="fmc-draft ${i === fmCapIndex ? 'active' : ''}">
-        <div class="fmc-draft-q">${i + 1}. ${escapeHtml(q.text)}</div>
+      <div class="fmc-draft ${active ? 'active' : ''}">
+        <div class="fmc-draft-q" onclick="fmRecordSlot(${i})" title="Tap to record this answer">
+          <span>${i + 1}. ${escapeHtml(q.text)}</span> ${badge}
+        </div>
         ${p1ref}
         <div class="fmc-draft-row">
           <textarea class="input fmc-draft-input" id="fmc-draft-${i}" rows="2"
@@ -836,6 +844,9 @@ function renderRoundSetup() {
     document.getElementById('btn-reroll-q').classList.add('hidden');
   }
 
+  // Editable roster (collapsible) — fix the line-up between rounds
+  renderSetupRoster();
+
   // Open-buzzers readiness
   const ready = fo.team1Player && fo.team2Player && hasQuestion;
   document.getElementById('btn-open-buzzers').disabled = !ready;
@@ -952,22 +963,35 @@ function renderLobby() {
       `${n} buzzer${n === 1 ? '' : 's'} connected`;
 
     const list = document.getElementById(`lobby-${teamKey}-roster`);
-    const roster = team.roster || [];
-    if (roster.length === 0) {
-      list.innerHTML = '<li class="player-empty">No players added yet</li>';
-    } else {
-      list.innerHTML = roster
-        .map((name) => `<li class="player-item roster-item">
-          <span>${escapeHtml(name)}</span>
-          <button class="roster-x" onclick="removeRoster('${teamKey}', '${escapeHtml(name)}')">&times;</button>
-        </li>`)
-        .join('');
-    }
+    fillRosterList(list, teamKey, team.roster || []);
   }
 }
 
-function addRoster(team) {
-  const input = document.getElementById(`roster-input-${team}`);
+// Shared editable roster list (lobby + round-setup). Each player gets
+// rename (✎), move-to-other-team (⇄) and remove (✕) controls.
+function fillRosterList(list, teamKey, roster) {
+  if (!list) return;
+  if (roster.length === 0) {
+    list.innerHTML = '<li class="player-empty">No players added yet</li>';
+    return;
+  }
+  list.innerHTML = roster.map((name) => rosterRowHtml(teamKey, name)).join('');
+}
+
+function rosterRowHtml(teamKey, name) {
+  const e = escapeHtml(name);
+  return `<li class="player-item roster-item">
+      <span class="roster-name">${e}</span>
+      <span class="roster-actions">
+        <button class="roster-btn" title="Rename" onclick="renameRoster('${teamKey}', '${e}')">✎</button>
+        <button class="roster-btn" title="Move to other team" onclick="moveRoster('${teamKey}', '${e}')">⇄</button>
+        <button class="roster-btn roster-x" title="Remove" onclick="removeRoster('${teamKey}', '${e}')">✕</button>
+      </span>
+    </li>`;
+}
+
+function addRoster(team, inputId) {
+  const input = document.getElementById(inputId || `roster-input-${team}`);
   const name = input.value.trim();
   if (!name) return;
   socket.emit('roster-add', { team, name });
@@ -977,6 +1001,38 @@ function addRoster(team) {
 
 function removeRoster(team, name) {
   socket.emit('roster-remove', { team, name });
+}
+
+function renameRoster(team, name) {
+  const next = prompt('Rename player:', name);
+  if (next === null) return;
+  const trimmed = next.trim();
+  if (!trimmed || trimmed === name) return;
+  socket.emit('roster-rename', { team, oldName: name, newName: trimmed });
+}
+
+function moveRoster(team, name) {
+  socket.emit('roster-move', { fromTeam: team, name });
+}
+
+// Round-setup "Edit Players" collapsible
+let editPlayersOpen = false;
+function toggleEditPlayers() {
+  editPlayersOpen = !editPlayersOpen;
+  const body = document.getElementById('setup-roster-body');
+  const caret = document.getElementById('setup-roster-caret');
+  if (body) body.classList.toggle('hidden', !editPlayersOpen);
+  if (caret) caret.textContent = editPlayersOpen ? '▾' : '▸';
+}
+
+function renderSetupRoster() {
+  if (!gameState) return;
+  for (const teamKey of ['team1', 'team2']) {
+    const nameEl = document.getElementById(`setup-roster-${teamKey}-name`);
+    if (nameEl) nameEl.textContent = gameState.teams[teamKey].name;
+    const list = document.getElementById(`setup-roster-${teamKey}-list`);
+    fillRosterList(list, teamKey, gameState.teams[teamKey].roster || []);
+  }
 }
 
 function restartGame() {
