@@ -208,7 +208,14 @@ function renderAll() {
   renderBuzzIn();
   renderPlayOverlay();
   setBank(gameState.roundBank || 0);
-  renderStrikes(gameState.activePlay ? gameState.activePlay.strikes : 0);
+  // Strikes are a transient FLASH only (see flashStrikes on the strike event) —
+  // the big X covers the whole board, so we must never re-draw it persistently
+  // here, or it would sit on top of answers revealed after the strike. Just make
+  // sure the overlay is cleared once strikes are gone (reset / new round).
+  if (!gameState.activePlay || !gameState.activePlay.strikes) {
+    const sEl = document.getElementById('gs-strikes');
+    if (sEl) sEl.innerHTML = '';
+  }
   renderEndState();
 }
 
