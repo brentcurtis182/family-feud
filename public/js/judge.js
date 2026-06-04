@@ -23,6 +23,9 @@ function revealAnswer(position) {
 function addStrike() {
   socket.emit('add-strike');
 }
+function choosePlay(team) {
+  socket.emit('choose-play', { team });
+}
 
 // ---- Render ----
 const PLAY_PHASES = ['FACE_OFF_ANSWER', 'TEAM_PLAY', 'STEAL_ATTEMPT'];
@@ -109,6 +112,18 @@ function renderGameplay() {
   document.getElementById('j-strikes').innerHTML = sh;
 
   document.getElementById('j-bank').textContent = gameState.roundBank || 0;
+
+  // Play-or-pass buttons (face-off winner decides) — same option the host has.
+  const actions = document.getElementById('j-actions');
+  if (phase === 'FACE_OFF_ANSWER') {
+    actions.innerHTML =
+      `<button class="btn btn-primary" onclick="choosePlay('team1')">${escapeHtml(gameState.teams.team1.name)} plays</button>` +
+      `<button class="btn btn-primary" onclick="choosePlay('team2')">${escapeHtml(gameState.teams.team2.name)} plays</button>`;
+    actions.classList.remove('hidden');
+  } else {
+    actions.innerHTML = '';
+    actions.classList.add('hidden');
+  }
 
   // Strike button label
   const strikeBtn = document.getElementById('j-strike');
