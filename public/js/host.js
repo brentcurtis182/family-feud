@@ -220,6 +220,11 @@ function renderPhase() {
   if (resetBtn) resetBtn.classList.toggle('hidden', gameState.phase === 'LOBBY');
   const fmBtn = document.getElementById('btn-fastmoney');
   if (fmBtn) fmBtn.classList.toggle('hidden', gameState.phase === 'LOBBY' || isFM);
+  // Roster editor is reachable in every phase once the game has started.
+  const playersBtn = document.getElementById('btn-players');
+  if (playersBtn) playersBtn.classList.toggle('hidden', gameState.phase === 'LOBBY');
+  // Keep the overlay live if it's open while state changes come in.
+  if (rosterEditorOpen) renderRosterEditor();
   const camRow = document.getElementById('host-camera');
   if (camRow) camRow.classList.toggle('hidden', gameState.phase === 'LOBBY' || isFM);
 
@@ -844,9 +849,6 @@ function renderRoundSetup() {
     document.getElementById('btn-reroll-q').classList.add('hidden');
   }
 
-  // Editable roster (collapsible) — fix the line-up between rounds
-  renderSetupRoster();
-
   // Open-buzzers readiness
   const ready = fo.team1Player && fo.team2Player && hasQuestion;
   document.getElementById('btn-open-buzzers').disabled = !ready;
@@ -1015,22 +1017,23 @@ function moveRoster(team, name) {
   socket.emit('roster-move', { fromTeam: team, name });
 }
 
-// Round-setup "Edit Players" collapsible
-let editPlayersOpen = false;
-function toggleEditPlayers() {
-  editPlayersOpen = !editPlayersOpen;
-  const body = document.getElementById('setup-roster-body');
-  const caret = document.getElementById('setup-roster-caret');
-  if (body) body.classList.toggle('hidden', !editPlayersOpen);
-  if (caret) caret.textContent = editPlayersOpen ? '▾' : '▸';
+// Persistent roster editor — open any time after the game starts via the header
+// "👥 Players" button. Floats over whatever phase is live; the server broadcasts
+// every change, so the TV and all devices update in real time.
+let rosterEditorOpen = false;
+function toggleRosterEditor() {
+  rosterEditorOpen = !rosterEditorOpen;
+  const modal = document.getElementById('roster-editor-modal');
+  if (modal) modal.classList.toggle('hidden', !rosterEditorOpen);
+  if (rosterEditorOpen) renderRosterEditor();
 }
 
-function renderSetupRoster() {
+function renderRosterEditor() {
   if (!gameState) return;
   for (const teamKey of ['team1', 'team2']) {
-    const nameEl = document.getElementById(`setup-roster-${teamKey}-name`);
+    const nameEl = document.getElementById(`editor-${teamKey}-name`);
     if (nameEl) nameEl.textContent = gameState.teams[teamKey].name;
-    const list = document.getElementById(`setup-roster-${teamKey}-list`);
+    const list = document.getElementById(`editor-${teamKey}-list`);
     fillRosterList(list, teamKey, gameState.teams[teamKey].roster || []);
   }
 }

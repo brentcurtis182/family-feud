@@ -241,21 +241,47 @@
 .roster-btn:hover, .roster-btn:active { opacity: 1; background: rgba(255, 255, 255, 0.1); }
 .roster-btn.roster-x { color: var(--ff-red-glow); }
 
-/* "Edit Players" collapsible in round-setup */
-.setup-collapse {
-  width: 100%;
-  text-align: left;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--border-radius);
-  color: var(--ff-white);
-  font-size: 0.95rem;
-  font-weight: 600;
-  padding: 10px 14px;
-  cursor: pointer;
+/* Roster editor overlay (header "👥 Players" button) */
+.roster-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.72);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 24px 16px;
+  overflow-y: auto;
 }
-.setup-collapse:hover { background: rgba(255, 255, 255, 0.08); }
-.setup-roster { margin-top: 12px; }
+.roster-modal-card {
+  background: var(--ff-panel-gradient);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  width: 100%;
+  max-width: 640px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+.roster-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.roster-modal-head h2 { margin: 0; }
+.roster-modal-close {
+  background: none;
+  border: none;
+  color: var(--ff-white);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+  opacity: 0.8;
+}
+.roster-modal-close:hover { opacity: 1; }
+.roster-modal-hint { color: var(--ff-gray); font-size: 0.85rem; margin: 0 0 16px; }
+.roster-modal-card .btn-primary { width: 100%; margin-top: 16px; }
 
 /* Stakes banner */
 .gp-stakes {
