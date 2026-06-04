@@ -54,12 +54,45 @@ SocketClient.on('game-created', ({ gameId, state }) => {
   window.location.href = `/host.html?gameId=${gameId}`;
 });
 
+// ---- Resume Hosting ----
+// Show a "Resume Hosting" shortcut on the landing screen if this tab has a saved
+// host session AND that game is still active (so the host who hopped back to the
+// main menu can reclaim control instead of stranding the game).
+function updateResumeButton(games) {
+  const btn = document.getElementById('btn-resume-host');
+  if (!btn) return;
+  const gameId = sessionStorage.getItem('ff_gameId');
+  const role = sessionStorage.getItem('ff_role');
+  if (role === 'host' && gameId) {
+    const g = (games || []).find((x) => x.gameId === gameId);
+    if (g) {
+      btn.textContent = `▶ Resume Hosting: ${g.team1Name} vs ${g.team2Name}`;
+      btn.classList.remove('hidden');
+      return;
+    }
+    SocketClient.clearSession(); // game ended/deleted — drop the stale session
+  }
+  btn.classList.add('hidden');
+}
+
+function resumeHosting() {
+  const gameId = sessionStorage.getItem('ff_gameId');
+  if (gameId) window.location.href = `/host.html?gameId=${gameId}`;
+}
+
+// Check for a resumable host game as soon as we connect (and on landing load).
+SocketClient.on('connect', () => SocketClient.emit('list-games', {}));
+
 // ---- Join Game ----
 function refreshGames() {
   SocketClient.emit('list-games', {});
 }
 
 SocketClient.on('games-list', (games) => {
+  // A saved host session (sessionStorage survives the same-tab logo-link hop)
+  // lets the host jump straight back into a game they stepped away from.
+  updateResumeButton(games);
+
   const container = document.getElementById('games-list');
 
   if (!games || games.length === 0) {
