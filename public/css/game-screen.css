@@ -186,6 +186,7 @@
   animation: rbPop 0.18s ease;
 }
 .rb-cell.revealed .rb-pts {
+  display: block;            /* base rule hides .rb-pts; show it once revealed */
   position: absolute;
   right: 5%;
   top: 50%;

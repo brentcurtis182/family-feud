@@ -21,7 +21,10 @@ function revealAnswer(position) {
   socket.emit('reveal-answer', { position });
 }
 function addStrike() {
-  socket.emit('add-strike');
+  // During the face-off answer a wrong buzz-in is a transient strike, not a
+  // round strike (matches the host) — otherwise the X sticks on the board.
+  if (gameState && gameState.phase === 'FACE_OFF_ANSWER') socket.emit('faceoff-strike');
+  else socket.emit('add-strike');
 }
 function choosePlay(team) {
   socket.emit('choose-play', { team });

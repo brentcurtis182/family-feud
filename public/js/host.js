@@ -954,12 +954,18 @@ function renderGameplay() {
 
   // Answer list. Revealed answers always show; unrevealed ones are concealed
   // unless the host has chosen to display them (then they're clickable to reveal).
-  document.getElementById('gp-answers').innerHTML = q.answers
+  const concealing = !showHostAnswers && q.answers.some((a) => !a.revealed);
+  const hint = concealing
+    ? '<div class="gp-answers-hint">🙈 Answers hidden — tap a row (or “Display Answers”) to show them</div>'
+    : '';
+  document.getElementById('gp-answers').innerHTML = hint + q.answers
     .map((a, i) => {
       const isRev = !!a.revealed;
       const visible = isRev || showHostAnswers;
-      const clickable = !isRev && showHostAnswers; // only reveal what you can see
-      const onclick = clickable ? ` onclick="revealAnswer(${i})"` : '';
+      // Revealed = no action; visible+unrevealed = reveal it; concealed = a tap
+      // un-hides the host's answers (so it's never a dead button).
+      const onclick = isRev ? ''
+        : (showHostAnswers ? ` onclick="revealAnswer(${i})"` : ` onclick="toggleHostAnswers()"`);
       const check = isRev ? '&#10003;' : '';
       return `
         <div class="gp-answer${isRev ? ' revealed' : ''}${visible ? '' : ' concealed'}"${onclick}>

@@ -101,7 +101,12 @@ socket.on('steal-setup', () => {
 });
 
 socket.on('steal-result', ({ success }) => {
-  if (success) Sounds.ding(); // steal success = correct answer; failure already struck
+  if (success) {
+    Sounds.ding(); // steal success = correct answer
+  } else {
+    flashStrikes(1); // failed steal — slam an X + buzzer (then the round ends)
+    Sounds.buzzer();
+  }
 });
 
 socket.on('round-ended', () => {

@@ -788,10 +788,12 @@
   background: rgba(34, 204, 68, 0.12);
 }
 
-/* Concealed answers (host hasn't tapped "Display Answers") — non-interactive */
-.gp-answer.concealed { cursor: default; opacity: 0.6; }
-.gp-answer.concealed:hover { border-color: rgba(255, 255, 255, 0.12); background: rgba(255, 255, 255, 0.05); }
+/* Concealed answers (host hasn't tapped "Display Answers") — a tap un-hides
+   the list, so the row is still actionable rather than dead. */
+.gp-answer.concealed { cursor: pointer; opacity: 0.6; }
 .gp-answer.concealed .gp-answer-text { color: var(--ff-gray); letter-spacing: 0.3em; }
+.gp-answer.concealed .gp-answer-rank { opacity: 0.4; } /* dim rank so "6" ≠ the answer */
+.gp-answers-hint { text-align: center; color: var(--ff-gray); font-size: 0.85rem; padding: 2px 0 10px; }
 
 /* "Display / Hide Answers" toggle on the gameplay panel */
 .gp-toggle-answers { display: block; margin: 0 auto 14px; padding: 8px 18px; font-size: 0.95rem; }

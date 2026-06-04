@@ -142,9 +142,11 @@ module.exports = function registerRoundHandlers(io, socket) {
     game.activePlay.playingTeam = team;
     game.activePlay.stealingTeam = null;
     game.activePlay.isStealing = false;
+    game.activePlay.strikes = 0; // team play starts clean (face-off strikes were transient)
     game.phase = PHASES.TEAM_PLAY;
 
     io.to(`game:${game.gameId}:gamescreen`).emit('camera-angle', { angle: cameraForTeam(team) });
+    io.to(`game:${game.gameId}:gamescreen`).emit('strikes-cleared', {});
     broadcastEvent(io, game, 'phase-changed', {
       phase: game.phase,
       round: game.round,
