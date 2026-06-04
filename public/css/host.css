@@ -241,6 +241,10 @@
 .roster-btn:hover, .roster-btn:active { opacity: 1; background: rgba(255, 255, 255, 0.1); }
 .roster-btn.roster-x { color: var(--ff-red-glow); }
 
+/* Logo acts as a "back to main menu" link in the lobby only */
+#host-logo.logo-link { cursor: pointer; }
+#host-logo.logo-link:hover { color: var(--ff-yellow-light); }
+
 /* Roster editor overlay (header "👥 Players" button) */
 .roster-modal {
   position: fixed;

@@ -91,6 +91,12 @@ socket.on('phase-changed', ({ phase, round, roundMultiplier }) => {
 });
 
 // ---- Actions ----
+// Logo → main menu (lobby only; ignored once the game is underway).
+function goHome() {
+  if (!gameState || gameState.phase !== 'LOBBY') return;
+  window.location.href = '/';
+}
+
 function startGame() {
   socket.emit('start-game');
   // Server auto-plays the theme on the TV — reflect that on the toggle.
@@ -223,6 +229,10 @@ function renderPhase() {
   // Roster editor is reachable in every phase once the game has started.
   const playersBtn = document.getElementById('btn-players');
   if (playersBtn) playersBtn.classList.toggle('hidden', gameState.phase === 'LOBBY');
+  // Logo links back to the main menu only in the lobby (before the game is
+  // underway) — leaving mid-game would drop host control of the game.
+  const logo = document.getElementById('host-logo');
+  if (logo) logo.classList.toggle('logo-link', gameState.phase === 'LOBBY');
   // Keep the overlay live if it's open while state changes come in.
   if (rosterEditorOpen) renderRosterEditor();
   const camRow = document.getElementById('host-camera');
