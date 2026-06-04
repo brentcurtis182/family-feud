@@ -316,49 +316,46 @@ function resetForNewGame(game) {
   game.phase = PHASES.LOBBY;
 }
 
-// Produce a short, host-readable "stakes" line for the dramatic moments
-// (mainly late game / steal): what each outcome means for winning.
+// Produce a short, host-readable "stakes" line for the dramatic moments — in
+// plain outcome language (who wins / sudden death) rather than point math.
+// Recomputed on every state broadcast, so it tracks the bank live as answers
+// reveal during the final round.
 function computeStakes(game) {
   if (!game.currentQuestion) return null;
   const ap = game.activePlay;
   const phase = game.phase;
   const bank = calculateRoundBank(game);
-  const nameOf = (t) => game.teams[t].name;
-  const scoreOf = (t) => game.teams[t].score;
+  const final = game.round >= game.totalRounds;
+  const nm = (t) => game.teams[t].name;
+  const sc = (t) => game.teams[t].score;
 
-  if (phase === PHASES.TEAM_PLAY && ap.playingTeam) {
-    const t = ap.playingTeam;
-    const projected = scoreOf(t) + bank;
-    if (projected >= WIN_SCORE && bank > 0) {
-      return `🏆 ${nameOf(t)} is at ${scoreOf(t)} (+${bank} banked = ${projected}). Banking this round WINS the game.`;
-    }
-    if (scoreOf(t) + bank >= WIN_SCORE) {
-      const need = WIN_SCORE - scoreOf(t);
-      return `${nameOf(t)} needs ${need} more this round to win — they're at ${bank} so far.`;
-    }
-    return null;
+  // What it means if `winner` ends up banking the current `bank` this round.
+  // Returns a plain phrase, or null when nothing is decided yet (early rounds).
+  function outcome(winner) {
+    const other = otherTeam(winner);
+    const wTotal = sc(winner) + bank;
+    if (wTotal >= WIN_SCORE) return `${nm(winner)} wins the game`;
+    if (!final) return null;                       // not the last round → no verdict yet
+    if (wTotal > sc(other)) return `${nm(winner)} wins`;
+    if (wTotal === sc(other)) return `it's a tie → SUDDEN DEATH`;
+    return `${nm(other)} still wins`;
+  }
+
+  if (phase === PHASES.TEAM_PLAY && ap.playingTeam && bank > 0) {
+    const P = ap.playingTeam, O = otherTeam(P);
+    const oP = outcome(P), oO = outcome(O);
+    if (!oP && !oO) return null;
+    let s = oP ? `🏆 If ${nm(P)} banks this round, ${oP}.` : '';
+    if (oO) s += ` If they strike out, ${nm(O)} can steal → ${oO}.`;
+    return s.trim() || null;
   }
 
   if (phase === PHASES.STEAL_ATTEMPT && ap.stealingTeam) {
-    const steal = ap.stealingTeam;
-    const play = ap.playingTeam;
-    const stealProj = scoreOf(steal) + bank;
-    const playProj = scoreOf(play) + bank;
-    const lines = [];
-    lines.push(
-      stealProj >= WIN_SCORE
-        ? `🎯 STEAL to WIN: if ${nameOf(steal)} steals, they take ${bank} → ${stealProj} and win the game.`
-        : `🎯 If ${nameOf(steal)} steals, they get ${bank} → ${stealProj}.`
-    );
-    lines.push(
-      playProj >= WIN_SCORE
-        ? `Otherwise ${nameOf(play)} keeps ${bank} → ${playProj} and WINS.`
-        : `Otherwise ${nameOf(play)} keeps ${bank} → ${playProj}.`
-    );
-    if (stealProj < WIN_SCORE && playProj < WIN_SCORE && game.round >= game.totalRounds) {
-      lines.push('Neither reaches 300 → SUDDEN DEATH.');
-    }
-    return lines.join(' ');
+    const O = ap.stealingTeam, P = ap.playingTeam;
+    const oO = outcome(O), oP = outcome(P);
+    let s = `🎯 If ${nm(O)} steals, ${oO || 'they take the bank'}.`;
+    s += ` If they fail, ${oP || `${nm(P)} keeps it`}.`;
+    return s;
   }
 
   return null;

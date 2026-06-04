@@ -946,9 +946,9 @@ function renderGameplay() {
 
   document.getElementById('gp-question').textContent = q.text;
 
-  // First time in gameplay, pick the default: hidden when a separate judge is
-  // handling reveals (host-only), shown when the host is also the judge.
-  if (showHostAnswers === null) showHostAnswers = gameState.hostMode === 'host-judge';
+  // Answers are shown by default; the host can tap "Hide Answers" for the fun
+  // suspense aspect (handy with a separate judge handling reveals).
+  if (showHostAnswers === null) showHostAnswers = true;
   const toggleBtn = document.getElementById('btn-toggle-answers');
   if (toggleBtn) toggleBtn.textContent = showHostAnswers ? '🙈 Hide Answers' : '👁 Display Answers';
 
