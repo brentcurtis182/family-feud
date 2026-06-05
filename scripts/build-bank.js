@@ -77,14 +77,15 @@ function pickTopic(text) {
 const lines = fs.readFileSync(IN, 'utf8').split('\n').filter(Boolean);
 const seen = new Set();
 const out = [];
-const stats = { total: lines.length, kept: 0, skipThin: 0, skipDup: 0, skipBad: 0, skipMangled: 0, byTopic: {}, byCount: {} };
+const stats = { total: lines.length, kept: 0, skipThin: 0, skipDup: 0, skipBad: 0, skipMangled: 0, skipBadCluster: 0, byTopic: {}, byCount: {} };
 
 for (const line of lines) {
   let obj;
   try { obj = JSON.parse(line); } catch { stats.skipBad++; continue; }
   const qsrc = obj && obj.question;
+  const clusters = obj && obj.answers && obj.answers.clusters;
   const raw = obj && obj.answers && obj.answers.raw;
-  if (!qsrc || !raw || typeof raw !== 'object') { stats.skipBad++; continue; }
+  if (!qsrc || (!clusters && !raw)) { stats.skipBad++; continue; }
 
   // Prefer `original` (keeps apostrophes/punctuation); sentenceCase re-derives
   // casing from scratch so its mixed Title Case doesn't matter.
@@ -99,13 +100,41 @@ for (const line of lines) {
   const key = text.toLowerCase();
   if (seen.has(key)) { stats.skipDup++; continue; }
 
-  let answers = Object.entries(raw)
-    .map(([t, c]) => ({ text: cap(t), points: Math.round(Number(c) || 0) }))
+  // Build from CLUSTERS (one entry per concept). `raw` lists every synonym with
+  // the FULL cluster count, which over-counts badly (e.g. wolf + timberwolf both
+  // 60). Take the shortest variant as the representative.
+  let entries;
+  if (clusters && typeof clusters === 'object') {
+    entries = Object.values(clusters).map((c) => {
+      const variants = (c && Array.isArray(c.answers) ? c.answers : []).filter((x) => typeof x === 'string' && x.trim());
+      if (!variants.length) return null;
+      const rep = variants.slice().sort((a, b) => a.length - b.length)[0];
+      return { text: rep.trim(), count: Math.max(0, Number(c.count) || 0) };
+    }).filter(Boolean);
+  } else {
+    entries = Object.entries(raw).map(([t, c]) => ({ text: String(t).trim(), count: Math.max(0, Number(c) || 0) }));
+  }
+
+  // Counts are response tallies that sum to the total responses (not 100), so
+  // normalize to survey percentages — the board should sum to ~100 or less.
+  const totalCount = entries.reduce((s, e) => s + e.count, 0);
+  if (totalCount <= 0) { stats.skipBad++; continue; }
+
+  const seenAns = new Set();
+  let answers = entries
+    .map((e) => ({ text: cap(e.text), points: Math.round((e.count / totalCount) * 100) }))
     .filter((a) => a.text && a.points > 0)
     .sort((a, b) => b.points - a.points)
+    .filter((a) => { const k = a.text.toLowerCase(); if (seenAns.has(k)) return false; seenAns.add(k); return true; })
     .slice(0, MAX_ANSWERS);
 
   if (answers.length < MIN_ANSWERS) { stats.skipThin++; continue; }
+
+  // Bad-clustering signal: lots of answers sharing the exact same points value
+  // usually means synonyms were split (e.g. "howls" → 6 dog words all at 8).
+  const valueCounts = {};
+  for (const a of answers) valueCounts[a.points] = (valueCounts[a.points] || 0) + 1;
+  if (Math.max(...Object.values(valueCounts)) >= 4) { stats.skipBadCluster++; continue; }
 
   seen.add(key);
   const topic = pickTopic(text + ' ' + answers.map((a) => a.text).join(' '));
