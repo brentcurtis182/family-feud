@@ -1,5 +1,6 @@
 const gameState = require('../gameState');
 const aiQuestions = require('../aiQuestions');
+const questions = require('../questions');
 const { resolveQuestion } = require('../questionService');
 const { broadcastState, broadcastEvent } = require('../broadcast');
 
@@ -72,8 +73,61 @@ function endRound(io, game, winningTeam) {
   console.log(`Game ${game.gameId}: round ${game.round} -> ${winningTeam} +${points}${winner ? ' (GAME OVER)' : ''}`);
 }
 
+// Commit a chosen question into the round (shared by set-question + choose-question).
+function applyChosenQuestion(io, g, question) {
+  g.currentQuestion = question;
+  g.questionOptions = null;
+  g.usedQuestionHashes.add(question.hash);
+  g.recentQuestions.push(question.text);
+  g.roundBank = 0;
+  gameState.resetActivePlay(g);
+
+  if (g.faceOff.team1Player && g.faceOff.team2Player) {
+    g.phase = PHASES.FACE_OFF_READY;
+  } else if (g.phase === PHASES.LOBBY) {
+    g.phase = PHASES.ROUND_SETUP;
+  }
+
+  broadcastEvent(io, g, 'question-ready', { text: question.text });
+  broadcastState(io, g);
+  broadcastEvent(io, g, 'phase-changed', {
+    phase: g.phase,
+    round: g.round,
+    roundMultiplier: g.roundMultiplier,
+  });
+  io.to(`game:${g.gameId}:gamescreen`).emit('camera-angle', { angle: 'wide' });
+}
+
+// Build N candidate questions for the host to pick from (the "hand of cards").
+async function buildQuestionOptions(game, request, count) {
+  // Bank (or AI unavailable): distinct unused bank questions — instant & free.
+  if (request.source === 'bank' || !aiQuestions.isAvailable()) {
+    const seen = new Set(game.usedQuestionHashes);
+    const out = [];
+    for (let i = 0; i < count; i++) {
+      const q = questions.getSampleQuestion(seen, request.topic);
+      seen.add(q.hash);
+      out.push(q);
+    }
+    return out;
+  }
+  // AI: generate `count` in parallel, then de-dupe / backfill from the bank.
+  const reqs = Array.from({ length: count }, () =>
+    resolveQuestion(game, { ...request, style: 'survey' })
+  );
+  const settled = await Promise.all(reqs);
+  const seen = new Set(game.usedQuestionHashes);
+  const out = [];
+  for (let q of settled) {
+    if (!q || seen.has(q.hash)) q = questions.getSampleQuestion(seen, request.topic);
+    seen.add(q.hash);
+    out.push(q);
+  }
+  return out;
+}
+
 module.exports = function registerRoundHandlers(io, socket) {
-  // Load a question into the current round (AI generation with bank fallback).
+  // Load a single question directly (legacy / quick path).
   socket.on('set-question', async (opts = {}) => {
     const game = gameState.getGame(socket.gameId);
     if (!canControl(game, socket)) return;
@@ -84,31 +138,41 @@ module.exports = function registerRoundHandlers(io, socket) {
 
     const question = await resolveQuestion(game, { ...request, style: 'survey', suddenDeath: game.suddenDeath });
 
-    // The game may have been removed while we awaited generation.
     const g = gameState.getGame(socket.gameId);
     if (!g) return;
-
-    g.currentQuestion = question;
-    g.usedQuestionHashes.add(question.hash);
-    g.recentQuestions.push(question.text);
-    g.roundBank = 0;
-    gameState.resetActivePlay(g);
-
-    if (g.faceOff.team1Player && g.faceOff.team2Player) {
-      g.phase = PHASES.FACE_OFF_READY;
-    } else if (g.phase === PHASES.LOBBY) {
-      g.phase = PHASES.ROUND_SETUP;
-    }
-
-    broadcastEvent(io, g, 'question-ready', { text: question.text });
-    broadcastState(io, g);
-    broadcastEvent(io, g, 'phase-changed', {
-      phase: g.phase,
-      round: g.round,
-      roundMultiplier: g.roundMultiplier,
-    });
-    io.to(`game:${g.gameId}:gamescreen`).emit('camera-angle', { angle: 'wide' });
+    applyChosenQuestion(io, g, question);
     console.log(`Game ${g.gameId}: question loaded ("${question.text}") [${request.source}/${request.topic}]`);
+  });
+
+  // Hand the host a set of candidate questions to choose from (+ reshuffle).
+  socket.on('request-question-options', async (opts = {}) => {
+    const game = gameState.getGame(socket.gameId);
+    if (!canControl(game, socket)) return;
+
+    const request = { topic: opts.topic || 'random', source: opts.source || 'ai' };
+    game.questionRequest = request;
+    signalGenerating(io, game, request);
+
+    const options = await buildQuestionOptions(game, request, 5);
+
+    const g = gameState.getGame(socket.gameId);
+    if (!g) return;
+    g.questionOptions = options;
+    // Full options (with answers) go only to the controllers so they can judge quality.
+    const payload = { options: options.map((q) => ({ text: q.text, topic: q.topic, answers: q.answers })) };
+    io.to(`game:${g.gameId}:host`).emit('question-options', payload);
+    io.to(`game:${g.gameId}:judge`).emit('question-options', payload);
+  });
+
+  // Host picked one of the candidates.
+  socket.on('choose-question', ({ index } = {}) => {
+    const game = gameState.getGame(socket.gameId);
+    if (!canControl(game, socket)) return;
+    const opts = game.questionOptions;
+    if (!Array.isArray(opts) || index < 0 || index >= opts.length) return;
+    const question = opts[index];
+    applyChosenQuestion(io, game, question);
+    console.log(`Game ${game.gameId}: question chosen ("${question.text}")`);
   });
 
   // Re-roll the current question, reusing the last topic/source request.

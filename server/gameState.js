@@ -67,6 +67,7 @@ function createGame({ hostSocketId, hostMode, team1Name, team2Name, passcode }) 
     totalRounds: 4,
 
     currentQuestion: null,
+    questionOptions: null, // candidate questions the host is choosing from (the "hand of cards")
     roundBank: 0,
     lastRoundResult: null, // { winningTeam, teamName, points } for ROUND_END display
     winner: null, // 'team1' | 'team2' once the game is won
@@ -180,6 +181,7 @@ function startNextRound(game) {
   game.round += 1;
   game.roundMultiplier = ROUND_MULTIPLIERS[game.round] || 3;
   game.currentQuestion = null;
+  game.questionOptions = null;
   game.roundBank = 0;
   game.lastRoundResult = null;
   game.suddenDeathTurn = null; // set on the first buzz of a sudden-death round

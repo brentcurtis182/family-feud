@@ -245,6 +245,53 @@
 #host-logo.logo-link { cursor: pointer; }
 #host-logo.logo-link:hover { color: var(--ff-yellow-light); }
 
+/* Question picker modal (pick from 5 + reshuffle) */
+.qp-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.72);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 24px 16px;
+  overflow-y: auto;
+}
+.qp-card {
+  background: var(--ff-panel-gradient);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  width: 100%;
+  max-width: 720px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+.qp-head { display: flex; align-items: center; justify-content: space-between; }
+.qp-head h2 { margin: 0; }
+.qp-close { background: none; border: none; color: var(--ff-white); font-size: 1.4rem; line-height: 1; cursor: pointer; padding: 4px 8px; opacity: 0.8; }
+.qp-close:hover { opacity: 1; }
+.qp-hint { color: var(--ff-gray); font-size: 0.85rem; margin: 4px 0 14px; }
+.qp-list { display: flex; flex-direction: column; gap: 10px; }
+.qp-loading { text-align: center; color: var(--ff-gray); padding: 28px; }
+.qp-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--border-radius);
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.qp-option:hover { border-color: var(--ff-yellow); background: rgba(245, 197, 24, 0.1); }
+.qp-q { font-size: 1.05rem; color: var(--ff-white); font-weight: 600; margin-bottom: 8px; }
+.qp-answers { display: flex; flex-wrap: wrap; gap: 6px; }
+.qp-ans { font-size: 0.78rem; color: var(--ff-gray); background: rgba(0, 0, 0, 0.25); border-radius: 6px; padding: 2px 8px; }
+.qp-ans b { color: var(--ff-yellow); }
+.qp-foot { display: flex; gap: 12px; margin-top: 16px; }
+.qp-foot .btn { flex: 1; }
+
 /* Roster editor overlay (header "👥 Players" button) */
 .roster-modal {
   position: fixed;

@@ -120,8 +120,8 @@
         <div id="setup-question-display" class="setup-question hidden"></div>
         <div id="q-loading" class="q-loading hidden">Generating question…</div>
         <div class="setup-actions">
-          <button class="btn btn-secondary" id="btn-load-q" onclick="loadQuestion()">Load Question</button>
-          <button class="btn btn-secondary hidden" id="btn-reroll-q" onclick="rerollQuestion()">Re-roll</button>
+          <button class="btn btn-secondary" id="btn-load-q" onclick="loadQuestion()">Pick a Question</button>
+          <button class="btn btn-secondary hidden" id="btn-reroll-q" onclick="rerollQuestion()">🔀 Change Question</button>
         </div>
       </div>
 
@@ -257,6 +257,22 @@
       <div id="fmr-questions"></div>
       <button class="btn btn-primary hidden" id="fmr-to-p2" onclick="fmToP2()">Continue to Player 2 →</button>
       <button class="btn btn-secondary hidden mt-2" id="fmr-runback" onclick="restartGame()">🔄 Run It Back (new game)</button>
+    </div>
+
+    <!-- Question picker (pick from a hand of 5, reshuffle) -->
+    <div id="question-picker-modal" class="qp-modal hidden">
+      <div class="qp-card">
+        <div class="qp-head">
+          <h2>Pick a Question</h2>
+          <button class="qp-close" onclick="closeQuestionPicker()" title="Close">✕</button>
+        </div>
+        <p class="qp-hint">Tap the question you want. Don't like any? Reshuffle for a new set.</p>
+        <div id="qp-list" class="qp-list"></div>
+        <div class="qp-foot">
+          <button class="btn btn-secondary" onclick="reshuffleQuestionOptions()">🔀 Reshuffle</button>
+          <button class="btn btn-secondary" onclick="closeQuestionPicker()">Cancel</button>
+        </div>
+      </div>
     </div>
 
     <!-- Roster editor overlay (open any time via the header "👥 Players" button) -->

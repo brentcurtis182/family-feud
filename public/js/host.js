@@ -111,14 +111,59 @@ function startGame() {
   if (t) t.classList.add('active');
 }
 
-function loadQuestion() {
-  setGenerating(true);
-  socket.emit('set-question', { topic: selectedTopic, source: selectedSource });
+// Both "Load Question" and "Change Question" open the picker (a hand of cards).
+function loadQuestion() { openQuestionPicker(); }
+function rerollQuestion() { openQuestionPicker(); }
+
+// ---- Question picker (pick from 5, reshuffle) ----
+let questionOptions = [];
+
+function openQuestionPicker() {
+  document.getElementById('question-picker-modal').classList.remove('hidden');
+  requestQuestionOptions();
 }
 
-function rerollQuestion() {
-  setGenerating(true);
-  socket.emit('reroll-question');
+function requestQuestionOptions() {
+  questionOptions = [];
+  document.getElementById('qp-list').innerHTML = '<div class="qp-loading">🔀 Shuffling questions…</div>';
+  socket.emit('request-question-options', { topic: selectedTopic, source: selectedSource });
+}
+
+function reshuffleQuestionOptions() { requestQuestionOptions(); }
+
+function closeQuestionPicker() {
+  document.getElementById('question-picker-modal').classList.add('hidden');
+}
+
+socket.on('question-options', ({ options }) => {
+  setGenerating(false);
+  questionOptions = options || [];
+  renderQuestionOptions();
+});
+
+function renderQuestionOptions() {
+  const list = document.getElementById('qp-list');
+  if (!list) return;
+  if (!questionOptions.length) {
+    list.innerHTML = '<div class="qp-loading">No questions found — try Reshuffle.</div>';
+    return;
+  }
+  list.innerHTML = questionOptions
+    .map((q, i) => {
+      const answers = q.answers
+        .map((a) => `<span class="qp-ans">${escapeHtml(a.text)} <b>${a.points}</b></span>`)
+        .join('');
+      return `<button class="qp-option" onclick="chooseQuestion(${i})">
+          <div class="qp-q">${escapeHtml(q.text)}</div>
+          <div class="qp-answers">${answers}</div>
+        </button>`;
+    })
+    .join('');
+}
+
+function chooseQuestion(i) {
+  socket.emit('choose-question', { index: i });
+  closeQuestionPicker();
 }
 
 function selectTopic(topic) {
@@ -145,7 +190,7 @@ function setGenerating(on) {
 function updateLoadButtonLabel() {
   const btn = document.getElementById('btn-load-q');
   const ai = gameState && gameState.aiAvailable && selectedSource === 'ai';
-  btn.textContent = ai ? 'Generate Question (AI)' : 'Load Question';
+  btn.textContent = ai ? 'Pick a Question (AI)' : 'Pick a Question';
 }
 
 function selectFaceoff(team, playerName) {
