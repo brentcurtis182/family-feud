@@ -619,6 +619,7 @@
 .fmr-chip.taken { opacity: 0.35; text-decoration: line-through; cursor: default; }
 .fmc-status { font-size: 0.85rem; color: var(--ff-gray); }
 .fmc-current { text-align: center; margin: 8px 0; }
+.fmc-remind { display: block; width: 100%; margin: 8px 0; }
 .fmc-p1ref {
   text-align: center;
   background: rgba(245,197,24,0.12);

@@ -302,6 +302,7 @@ function renderPhase() {
     case 'FAST_MONEY_P2':
       document.getElementById('panel-fastmoney-capture').classList.remove('hidden');
       initFmCapture();
+      updateFmCaptureRemind();
       break;
     case 'FAST_MONEY_P2_WAIT':
       document.getElementById('panel-fastmoney-p2wait').classList.remove('hidden');
@@ -714,6 +715,17 @@ function fmToggleRemind() {
   socket.emit('fastmoney-remind', { show: !(fm && fm.remindP1) });
 }
 
+// Keep the P2 capture screen's "Show P1 Answers" toggle visible + labeled, so
+// the host can flash P1's answers for the room to spot a duplicate.
+function updateFmCaptureRemind() {
+  const btn = document.getElementById('fmc-remind');
+  if (!btn) return;
+  const fm = gameState.fastMoney;
+  const isP2 = gameState.phase === 'FAST_MONEY_P2';
+  btn.classList.toggle('hidden', !isP2);
+  if (isP2 && fm) btn.textContent = fm.remindP1 ? '🙈 Hide P1 Answers' : '👀 Show P1 Answers';
+}
+
 function fmToP2() {
   socket.emit('fastmoney-to-p2');
 }
@@ -764,9 +776,10 @@ function fmrRow(player, i, q) {
   const dup = player === 'p2'
     ? `<button class="fmr-chip fmr-dup" ${dis} onclick="fmPickDup(${i})">Duplicate</button>` : '';
 
-  // Transcript / memory aid — full text, wraps so nothing is cut off
+  // Transcript / memory aid — also what "No match" puts on the board (so the
+  // audience sees what the player actually said, even at 0). Editable; wraps.
   const transcript = `<div class="fmr-said"><span class="fmr-name">they said:</span>
-      <textarea class="input fmr-answer-edit" rows="2" onchange="fmEdit('${player}',${i},this.value)" placeholder="(optional note)">${escapeHtml(said)}</textarea>
+      <textarea class="input fmr-answer-edit" id="fmr-said-${player}-${i}" rows="2" onchange="fmEdit('${player}',${i},this.value)" placeholder="(type what to show on the board — optional)">${escapeHtml(said)}</textarea>
     </div>`;
 
   // 3-beat reveal: ① cursor → ② pick answer (words flip + chase) → ③ score
@@ -800,8 +813,11 @@ function fmPickChip(player, qIndex, ansIndex) {
   socket.emit('fastmoney-pick', { player, index: qIndex, text: a.text, points: a.points, duplicate: false });
 }
 function fmPickNoMatch(player, index) {
-  // Blank board entry (a dash) — never dump the raw transcript onto the board.
-  socket.emit('fastmoney-pick', { player, index, text: '—', points: 0, duplicate: false });
+  // Show whatever the host typed/transcribed in the "they said" box (so the
+  // audience sees the player's answer at 0). Falls back to a dash if empty.
+  const el = document.getElementById(`fmr-said-${player}-${index}`);
+  const text = ((el ? el.value : gameState.fastMoney.input[player][index]) || '').trim();
+  socket.emit('fastmoney-pick', { player, index, text: text || '—', points: 0, duplicate: false });
 }
 function fmPickDup(index) {
   socket.emit('fastmoney-pick', { player: 'p2', index, text: '—', points: 0, duplicate: true });
