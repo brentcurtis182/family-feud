@@ -440,11 +440,56 @@ function fmSelectSource(btn) {
   fmSource = btn.dataset.source;
 }
 
+// Start Fast Money → open the review modal with 5 questions to vet/swap first.
+let fmReviewQuestions = [];
 function startFastMoney() {
   if (!fmP1 || !fmP2) return;
-  document.getElementById('fm-gen-loading').classList.remove('hidden');
-  document.getElementById('fm-start-btn').disabled = true;
-  socket.emit('fastmoney-start', { p1: fmP1, p2: fmP2, source: fmSource });
+  document.getElementById('fm-review-modal').classList.remove('hidden');
+  document.getElementById('fm-review-list').innerHTML = '<div class="qp-loading">🔀 Generating 5 questions…</div>';
+  socket.emit('fastmoney-prepare', { p1: fmP1, p2: fmP2, source: fmSource });
+}
+
+socket.on('fastmoney-options', ({ questions }) => {
+  fmReviewQuestions = questions || [];
+  renderFmReview();
+});
+
+function renderFmReview() {
+  const list = document.getElementById('fm-review-list');
+  if (!list) return;
+  list.innerHTML = fmReviewQuestions
+    .map((q, i) => {
+      const answers = q.answers
+        .map((a) => `<span class="qp-ans">${escapeHtml(a.text)} <b>${a.points}</b></span>`)
+        .join('');
+      const label = i === 0 ? `${i + 1}. (survey) ` : `${i + 1}. `;
+      return `<div class="qp-option fm-review-item">
+          <div class="qp-q">${label}${escapeHtml(q.text)}</div>
+          <div class="qp-answers">${answers}</div>
+          <button class="btn btn-secondary fm-swap-btn" onclick="fmSwap(${i})">🔀 Swap this one</button>
+        </div>`;
+    })
+    .join('');
+}
+
+function fmSwap(i) {
+  const item = document.querySelectorAll('#fm-review-list .fm-review-item')[i];
+  if (item) item.style.opacity = '0.5';
+  socket.emit('fastmoney-swap', { index: i });
+}
+
+function fmReshuffleAll() {
+  document.getElementById('fm-review-list').innerHTML = '<div class="qp-loading">🔀 Reshuffling…</div>';
+  socket.emit('fastmoney-reshuffle');
+}
+
+function fmConfirmStart() {
+  socket.emit('fastmoney-confirm');
+  closeFmReview();
+}
+
+function closeFmReview() {
+  document.getElementById('fm-review-modal').classList.add('hidden');
 }
 
 function startFastMoneyP2() {

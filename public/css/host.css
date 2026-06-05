@@ -291,6 +291,10 @@
 .qp-ans b { color: var(--ff-yellow); }
 .qp-foot { display: flex; gap: 12px; margin-top: 16px; }
 .qp-foot .btn { flex: 1; }
+/* Fast Money review items are containers (not pick-one buttons) */
+.fm-review-item { cursor: default; transition: opacity var(--transition-fast); }
+.fm-review-item:hover { border-color: rgba(255, 255, 255, 0.14); background: rgba(255, 255, 255, 0.05); }
+.fm-swap-btn { margin-top: 10px; padding: 6px 12px; font-size: 0.85rem; }
 
 /* Roster editor overlay (header "👥 Players" button) */
 .roster-modal {

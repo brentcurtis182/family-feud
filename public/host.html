@@ -259,6 +259,22 @@
       <button class="btn btn-secondary hidden mt-2" id="fmr-runback" onclick="restartGame()">🔄 Run It Back (new game)</button>
     </div>
 
+    <!-- Fast Money review (vet/swap the 5 questions before starting) -->
+    <div id="fm-review-modal" class="qp-modal hidden">
+      <div class="qp-card">
+        <div class="qp-head">
+          <h2>Fast Money Questions</h2>
+          <button class="qp-close" onclick="closeFmReview()" title="Close">✕</button>
+        </div>
+        <p class="qp-hint">Your 5 questions. Swap any you don't like, or reshuffle them all, then start.</p>
+        <div id="fm-review-list" class="qp-list"></div>
+        <div class="qp-foot">
+          <button class="btn btn-secondary" onclick="fmReshuffleAll()">🔀 Reshuffle All</button>
+          <button class="btn btn-primary" onclick="fmConfirmStart()">Start Fast Money →</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Question picker (pick from a hand of 5, reshuffle) -->
     <div id="question-picker-modal" class="qp-modal hidden">
       <div class="qp-card">

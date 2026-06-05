@@ -11,6 +11,32 @@ function isHostOrJudge(game, socket) {
   return socket.id === game.hostSocketId || socket.id === game.judgeSocketId;
 }
 
+// Generate `count` Fast Money questions (slot 0 is the long survey one), de-duped
+// against questions already used this game. Hashes are NOT marked used here —
+// that happens on confirm, so reshuffling/swapping doesn't burn questions.
+async function buildFmQuestions(game, source, topic, count) {
+  const reqs = Array.from({ length: count }, (_, i) =>
+    resolveQuestion(game, { topic: topic || 'random', source: source || 'ai', style: i === 0 ? 'survey' : 'fastmoney' })
+  );
+  const settled = await Promise.all(reqs);
+  const seen = new Set(game.usedQuestionHashes);
+  const qs = [];
+  for (let i = 0; i < settled.length; i++) {
+    let q = settled[i];
+    if (!q || seen.has(q.hash)) q = questions.getSampleQuestion(seen, null, { fmFriendly: i !== 0 });
+    seen.add(q.hash);
+    qs.push(q);
+  }
+  return qs;
+}
+
+function emitFmOptions(io, g) {
+  if (!g.fmPrep) return;
+  const payload = { questions: g.fmPrep.questions.map((q) => ({ text: q.text, answers: q.answers })) };
+  io.to(`game:${g.gameId}:host`).emit('fastmoney-options', payload);
+  io.to(`game:${g.gameId}:judge`).emit('fastmoney-options', payload);
+}
+
 module.exports = function registerFastMoneyHandlers(io, socket) {
   // Host starts Fast Money: pick two contestants, generate the 5 questions.
   socket.on('fastmoney-start', async ({ p1, p2, source, topic } = {}) => {
@@ -55,6 +81,62 @@ module.exports = function registerFastMoneyHandlers(io, socket) {
     io.to(`game:${g.gameId}:gamescreen`).emit('camera-angle', { angle: 'wide' });
     broadcastState(io, g);
     console.log(`Game ${g.gameId}: Fast Money started (${p1} & ${p2})`);
+  });
+
+  // Prepare Fast Money: generate the 5 questions and let the host review/swap
+  // them before starting (instead of being stuck with the first batch).
+  socket.on('fastmoney-prepare', async ({ p1, p2, source, topic } = {}) => {
+    const game = gameState.getGame(socket.gameId);
+    if (!isHostOrJudge(game, socket)) return;
+    if (!p1 || !p2) { socket.emit('error', { message: 'Pick two Fast Money contestants.' }); return; }
+    broadcastEvent(io, game, 'fastmoney-generating', {});
+    const qs = await buildFmQuestions(game, source, topic, SLOTS);
+    const g = gameState.getGame(socket.gameId);
+    if (!g) return;
+    g.fmPrep = { p1, p2, source: source || 'ai', topic: topic || 'random', questions: qs };
+    emitFmOptions(io, g);
+  });
+
+  // Reshuffle all five staged questions.
+  socket.on('fastmoney-reshuffle', async () => {
+    const game = gameState.getGame(socket.gameId);
+    if (!isHostOrJudge(game, socket) || !game.fmPrep) return;
+    broadcastEvent(io, game, 'fastmoney-generating', {});
+    const qs = await buildFmQuestions(game, game.fmPrep.source, game.fmPrep.topic, SLOTS);
+    const g = gameState.getGame(socket.gameId);
+    if (!g || !g.fmPrep) return;
+    g.fmPrep.questions = qs;
+    emitFmOptions(io, g);
+  });
+
+  // Swap a single staged question for a fresh one.
+  socket.on('fastmoney-swap', async ({ index } = {}) => {
+    const game = gameState.getGame(socket.gameId);
+    if (!isHostOrJudge(game, socket) || !game.fmPrep) return;
+    if (index < 0 || index >= SLOTS) return;
+    const avoid = new Set(game.usedQuestionHashes);
+    game.fmPrep.questions.forEach((q, i) => { if (i !== index) avoid.add(q.hash); });
+    let q = await resolveQuestion(game, { topic: game.fmPrep.topic, source: game.fmPrep.source, style: index === 0 ? 'survey' : 'fastmoney' });
+    if (!q || avoid.has(q.hash)) q = questions.getSampleQuestion(avoid, null, { fmFriendly: index !== 0 });
+    const g = gameState.getGame(socket.gameId);
+    if (!g || !g.fmPrep) return;
+    g.fmPrep.questions[index] = q;
+    emitFmOptions(io, g);
+  });
+
+  // Confirm the staged questions and actually start Fast Money.
+  socket.on('fastmoney-confirm', () => {
+    const game = gameState.getGame(socket.gameId);
+    if (!isHostOrJudge(game, socket) || !game.fmPrep) return;
+    const { p1, p2, questions: qs } = game.fmPrep;
+    qs.forEach((q) => { game.usedQuestionHashes.add(q.hash); game.recentQuestions.push(q.text); });
+    gameState.initFastMoney(game, p1, p2, qs);
+    game.fmPrep = null;
+    game.phase = PHASES.FAST_MONEY_P1;
+    broadcastEvent(io, game, 'phase-changed', { phase: game.phase, round: game.round, roundMultiplier: game.roundMultiplier });
+    io.to(`game:${game.gameId}:gamescreen`).emit('camera-angle', { angle: 'wide' });
+    broadcastState(io, game);
+    console.log(`Game ${game.gameId}: Fast Money started (${p1} & ${p2})`);
   });
 
   // Host's first mic-press starts the on-screen countdown for this player's turn.
