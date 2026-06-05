@@ -692,6 +692,28 @@
   font-weight: 600;
   color: var(--ff-yellow);
 }
+/* Two-cell face-off layout (buzzer + the other contestant) */
+.gp-faceoff-banner.fo-duo-mode { background: none; border: none; padding: 0; }
+.fo-duo { display: flex; gap: 12px; }
+.fo-cell {
+  flex: 1;
+  border-radius: var(--border-radius);
+  padding: 10px 12px;
+  text-align: center;
+}
+.fo-cell.fo-buzzed {
+  background: rgba(245, 197, 24, 0.18);
+  border: 2px solid var(--ff-yellow);
+}
+.fo-cell.fo-other {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  opacity: 0.85;
+}
+.fo-who { font-family: var(--font-display); font-size: 1.5rem; color: var(--ff-white); letter-spacing: 0.03em; }
+.fo-cell.fo-buzzed .fo-who { color: var(--ff-yellow); }
+.fo-team { font-size: 0.85rem; color: var(--ff-gray); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+.fo-tag { font-size: 0.8rem; color: var(--ff-gray); margin-top: 6px; font-weight: 400; }
 
 .gp-actions {
   display: flex;

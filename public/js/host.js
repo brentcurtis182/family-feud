@@ -914,6 +914,7 @@ function renderGameplay() {
 
   const sd = gameState.suddenDeath;
   const banner = document.getElementById('gp-faceoff-banner');
+  banner.classList.remove('fo-duo-mode'); // only the regular face-off uses the 2-cell layout
   if (phase === 'FACE_OFF_ANSWER' && fo.winner && sd) {
     const turn = gameState.suddenDeathTurn || fo.winner;
     const turnName = gameState.teams[turn].name;
@@ -921,9 +922,23 @@ function renderGameplay() {
     banner.textContent = `🟥 SUDDEN DEATH — ${turnName}'s turn. Reveal the #1 answer if they got it (they WIN), or "Missed — pass to ${otherName}".`;
     banner.classList.remove('hidden');
   } else if (phase === 'FACE_OFF_ANSWER' && fo.winner) {
-    const c = fo[`${fo.winner}Player`];
-    const teamName = gameState.teams[fo.winner].name;
-    banner.textContent = `⚡ ${c ? c.playerName : teamName} (${teamName}) buzzed first — reveal their answer, then pick who plays`;
+    // Two cells: who buzzed first (active) + the other contestant, so if the
+    // buzzer misses the top answer the host can call on the other player.
+    const winner = fo.winner;
+    const otherT = winner === 'team1' ? 'team2' : 'team1';
+    const wC = fo[`${winner}Player`], oC = fo[`${otherT}Player`];
+    const wName = wC ? wC.playerName : gameState.teams[winner].name;
+    const oName = oC ? oC.playerName : gameState.teams[otherT].name;
+    banner.innerHTML =
+      `<div class="fo-duo">` +
+        `<div class="fo-cell fo-buzzed"><div class="fo-who">⚡ ${escapeHtml(wName)}</div>` +
+          `<div class="fo-team">${escapeHtml(gameState.teams[winner].name)}</div>` +
+          `<div class="fo-tag">buzzed first — reveal their answer</div></div>` +
+        `<div class="fo-cell fo-other"><div class="fo-who">${escapeHtml(oName)}</div>` +
+          `<div class="fo-team">${escapeHtml(gameState.teams[otherT].name)}</div>` +
+          `<div class="fo-tag">if they miss the top answer, call this player</div></div>` +
+      `</div>`;
+    banner.classList.add('fo-duo-mode');
     banner.classList.remove('hidden');
   } else if (phase === 'TEAM_PLAY' && ap.playingTeam) {
     banner.textContent = `▶ ${gameState.teams[ap.playingTeam].name} is playing the board`;
