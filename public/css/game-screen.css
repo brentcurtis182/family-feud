@@ -529,11 +529,11 @@
   color: #fff;
   background: linear-gradient(180deg, rgba(0,0,0,0.85), rgba(0,0,0,0));
   text-shadow: 0 0 20px var(--ff-yellow), 0 4px 8px #000;
-  animation: buzzInPop 0.35s cubic-bezier(0.2, 1.5, 0.4, 1);
+  animation: buzzInPop 0.2s cubic-bezier(0.2, 1.5, 0.4, 1);
 }
 .gs-buzzin.team1 { color: var(--ff-yellow); }
 .gs-buzzin.team2 { color: var(--ff-yellow-light); }
-@keyframes buzzInPop { from { opacity: 0; transform: translateY(-20%) scale(0.8); } to { opacity: 1; transform: none; } }
+@keyframes buzzInPop { from { opacity: 0.25; transform: translateY(-12%) scale(0.85); } to { opacity: 1; transform: none; } }
 
 /* Round-end / game-over overlay */
 .gs-overlay {

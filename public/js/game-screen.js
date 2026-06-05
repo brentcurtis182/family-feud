@@ -142,7 +142,8 @@ socket.on('fm-score-revealed', ({ player, index, points, duplicate, total, won }
     cell.classList.add('pop');
     setTimeout(() => cell.classList.remove('pop'), 350);
   }
-  if (duplicate) Sounds.duplicateSound(); else Sounds.fmDingSound();
+  // A scoring answer dings; a duplicate OR a "no answer" (— / 0 points) buzzes.
+  if (points > 0 && !duplicate) Sounds.fmDingSound(); else Sounds.duplicateSound();
   const totalEl = document.getElementById('fmb-total');
   if (totalEl) totalEl.textContent = total;
   if (won) Sounds.fanfare();
