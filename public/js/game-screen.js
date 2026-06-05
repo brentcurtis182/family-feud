@@ -225,10 +225,13 @@ function renderBuzzIn() {
   if (!el) return;
   const fo = gameState.faceOff || {};
   if (gameState.phase === 'FACE_OFF_ANSWER' && fo.winner) {
-    const c = fo[`${fo.winner}Player`];
-    const who = c ? c.playerName : gameState.teams[fo.winner].name;
-    el.className = 'gs-buzzin ' + fo.winner;
-    el.textContent = `⚡ ${(who || '').toUpperCase()} — IN!`;
+    const sd = gameState.suddenDeath;
+    // In sudden death the active answerer alternates on a miss.
+    const who = sd ? (gameState.suddenDeathTurn || fo.winner) : fo.winner;
+    const c = fo[`${who}Player`];
+    const name = c ? c.playerName : gameState.teams[who].name;
+    el.className = 'gs-buzzin ' + who;
+    el.textContent = sd ? `🟥 ${(name || '').toUpperCase()} — ANSWER!` : `⚡ ${(name || '').toUpperCase()} — IN!`;
     el.classList.remove('hidden');
   } else {
     el.classList.add('hidden');

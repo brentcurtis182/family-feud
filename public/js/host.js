@@ -899,9 +899,10 @@ function renderGameplay() {
   const sd = gameState.suddenDeath;
   const banner = document.getElementById('gp-faceoff-banner');
   if (phase === 'FACE_OFF_ANSWER' && fo.winner && sd) {
-    const teamName = gameState.teams[fo.winner].name;
-    const otherName = gameState.teams[fo.winner === 'team1' ? 'team2' : 'team1'].name;
-    banner.textContent = `🟥 SUDDEN DEATH — ${teamName} buzzed. Reveal the #1 answer if they got it (they win), or hit "Missed it" (${otherName} wins).`;
+    const turn = gameState.suddenDeathTurn || fo.winner;
+    const turnName = gameState.teams[turn].name;
+    const otherName = gameState.teams[turn === 'team1' ? 'team2' : 'team1'].name;
+    banner.textContent = `🟥 SUDDEN DEATH — ${turnName}'s turn. Reveal the #1 answer if they got it (they WIN), or "Missed — pass to ${otherName}".`;
     banner.classList.remove('hidden');
   } else if (phase === 'FACE_OFF_ANSWER' && fo.winner) {
     const c = fo[`${fo.winner}Player`];
@@ -942,8 +943,9 @@ function renderGameplay() {
   // Strike button: face-off wrong answer, normal strike, or steal-fail
   const strikeBtn = document.getElementById('btn-strike');
   if (phase === 'FACE_OFF_ANSWER' && sd) {
-    const otherName = fo.winner ? gameState.teams[fo.winner === 'team1' ? 'team2' : 'team1'].name : 'other team';
-    strikeBtn.textContent = `✗ Missed it — ${otherName} wins`;
+    const turn = gameState.suddenDeathTurn || fo.winner;
+    const otherName = turn ? gameState.teams[turn === 'team1' ? 'team2' : 'team1'].name : 'other team';
+    strikeBtn.textContent = `✗ Missed — pass to ${otherName}`;
     strikeBtn.classList.remove('hidden');
   } else if (phase === 'FACE_OFF_ANSWER') {
     strikeBtn.textContent = '✗ Strike (wrong answer)';

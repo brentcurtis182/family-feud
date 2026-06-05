@@ -65,6 +65,7 @@ module.exports = function registerFaceOffHandlers(io, socket) {
       game.faceOff.buzzersOpen = false;
       game.phase = gameState.PHASES.FACE_OFF_ANSWER;
       game.activePlay.playingTeam = team; // tentative; play-or-pass refines next
+      if (game.suddenDeath) game.suddenDeathTurn = team; // this team answers first
 
       // Display the host-selected contestant name if there is one.
       const contestant = game.faceOff[`${team}Player`];
@@ -85,17 +86,13 @@ module.exports = function registerFaceOffHandlers(io, socket) {
   socket.on('faceoff-strike', () => {
     const game = gameState.getGame(socket.gameId);
     if (!isHostOrJudge(game, socket)) return;
-    // Sudden death: a missed top answer hands the game to the other team.
+    // Sudden death: a miss passes the turn to the other team (back and forth
+    // until someone gives the #1 answer) rather than ending the game.
     if (game.suddenDeath && game.phase === gameState.PHASES.FACE_OFF_ANSWER && game.faceOff.winner) {
-      const winner = gameState.otherTeam(game.faceOff.winner);
-      gameState.endGameWith(game, winner);
-      broadcastEvent(io, game, 'game-over', {
-        winner,
-        winnerName: game.teams[winner].name,
-        scores: { team1: game.teams.team1.score, team2: game.teams.team2.score },
-        suddenDeath: true,
-      });
-      broadcastState(io, game);
+      const current = game.suddenDeathTurn || game.faceOff.winner;
+      game.suddenDeathTurn = gameState.otherTeam(current);
+      broadcastEvent(io, game, 'faceoff-strike', {}); // transient X + buzzer
+      broadcastState(io, game); // updates whose turn it is
       return;
     }
     broadcastEvent(io, game, 'faceoff-strike', {});

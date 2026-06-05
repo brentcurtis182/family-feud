@@ -178,10 +178,10 @@ module.exports = function registerRoundHandlers(io, socket) {
       roundBank: game.roundBank,
     });
 
-    // Sudden death: the buzzed team revealing the #1 answer wins the game.
+    // Sudden death: the team whose turn it is revealing the #1 answer wins.
     if (game.suddenDeath && game.phase === PHASES.FACE_OFF_ANSWER) {
       if (position === 0 && game.faceOff.winner) {
-        const winner = game.faceOff.winner;
+        const winner = game.suddenDeathTurn || game.faceOff.winner;
         gameState.endGameWith(game, winner);
         broadcastEvent(io, game, 'game-over', {
           winner,
@@ -327,25 +327,10 @@ module.exports = function registerRoundHandlers(io, socket) {
     if (game.winner) return;
     if (game.phase !== PHASES.ROUND_END) return;
 
-    const t1 = game.teams.team1.score;
-    const t2 = game.teams.team2.score;
-    const roundsExhausted = game.round >= game.totalRounds;
-
-    // Rounds used up and someone leads -> game over.
-    if (roundsExhausted && t1 !== t2) {
-      game.winner = t1 > t2 ? 'team1' : 'team2';
-      game.phase = PHASES.GAME_OVER;
-      broadcastEvent(io, game, 'game-over', {
-        winner: game.winner,
-        winnerName: game.teams[game.winner].name,
-        scores: { team1: t1, team2: t2 },
-      });
-      broadcastState(io, game);
-      return;
-    }
-
-    // Tie at the end -> sudden death.
-    if (roundsExhausted && t1 === t2) game.suddenDeath = true;
+    // Reaching 300 ends the game during play (checkWinCondition), so if we're
+    // at the end of the final round with no winner yet, BOTH teams are under 300
+    // → go to Sudden Death (regardless of who's ahead; no tie special-case).
+    if (game.round >= game.totalRounds) game.suddenDeath = true;
 
     gameState.startNextRound(game);
     broadcastEvent(io, game, 'phase-changed', {

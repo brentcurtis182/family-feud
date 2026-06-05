@@ -79,9 +79,9 @@ function renderGameplay() {
   // Banner
   const banner = document.getElementById('j-banner');
   if (phase === 'FACE_OFF_ANSWER' && gameState.faceOff.winner && sd) {
-    const w = gameState.faceOff.winner;
-    const otherName = gameState.teams[w === 'team1' ? 'team2' : 'team1'].name;
-    banner.textContent = `🟥 SUDDEN DEATH — reveal the #1 answer if ${gameState.teams[w].name} got it (they win), or Strike (${otherName} wins).`;
+    const turn = gameState.suddenDeathTurn || gameState.faceOff.winner;
+    const otherName = gameState.teams[turn === 'team1' ? 'team2' : 'team1'].name;
+    banner.textContent = `🟥 SUDDEN DEATH — ${gameState.teams[turn].name}'s turn. Reveal #1 if they got it (they WIN), or Strike (pass to ${otherName}).`;
     banner.classList.remove('hidden');
   } else if (phase === 'FACE_OFF_ANSWER' && gameState.faceOff.winner) {
     const w = gameState.faceOff.winner;
@@ -138,8 +138,8 @@ function renderGameplay() {
   // Strike button label
   const strikeBtn = document.getElementById('j-strike');
   if (sd && phase === 'FACE_OFF_ANSWER' && gameState.faceOff.winner) {
-    const w = gameState.faceOff.winner;
-    strikeBtn.textContent = `Missed — ${gameState.teams[w === 'team1' ? 'team2' : 'team1'].name} wins`;
+    const turn = gameState.suddenDeathTurn || gameState.faceOff.winner;
+    strikeBtn.textContent = `Missed — pass to ${gameState.teams[turn === 'team1' ? 'team2' : 'team1'].name}`;
   } else {
     strikeBtn.textContent = phase === 'STEAL_ATTEMPT' ? 'Steal Failed' : 'Strike';
   }

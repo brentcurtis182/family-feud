@@ -71,6 +71,7 @@ function createGame({ hostSocketId, hostMode, team1Name, team2Name, passcode }) 
     lastRoundResult: null, // { winningTeam, teamName, points } for ROUND_END display
     winner: null, // 'team1' | 'team2' once the game is won
     suddenDeath: false,
+    suddenDeathTurn: null, // whose turn to answer in sudden death (alternates on a miss)
 
     faceOff: {
       team1Player: null,
@@ -181,6 +182,7 @@ function startNextRound(game) {
   game.currentQuestion = null;
   game.roundBank = 0;
   game.lastRoundResult = null;
+  game.suddenDeathTurn = null; // set on the first buzz of a sudden-death round
   resetFaceOff(game);
   resetActivePlay(game);
   game.phase = PHASES.ROUND_SETUP;
@@ -315,6 +317,7 @@ function resetForNewGame(game) {
   game.lastRoundResult = null;
   game.winner = null;
   game.suddenDeath = false;
+  game.suddenDeathTurn = null;
   game.fastMoney = null;
   game.usedQuestionHashes.clear();
   game.recentQuestions = [];
@@ -412,6 +415,7 @@ function getClientState(game, role) {
     lastRoundResult: game.lastRoundResult,
     winner: game.winner,
     suddenDeath: game.suddenDeath,
+    suddenDeathTurn: game.suddenDeathTurn,
     stakes: computeStakes(game),
     aiAvailable: aiQuestions.isAvailable(),
     topics: questions.TOPICS,
