@@ -408,7 +408,10 @@
   z-index: 0;
   transition: opacity 0.4s ease;
 }
-.gs-scoreboard, .gs-stage { position: relative; z-index: 1; }
+.gs-stage { position: relative; z-index: 1; }
+/* Scoreboard above the stage so the (bigger, bleeding) team names float in
+   FRONT of the gameboard instead of being painted over by it. */
+.gs-scoreboard { position: relative; z-index: 12; }
 
 .camera-wide .gs-backdrop { background-image: url('/assets/images/set-wide.png'); }
 .camera-faceoff .gs-backdrop { background-image: url('/assets/images/set-right.png'); }
@@ -536,8 +539,8 @@
   text-shadow: 0 0 18px var(--ff-yellow), 0 3px 6px #000;
   animation: buzzInPop 0.2s cubic-bezier(0.2, 1.5, 0.4, 1);
 }
-.gs-buzzin.team1 { left: 1.5%;  right: auto; color: var(--ff-yellow); }
-.gs-buzzin.team2 { right: 1.5%; left: auto;  color: var(--ff-yellow-light); }
+.gs-buzzin.team1 { left: 7%;  right: auto; color: var(--ff-yellow); }
+.gs-buzzin.team2 { right: 7%; left: auto;  color: var(--ff-yellow-light); }
 @keyframes buzzInPop { from { opacity: 0.25; transform: translateY(-12%) scale(0.85); } to { opacity: 1; transform: none; } }
 
 /* Round-end / game-over overlay */
