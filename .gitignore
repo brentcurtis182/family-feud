@@ -9,5 +9,6 @@ npm-debug.log*
 # via scripts/build-bank.js. The generated server/questionBank.json IS committed.
 protoqa_train.jsonl
 
-# Alignment-tuning screenshots dropped in for reference — not game assets
+# Tuning/reference screenshots dropped in for reference — not game assets
 public/assets/images/players*.png
+public/assets/images/*demo*.png
