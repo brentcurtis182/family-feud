@@ -460,22 +460,25 @@ function renderBoard() {
     return;
   }
 
-  const count = q.answerCount || q.answers.length;
-  const sig = `${q.text}|${count}`;
+  // Sudden death shows a single slot (the #1 answer), like the show.
+  const sd = gameState.suddenDeath;
+  const list = sd ? q.answers.slice(0, 1) : q.answers;
+  const count = sd ? 1 : (q.answerCount || q.answers.length);
+  const sig = `${q.text}|${count}|${sd ? 'sd' : ''}`;
 
   if (sig !== renderedQuestionSig) {
     renderedQuestionSig = sig;
-    slots.innerHTML = q.answers.map((a, i) => rbCell(a, i)).join('');
+    slots.innerHTML = list.map((a, i) => rbCell(a, i)).join('');
     // Populate the rank strips one at a time, each with a quick whoosh.
-    q.answers.forEach((_, i) => setTimeout(() => Sounds.woosh(), 250 + i * 130));
+    list.forEach((_, i) => setTimeout(() => Sounds.woosh(), 250 + i * 130));
   } else {
-    q.answers.forEach((a, i) => {
+    list.forEach((a, i) => {
       const cell = slots.querySelector(`.rb-cell[data-position="${i}"]`);
       if (cell) syncRbCell(cell, a);
     });
   }
 
-  document.getElementById('rb-total').textContent = gameState.roundBank || 0;
+  document.getElementById('rb-total').textContent = sd ? '' : (gameState.roundBank || 0);
 }
 
 // Shrink the answer font for longer text so it fits the slot without clipping

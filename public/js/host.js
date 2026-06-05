@@ -970,11 +970,13 @@ function renderGameplay() {
 
   // Answer list. Revealed answers always show; unrevealed ones are concealed
   // unless the host has chosen to display them (then they're clickable to reveal).
-  const concealing = !showHostAnswers && q.answers.some((a) => !a.revealed);
+  // Sudden death plays a single slot — only the #1 answer is in play.
+  const answerList = sd ? q.answers.slice(0, 1) : q.answers;
+  const concealing = !showHostAnswers && answerList.some((a) => !a.revealed);
   const hint = concealing
     ? '<div class="gp-answers-hint">🙈 Answers hidden — tap a row (or “Display Answers”) to show them</div>'
     : '';
-  document.getElementById('gp-answers').innerHTML = hint + q.answers
+  document.getElementById('gp-answers').innerHTML = hint + answerList
     .map((a, i) => {
       const isRev = !!a.revealed;
       const visible = isRev || showHostAnswers;

@@ -100,7 +100,8 @@ function renderGameplay() {
 
   document.getElementById('j-question').textContent = q.text;
 
-  document.getElementById('j-answers').innerHTML = q.answers
+  // Sudden death plays a single slot — only the #1 answer is in play.
+  document.getElementById('j-answers').innerHTML = (sd ? q.answers.slice(0, 1) : q.answers)
     .map((a, i) => {
       const revealed = a.revealed ? ' revealed' : '';
       const onclick = a.revealed ? '' : ` onclick="revealAnswer(${i})"`;
