@@ -499,19 +499,21 @@
   color: #fff;
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);  /* no box — clean on the blue */
 }
-/* Per-plate fine alignment (perspective spacing differs per side). */
+/* Per-plate fine alignment (perspective spacing differs per side). The desk
+   plates bow down toward the center, so middle names (2-4) drop a touch; the
+   ends (1, 5) already sit right. Positive top = down. */
 /* Left side (play-left) */
-.camera-play-left .gs-play-name:nth-child(1),
-.camera-play-left .gs-play-name:nth-child(2) { left: 1em; }     /* +1 letter */
-.camera-play-left .gs-play-name:nth-child(3) { left: 0.5em; }
-.camera-play-left .gs-play-name:nth-child(4) { left: 0.25em; }
+.camera-play-left .gs-play-name:nth-child(1) { left: 1em; }
+.camera-play-left .gs-play-name:nth-child(2) { left: 1em;    top: 0.3em; }
+.camera-play-left .gs-play-name:nth-child(3) { left: 0.5em;  top: 0.4em; }
+.camera-play-left .gs-play-name:nth-child(4) { left: 0.25em; top: 0.3em; }
 .camera-play-left .gs-play-name:nth-child(5) { left: -0.5em; }
 /* Right side (play-right) — 1 char ≈ 0.5em (one letter) */
-.camera-play-right .gs-play-name:nth-child(1) { left: 1.5em; }   /* -1 letter */
-.camera-play-right .gs-play-name:nth-child(2) { left: 0em; }     /* -1 letter */
-.camera-play-right .gs-play-name:nth-child(3) { left: -0.5em; }  /* right ~4 chars */
-.camera-play-right .gs-play-name:nth-child(4) { left: -1.5em; }  /* good as-is */
-.camera-play-right .gs-play-name:nth-child(5) { left: -1.5em; }  /* left ~3 chars */
+.camera-play-right .gs-play-name:nth-child(1) { left: 1.5em; }
+.camera-play-right .gs-play-name:nth-child(2) { left: 0em;    top: 0.3em; }
+.camera-play-right .gs-play-name:nth-child(3) { left: -0.5em; top: 0.4em; }
+.camera-play-right .gs-play-name:nth-child(4) { left: -1.5em; top: 0.3em; }
+.camera-play-right .gs-play-name:nth-child(5) { left: -1.5em; }
 
 /* ---- GIANT buzz-in indicator ---- */
 .gs-buzzin {
