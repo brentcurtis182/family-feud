@@ -431,6 +431,15 @@
   font-weight: 600;
 }
 
+/* Host-only "We surveyed 100…" patter reminder */
+.q-suggest {
+  color: var(--ff-gray);
+  font-size: 0.85rem;
+  font-style: italic;
+  margin: -4px 0 12px;
+  text-align: center;
+}
+
 /* Question source toggle + topic chips */
 .q-source-row {
   display: flex;

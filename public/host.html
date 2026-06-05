@@ -118,6 +118,7 @@
         </div>
         <div class="topic-chips" id="topic-chips"></div>
         <div id="setup-question-display" class="setup-question hidden"></div>
+        <div id="setup-q-suggest" class="q-suggest hidden"></div>
         <div id="q-loading" class="q-loading hidden">Generating question…</div>
         <div class="setup-actions">
           <button class="btn btn-secondary" id="btn-load-q" onclick="loadQuestion()">Pick a Question</button>
@@ -139,6 +140,7 @@
     <div id="panel-faceoff-buzzer" class="host-panel hidden">
       <h2>⚡ Buzzers Open — read the question!</h2>
       <div class="gp-question" id="fob-question">Question</div>
+      <div id="fob-q-suggest" class="q-suggest hidden"></div>
       <p class="text-center" style="color:var(--ff-gray)">Read the question aloud. Players can buzz any time. First buzz wins the face-off.</p>
       <div class="setup-actions">
         <button class="btn btn-secondary" onclick="resetFaceoff()">Cancel / Re-pick</button>

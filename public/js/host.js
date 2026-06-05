@@ -253,6 +253,35 @@ function resetRound() {
   }
 }
 
+// ---- "We asked 100…" host patter suggestion (host-only reminder) ----
+const FM_AUDIENCES = [
+  '100 people', '100 married women', '100 married men', '100 men', '100 women',
+  '100 husbands', '100 wives', '100 moms', '100 dads', '100 grandparents',
+  '100 teenagers', '100 newlyweds', '100 single people',
+];
+let _suggestFor = null, _suggestAudience = null;
+
+// Returns a "We asked 100 X…" reminder for the question, or null if it's already
+// framed (a number/scale/we-asked question) and doesn't need one.
+function questionSuggestion(qText) {
+  if (!qText || /^(we asked|on a scale|how many|what percentage|at what age|according to)/i.test(qText.trim())) {
+    return null;
+  }
+  if (_suggestFor !== qText) {
+    _suggestFor = qText;
+    _suggestAudience = FM_AUDIENCES[Math.floor(Math.random() * FM_AUDIENCES.length)];
+  }
+  return `💡 Try reading it as: “We surveyed ${_suggestAudience}…”`;
+}
+
+function showQuestionSuggestion(elId, qText) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const s = questionSuggestion(qText);
+  el.textContent = s || '';
+  el.classList.toggle('hidden', !s);
+}
+
 // ---- Rendering ----
 function updateState(state) {
   gameState = state;
@@ -331,6 +360,7 @@ function renderPhase() {
       document.getElementById('panel-faceoff-buzzer').classList.remove('hidden');
       document.getElementById('fob-question').textContent =
         gameState.currentQuestion ? gameState.currentQuestion.text : '';
+      showQuestionSuggestion('fob-q-suggest', gameState.currentQuestion ? gameState.currentQuestion.text : '');
       break;
     case 'TEAM_PLAY':
     case 'STEAL_ATTEMPT':
@@ -971,10 +1001,12 @@ function renderRoundSetup() {
   if (hasQuestion) {
     qDisplay.textContent = gameState.currentQuestion.text;
     qDisplay.classList.remove('hidden');
+    showQuestionSuggestion('setup-q-suggest', gameState.currentQuestion.text);
     document.getElementById('btn-load-q').classList.add('hidden');
     document.getElementById('btn-reroll-q').classList.remove('hidden');
   } else {
     qDisplay.classList.add('hidden');
+    document.getElementById('setup-q-suggest').classList.add('hidden');
     document.getElementById('btn-load-q').classList.remove('hidden');
     document.getElementById('btn-reroll-q').classList.add('hidden');
   }
