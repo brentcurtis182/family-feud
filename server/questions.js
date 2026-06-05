@@ -8,6 +8,10 @@ const crypto = require('crypto');
 let BANK_QUESTIONS = [];
 try { BANK_QUESTIONS = require('./questionBank.json'); } catch { /* bank optional */ }
 
+// Curated Fast Money questions (classic "We asked 100…", scale, "how many…"
+// framings) — drawn from for Fast Money on the Bank source.
+const FM_CURATED = require('./fastMoneyQuestions');
+
 // Hand-curated questions — kept up front for their tidy topic tags and phrasing.
 const CURATED_QUESTIONS = [
   // ---- everyday ----
@@ -342,9 +346,25 @@ function isFmFriendly(q) {
     /^(name|tell me|how many|a reason|what|which|when|where|give me|at what)/i.test(q.text);
 }
 
+// Curated Fast Money pool with stable hashes (for de-dupe).
+const FM_BANK = FM_CURATED.map((raw) => ({ raw, hash: hashQuestion(raw.text) }));
+
+// True for a Fast Money "opener" framing (the long first question — there's time
+// to read it). The other four FM questions are 3-second sprints, so they stay short.
+function isFmOpener(text) {
+  return /^(we asked|on a scale|how many|what percentage|at what age)/i.test(text);
+}
+
 // Pick a random bank question (optionally by topic) not already used this game.
 // opts.fmFriendly biases toward short Fast Money-style prompts.
+// opts.fmOpener draws a curated classic-framing OPENER (first FM question only).
 function getSampleQuestion(usedHashes = new Set(), topic = null, opts = {}) {
+  if (opts.fmOpener) {
+    let avail = FM_BANK.filter((e) => isFmOpener(e.raw.text) && !usedHashes.has(e.hash));
+    if (!avail.length) avail = FM_BANK.filter((e) => !usedHashes.has(e.hash)); // any curated
+    if (avail.length) return buildQuestion(avail[Math.floor(Math.random() * avail.length)].raw);
+    opts = Object.assign({}, opts, { fmFriendly: true }); // exhausted → short bank Q
+  }
   let pool = SAMPLE_QUESTIONS;
   if (topic && topic !== 'random') {
     const byTopic = SAMPLE_QUESTIONS.filter((q) => q.topic === topic);

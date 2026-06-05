@@ -15,15 +15,16 @@ function isHostOrJudge(game, socket) {
 // against questions already used this game. Hashes are NOT marked used here —
 // that happens on confirm, so reshuffling/swapping doesn't burn questions.
 async function buildFmQuestions(game, source, topic, count) {
+  // Slot 0 is the OPENER (classic framing); slots 1-4 are short, quick prompts.
   const reqs = Array.from({ length: count }, (_, i) =>
-    resolveQuestion(game, { topic: topic || 'random', source: source || 'ai', style: i === 0 ? 'survey' : 'fastmoney' })
+    resolveQuestion(game, { topic: topic || 'random', source: source || 'ai', style: i === 0 ? 'survey' : 'fastmoney', fmOpener: i === 0 })
   );
   const settled = await Promise.all(reqs);
   const seen = new Set(game.usedQuestionHashes);
   const qs = [];
   for (let i = 0; i < settled.length; i++) {
     let q = settled[i];
-    if (!q || seen.has(q.hash)) q = questions.getSampleQuestion(seen, null, { fmFriendly: i !== 0 });
+    if (!q || seen.has(q.hash)) q = questions.getSampleQuestion(seen, null, i === 0 ? { fmOpener: true } : { fmFriendly: true });
     seen.add(q.hash);
     qs.push(q);
   }
@@ -116,8 +117,8 @@ module.exports = function registerFastMoneyHandlers(io, socket) {
     if (index < 0 || index >= SLOTS) return;
     const avoid = new Set(game.usedQuestionHashes);
     game.fmPrep.questions.forEach((q, i) => { if (i !== index) avoid.add(q.hash); });
-    let q = await resolveQuestion(game, { topic: game.fmPrep.topic, source: game.fmPrep.source, style: index === 0 ? 'survey' : 'fastmoney' });
-    if (!q || avoid.has(q.hash)) q = questions.getSampleQuestion(avoid, null, { fmFriendly: index !== 0 });
+    let q = await resolveQuestion(game, { topic: game.fmPrep.topic, source: game.fmPrep.source, style: index === 0 ? 'survey' : 'fastmoney', fmOpener: index === 0 });
+    if (!q || avoid.has(q.hash)) q = questions.getSampleQuestion(avoid, null, index === 0 ? { fmOpener: true } : { fmFriendly: true });
     const g = gameState.getGame(socket.gameId);
     if (!g || !g.fmPrep) return;
     g.fmPrep.questions[index] = q;

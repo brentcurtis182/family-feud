@@ -3,7 +3,7 @@ const aiQuestions = require('./aiQuestions');
 
 // Resolve one question: try AI (unless bank requested / unavailable), fall back
 // to the offline bank. Avoids repeating a question already used this game.
-async function resolveQuestion(game, { topic, source, style, suddenDeath } = {}) {
+async function resolveQuestion(game, { topic, source, style, suddenDeath, fmOpener } = {}) {
   // Sudden death: always pull from the bank so we can guarantee a dominant-top
   // ("obvious") question.
   if (suddenDeath) {
@@ -24,7 +24,10 @@ async function resolveQuestion(game, { topic, source, style, suddenDeath } = {})
       }
     }
   }
-  return questions.getSampleQuestion(game.usedQuestionHashes, topic, { fmFriendly: style === 'fastmoney' });
+  return questions.getSampleQuestion(game.usedQuestionHashes, topic, {
+    fmFriendly: style === 'fastmoney',
+    fmOpener: !!fmOpener, // only the first FM question uses the classic framing
+  });
 }
 
 module.exports = { resolveQuestion };
