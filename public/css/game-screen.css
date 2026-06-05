@@ -503,11 +503,11 @@
    Horizontal: ~0.5em ≈ 1 character. Vertical: ~0.7em ≈ 1 character height;
    negative top nudges the name UP. */
 /* Left side (play-left) */
-.camera-play-left .gs-play-name:nth-child(1) { left: 1em;     top: -0.14em; } /* up ~20% */
-.camera-play-left .gs-play-name:nth-child(2) { left: 1.25em;  top: -0.14em; } /* +½ char, up ~20% */
-.camera-play-left .gs-play-name:nth-child(3) { left: 0.75em;  top: -0.14em; } /* +½ char, up ~20% */
-.camera-play-left .gs-play-name:nth-child(4) { left: -0.25em; top: -0.42em; } /* −1 char, up ~60% */
-.camera-play-left .gs-play-name:nth-child(5) { left: -1.5em;  top: -0.56em; } /* −2 char, up ~80% */
+.camera-play-left .gs-play-name:nth-child(1) { left: 1em;     top: -0.56em; } /* up ~80% */
+.camera-play-left .gs-play-name:nth-child(2) { left: 1.25em;  top: -0.35em; } /* +½ char, up ~50% */
+.camera-play-left .gs-play-name:nth-child(3) { left: 0.75em;  top: -0.35em; } /* +½ char, up ~50% */
+.camera-play-left .gs-play-name:nth-child(4) { left: -0.25em; top: -0.53em; } /* −1 char, up ~75% */
+.camera-play-left .gs-play-name:nth-child(5) { left: -1.5em;  top: -0.53em; } /* −2 char, up ~75% */
 /* Right side (play-right) */
 .camera-play-right .gs-play-name:nth-child(1) { left: 1.5em;  top: -0.42em; } /* up ~60% */
 .camera-play-right .gs-play-name:nth-child(2) { left: 0em;    top: -0.42em; } /* up ~60% */
