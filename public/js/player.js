@@ -51,13 +51,16 @@ function render() {
     return;
   }
 
-  if (phase === 'FACE_OFF_READY') {
+  if (phase === 'ROUND_SETUP' || phase === 'FACE_OFF_READY') {
+    // Show the (greyed) buzzer early so players know it's there and what's coming.
     showView('buzzer');
-    setBuzzer(false, 'Get Ready…');
+    setBuzzer(false, 'Get Ready…', phase === 'FACE_OFF_READY'
+      ? '⏳ Waiting for the host to open the buzzers…'
+      : '⏳ The host is setting up the round…');
   } else if (phase === 'FACE_OFF_BUZZER') {
     showView('buzzer');
-    if (buzzedLocally) setBuzzer(false, 'Buzzed! ⚡');
-    else setBuzzer(true, 'BUZZ!');
+    if (buzzedLocally) setBuzzer(false, 'Buzzed! ⚡', 'Nice — hang tight!');
+    else setBuzzer(true, 'BUZZ!', 'Tap as fast as you can!');
   } else if (phase === 'FACE_OFF_ANSWER') {
     showView('status');
     setStatus(iWon() ? '⚡ Your team buzzed first!' : 'Other team buzzed first.');
@@ -103,9 +106,14 @@ function setStatus(text) {
   document.getElementById('player-status').textContent = text;
 }
 
-function setBuzzer(active, label) {
+function setBuzzer(active, label, caption) {
   const btn = document.getElementById('buzz-btn');
   btn.textContent = label;
   btn.disabled = !active;
   btn.classList.toggle('armed', active);
+  const cap = document.getElementById('buzz-caption');
+  if (cap) {
+    cap.textContent = caption || '';
+    cap.classList.toggle('hidden', !caption);
+  }
 }

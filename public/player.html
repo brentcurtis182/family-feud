@@ -65,6 +65,14 @@
       gap: 20px;
     }
 
+    .buzz-caption {
+      color: var(--ff-gray);
+      font-size: 0.95rem;
+      max-width: 280px;
+      line-height: 1.4;
+    }
+    .buzz-caption.hidden { display: none; }
+
     .buzz-btn {
       width: min(70vw, 260px);
       height: min(70vw, 260px);
@@ -152,6 +160,7 @@
     <!-- Buzzer view -->
     <div id="view-buzzer" class="hidden">
       <button class="buzz-btn" id="buzz-btn" disabled onclick="buzz()">BUZZ!</button>
+      <div class="buzz-caption" id="buzz-caption"></div>
     </div>
 
     <!-- Fast Money entry view -->
