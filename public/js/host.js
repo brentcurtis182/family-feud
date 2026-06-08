@@ -201,6 +201,26 @@ function openBuzzers() {
   socket.emit('open-buzzers');
 }
 
+// Clicking "Open Buzzers" before it's ready explains exactly what's missing
+// (instead of a dead, greyed-out button that confuses everyone).
+function tryOpenBuzzers() {
+  const fo = (gameState && gameState.faceOff) || {};
+  const ready = fo.team1Player && fo.team2Player && gameState && gameState.currentQuestion;
+  if (ready) { openBuzzers(); return; }
+  const teams = gameState.teams;
+  const item = (done, text) =>
+    `<li class="bh-item ${done ? 'done' : 'todo'}">${done ? '✅' : '⬜'} ${text}</li>`;
+  document.getElementById('bh-list').innerHTML =
+    item(!!fo.team1Player, `Pick a contestant from <b>${escapeHtml(teams.team1.name)}</b>`) +
+    item(!!fo.team2Player, `Pick a contestant from <b>${escapeHtml(teams.team2.name)}</b>`) +
+    item(!!(gameState && gameState.currentQuestion), 'Pick a question');
+  document.getElementById('buzzer-help-modal').classList.remove('hidden');
+}
+
+function closeBuzzerHelp() {
+  document.getElementById('buzzer-help-modal').classList.add('hidden');
+}
+
 function resetFaceoff() {
   socket.emit('reset-faceoff');
 }
@@ -1011,9 +1031,10 @@ function renderRoundSetup() {
     document.getElementById('btn-reroll-q').classList.add('hidden');
   }
 
-  // Open-buzzers readiness
+  // Open-buzzers readiness — keep the button clickable (so it can explain what's
+  // missing) but give it the greyed "not ready" look until everything's set.
   const ready = fo.team1Player && fo.team2Player && hasQuestion;
-  document.getElementById('btn-open-buzzers').disabled = !ready;
+  document.getElementById('btn-open-buzzers').classList.toggle('not-ready', !ready);
   document.getElementById('setup-hint').classList.toggle('hidden', !!ready);
 }
 

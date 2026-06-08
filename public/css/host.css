@@ -431,6 +431,16 @@
   font-weight: 600;
 }
 
+/* "Open Buzzers" not-ready look (still clickable so it can explain why) */
+#btn-open-buzzers.not-ready { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.4); }
+
+/* "Why can't I open buzzers?" checklist */
+.bh-list { list-style: none; padding: 0; margin: 0; }
+.bh-list li { padding: 9px 2px; font-size: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+.bh-list li:last-child { border-bottom: none; }
+.bh-list li.done { color: var(--ff-green-glow); }
+.bh-list li.todo { color: var(--ff-white); }
+
 /* Host-only "We surveyed 100…" patter reminder */
 .q-suggest {
   color: var(--ff-gray);

@@ -128,7 +128,7 @@
 
       <div class="setup-section">
         <h3 class="setup-label">3. Open the buzzers</h3>
-        <button class="btn btn-primary" id="btn-open-buzzers" onclick="openBuzzers()" disabled>
+        <button class="btn btn-primary" id="btn-open-buzzers" onclick="tryOpenBuzzers()">
           Open Buzzers
         </button>
         <p class="setup-hint" id="setup-hint">Pick both contestants and load a question first.</p>
@@ -259,6 +259,19 @@
       <div id="fmr-questions"></div>
       <button class="btn btn-primary hidden" id="fmr-to-p2" onclick="fmToP2()">Continue to Player 2 →</button>
       <button class="btn btn-secondary hidden mt-2" id="fmr-runback" onclick="restartGame()">🔄 Run It Back (new game)</button>
+    </div>
+
+    <!-- "Why can't I open buzzers?" helper -->
+    <div id="buzzer-help-modal" class="qp-modal hidden">
+      <div class="qp-card" style="max-width:440px">
+        <div class="qp-head">
+          <h2>Almost ready…</h2>
+          <button class="qp-close" onclick="closeBuzzerHelp()" title="Close">✕</button>
+        </div>
+        <p class="qp-hint">Finish these and the <b>Open Buzzers</b> button is good to go:</p>
+        <ul id="bh-list" class="bh-list"></ul>
+        <button class="btn btn-primary" onclick="closeBuzzerHelp()" style="width:100%; margin-top:14px">Got it</button>
+      </div>
     </div>
 
     <!-- Fast Money review (vet/swap the 5 questions before starting) -->
