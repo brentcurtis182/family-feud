@@ -515,35 +515,38 @@
 .camera-play-left .gs-play-team { left: 3%; }   /* podiums on the left */
 .camera-play-right .gs-play-team { right: 3%; }  /* podiums on the right */
 
-/* Roster names sit IN the blue LED banner on the podium front. The canvas is
-   a fixed 1920x1080 and set-right.png (1672x941, exactly 16:9) covers it 1:1,
-   so the banner is at deterministic px: y ~820..895, segment centers every
-   200px starting at x=142. One tuning holds on every device. */
+/* Roster names sit IN the blue name plates on the podium front. The canvas is
+   a fixed 1920x1080 and set-right.png (1672x941) covers it ~1:1, so the plates
+   are at deterministic px — measured by scanning the image for blue runs:
+   centers (266,857) (421,841) (560,840) (688,832) (800,825). The row recedes
+   in perspective (narrower plates, rising to the right), hence per-plate
+   coordinates + shrinking font + a slight tilt. One tuning holds everywhere. */
 .gs-play-roster {
   position: absolute;
-  top: 816px;
-  height: 84px;        /* the blue banner band */
-  width: 1000px;       /* 5 segments x 200px */
-  /* Fixed 5-slot grid so names land in the SAME spots no matter the count
-     (2 or 3 players fill slots 1..N, matching the 5-player layout). */
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  justify-items: center;
-  align-items: center;
+  inset: 0;            /* names are positioned in frame px */
 }
-.camera-play-left .gs-play-roster { left: 42px; }
-/* Mirrored set: fill names from the screen edge inward (rtl grid flow) so
-   they land on the visible mirrored segments. */
-.camera-play-right .gs-play-roster { right: 42px; direction: rtl; }
 .gs-play-name {
-  direction: ltr;      /* names themselves always read left-to-right */
+  position: absolute;
   font-family: var(--font-display);
-  font-size: 32px;
   text-transform: uppercase;
   white-space: nowrap;
   color: #fff;
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);  /* no box — clean on the blue */
 }
+/* Left side (team 1): plates recede left-to-right */
+.camera-play-left .gs-play-name { transform: translate(-50%, -50%) rotate(-2.5deg); }
+.camera-play-left .gs-play-name:nth-child(1) { left: 266px; top: 857px; font-size: 32px; }
+.camera-play-left .gs-play-name:nth-child(2) { left: 421px; top: 841px; font-size: 31px; }
+.camera-play-left .gs-play-name:nth-child(3) { left: 560px; top: 840px; font-size: 29px; }
+.camera-play-left .gs-play-name:nth-child(4) { left: 688px; top: 832px; font-size: 27px; }
+.camera-play-left .gs-play-name:nth-child(5) { left: 800px; top: 825px; font-size: 25px; }
+/* Right side (team 2): backdrop is mirrored, so positions mirror too */
+.camera-play-right .gs-play-name { transform: translate(-50%, -50%) rotate(2.5deg); }
+.camera-play-right .gs-play-name:nth-child(1) { left: 1654px; top: 857px; font-size: 32px; }
+.camera-play-right .gs-play-name:nth-child(2) { left: 1499px; top: 841px; font-size: 31px; }
+.camera-play-right .gs-play-name:nth-child(3) { left: 1360px; top: 840px; font-size: 29px; }
+.camera-play-right .gs-play-name:nth-child(4) { left: 1232px; top: 832px; font-size: 27px; }
+.camera-play-right .gs-play-name:nth-child(5) { left: 1120px; top: 825px; font-size: 25px; }
 
 /* ---- Buzz-in indicator — sits under the buzzing team's name/score, on their
    side, layered over the board (so it's obvious who buzzed on a shared screen). */
