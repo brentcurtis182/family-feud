@@ -1,6 +1,6 @@
-// Temp visual test: render the TEAM_PLAY camera shot (camera-play-left) with a
-// populated board and roster, screenshot at several viewport sizes.
-// Usage: node scripts/playshot-test.js <label>
+// Temp visual test: render the TEAM_PLAY camera shot with a populated board
+// and roster, screenshot at several viewport sizes.
+// Usage: node scripts/playshot-test.js <label> [left|right]
 const puppeteer = require('puppeteer-core');
 const fs = require('fs');
 const path = require('path');
@@ -8,6 +8,7 @@ const path = require('path');
 const EDGE = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
 const OUT = path.join(process.env.TEMP || '.', 'ff-shots');
 const label = process.argv[2] || 'x';
+const side = process.argv[3] === 'right' ? 'right' : 'left';
 
 const SIZES = [
   ['desktop', 1920, 1080],
@@ -26,9 +27,9 @@ const SIZES = [
   for (const [name, w, h] of SIZES) {
     await page.setViewport({ width: w, height: h });
     await page.goto('http://localhost:3000/game-screen.html', { waitUntil: 'networkidle0' });
-    await page.evaluate(() => {
+    await page.evaluate((side) => {
       const stage = document.getElementById('game-stage');
-      stage.className = 'game-screen camera-play-left';
+      stage.className = `game-screen camera-play-${side}`;
       document.getElementById('gs-waiting').classList.add('hidden');
       const hint = document.getElementById('gs-audio-hint');
       if (hint) hint.classList.add('hidden');
@@ -53,8 +54,8 @@ const SIZES = [
       document.getElementById('gs-team2-score').textContent = '85';
       document.getElementById('gs-play-team').textContent = 'SMITHS';
       document.getElementById('gs-play-roster').innerHTML =
-        ['BRENT', 'ALEX', 'SAM', 'JO', 'PAT'].map((n) => `<span class="gs-play-name">${n}</span>`).join('');
-    });
+        ['BRENT', 'ALEX', 'SAM'].map((n) => `<span class="gs-play-name">${n}</span>`).join('');
+    }, side);
     // Let fonts/backdrop/transitions settle
     await new Promise((r) => setTimeout(r, 1200));
     const file = path.join(OUT, `play-${label}-${name}.png`);
