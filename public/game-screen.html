@@ -101,6 +101,10 @@
 
     <!-- Fullscreen toggle (outside the scaled frame; hidden where unsupported) -->
     <button class="gs-fullscreen-btn" id="gs-fullscreen-btn" title="Fullscreen" aria-label="Toggle fullscreen">⛶</button>
+
+    <!-- Sound-unlock reminder — browsers (especially iOS) block audio until the
+         page is tapped once. Visible until the first tap/click unlocks audio. -->
+    <div class="gs-sound-chip" id="gs-sound-chip">🔇 Tap anywhere for sound</div>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>

@@ -61,15 +61,20 @@ fitFrame();
 })();
 
 // Browsers gate audio behind a user gesture — unlock on first interaction.
+// iOS is strict (every page load needs a tap); desktop Chrome is often lenient.
 function unlockAudioOnce() {
   Sounds.unlock();
   document.removeEventListener('click', unlockAudioOnce);
   document.removeEventListener('keydown', unlockAudioOnce);
+  document.removeEventListener('touchstart', unlockAudioOnce);
   const hint = document.getElementById('gs-audio-hint');
   if (hint) hint.classList.add('hidden');
+  const chip = document.getElementById('gs-sound-chip');
+  if (chip) chip.classList.add('hidden');
 }
 document.addEventListener('click', unlockAudioOnce);
 document.addEventListener('keydown', unlockAudioOnce);
+document.addEventListener('touchstart', unlockAudioOnce);
 
 // Full state (on join / reconnect / broad updates)
 socket.on('game-state-sync', (state) => {
