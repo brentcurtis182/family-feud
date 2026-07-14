@@ -54,7 +54,7 @@ const SIZES = [
       document.getElementById('gs-team2-score').textContent = '85';
       document.getElementById('gs-play-team').textContent = 'SMITHS';
       document.getElementById('gs-play-roster').innerHTML =
-        ['BRENT', 'ALEX', 'SAM'].map((n) => `<span class="gs-play-name">${n}</span>`).join('');
+        ['BRENT', 'ALEX', 'SAM', 'JO', 'PAT'].map((n) => `<span class="gs-play-name">${n}</span>`).join('');
     }, side);
     // Let fonts/backdrop/transitions settle
     await new Promise((r) => setTimeout(r, 1200));

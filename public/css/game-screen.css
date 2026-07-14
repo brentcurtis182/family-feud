@@ -466,18 +466,27 @@
   --play-shift-x: 28.1%;  /* toward the corner; yellow rect stays on-screen */
   --play-shift-y: 5%;     /* up against the scoreboard, no top crop */
 }
-.gs-board { transition: transform var(--transition-camera); }
-/* team1 (podiums left) -> board to the RIGHT corner */
+.gs-board {
+  clip-path: inset(0);
+  transition: transform var(--transition-camera), clip-path var(--transition-camera);
+}
+/* During play shots, slice off the board graphic's decorative inner edge
+   (dot wall / oval arc left of the yellow rectangle, which starts ~19.5%
+   into the image) so the podium name plates behind stay visible. The board
+   itself keeps its size — the slice is just transparent. */
+/* team1 (podiums left) -> board to the RIGHT corner, slice its LEFT side */
 .camera-play-left .gs-board {
   transform: translate(-50%, -50%)
              translate(var(--play-shift-x), calc(-1 * var(--play-shift-y)))
              scale(var(--play-scale));
+  clip-path: inset(0 0 0 18.5%);
 }
-/* team2 (podiums right) -> board to the LEFT corner */
+/* team2 (podiums right) -> board to the LEFT corner, slice its RIGHT side */
 .camera-play-right .gs-board {
   transform: translate(-50%, -50%)
              translate(calc(-1 * var(--play-shift-x)), calc(-1 * var(--play-shift-y)))
              scale(var(--play-scale));
+  clip-path: inset(0 18.5% 0 0);
 }
 
 /* Playing team name + roster overlaid on their (revealed) podium side */
