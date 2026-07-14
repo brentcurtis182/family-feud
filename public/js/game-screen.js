@@ -11,6 +11,55 @@ socket.on('connect', () => {
   socket.emit('rejoin', { gameId, role: 'gamescreen' });
 });
 
+// ---- 16:9 frame scaling ----
+// The stage is a fixed 1920x1080 design canvas (.gs-frame); scale it to fit
+// whatever screen we're on. Every device renders the same layout, letterboxed.
+const FRAME_W = 1920;
+const FRAME_H = 1080;
+function fitFrame() {
+  const frame = document.getElementById('gs-frame');
+  const shell = document.getElementById('game-stage');
+  if (!frame || !shell) return;
+  // Measure the shell (100dvh-sized), not the window — tracks iOS toolbars.
+  const rect = shell.getBoundingClientRect();
+  const scale = Math.min(rect.width / FRAME_W, rect.height / FRAME_H);
+  frame.style.transform = `scale(${scale})`;
+}
+window.addEventListener('resize', fitFrame);
+window.addEventListener('orientationchange', fitFrame);
+if (window.visualViewport) window.visualViewport.addEventListener('resize', fitFrame);
+fitFrame();
+
+// ---- Fullscreen toggle (hides browser chrome when casting from iPad/laptop) ----
+(function initFullscreenBtn() {
+  const btn = document.getElementById('gs-fullscreen-btn');
+  if (!btn) return;
+  const root = document.documentElement;
+  const supported = !!(root.requestFullscreen || root.webkitRequestFullscreen);
+  // Hide if unsupported (older iPhones) or already chrome-less (PWA launch).
+  const standalone = window.matchMedia('(display-mode: standalone)').matches
+    || window.matchMedia('(display-mode: fullscreen)').matches
+    || window.navigator.standalone === true;
+  if (!supported || standalone) {
+    btn.classList.add('hidden');
+    return;
+  }
+  const isFs = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+  btn.addEventListener('click', () => {
+    if (isFs()) {
+      (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    } else {
+      (root.requestFullscreen || root.webkitRequestFullscreen).call(root);
+    }
+  });
+  const onFsChange = () => {
+    btn.title = isFs() ? 'Exit fullscreen' : 'Fullscreen';
+    fitFrame();
+  };
+  document.addEventListener('fullscreenchange', onFsChange);
+  document.addEventListener('webkitfullscreenchange', onFsChange);
+})();
+
 // Browsers gate audio behind a user gesture — unlock on first interaction.
 function unlockAudioOnce() {
   Sounds.unlock();

@@ -1,12 +1,32 @@
 /* Game Screen — TV Display */
+/* Outer shell: fills the real screen and letterboxes the 16:9 frame with dark
+   bars, so iPhones (19.5:9), iPads (4:3), and non-fullscreen browser windows
+   all show the exact same stage as a fullscreened 16:9 laptop. */
 .game-screen {
   width: 100%;
   height: 100vh;
+  height: 100dvh; /* iOS: exclude Safari's toolbars so nothing gets clipped */
+  background: #08101e; /* letterbox bar color (matches theme-color/manifest) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Fixed 1920x1080 design canvas — JS scales it (transform) to fit the screen.
+   All px/rem values inside are authored against this size, so every device
+   renders pixel-proportionally identical output. */
+.gs-frame {
+  position: relative;
+  flex: none;
+  width: 1920px;
+  height: 1080px;
   background: var(--ff-board-gradient);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  position: relative;
+  transform-origin: center center;
 }
 
 /* Scoreboard bar */
@@ -379,7 +399,7 @@
 
 .gs-strike-x {
   font-family: var(--font-display);
-  font-size: 26vw;
+  font-size: 500px; /* 26% of the 1920px design canvas (was 26vw) */
   line-height: 0.9;
   color: var(--ff-red-glow);
   text-shadow: 0 0 30px rgba(255,68,68,0.9), 0 0 60px rgba(255,68,68,0.5);
@@ -471,7 +491,7 @@
   width: 36%;
   text-align: center;
   font-family: var(--font-display);
-  font-size: 3.4vw;
+  font-size: 65px; /* 3.4% of the 1920px design canvas (was 3.4vw) */
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--ff-yellow);
@@ -498,7 +518,7 @@
 .gs-play-name {
   position: relative;            /* allow per-name nudges */
   font-family: var(--font-display);
-  font-size: 1.5vw;
+  font-size: 29px; /* 1.5% of the 1920px design canvas (was 1.5vw) */
   text-transform: uppercase;
   white-space: nowrap;
   color: #fff;
@@ -524,13 +544,13 @@
    side, layered over the board (so it's obvious who buzzed on a shared screen). */
 .gs-buzzin {
   position: absolute;
-  top: 8.5vh;
+  top: 92px;  /* 8.5% of the 1080px design canvas (was 8.5vh) */
   z-index: 25;
   max-width: 46%;
   text-align: center;
-  padding: 0.4vh 1.4vw;
+  padding: 4px 27px; /* was 0.4vh 1.4vw */
   font-family: var(--font-display);
-  font-size: 3.6vw;
+  font-size: 69px; /* 3.6% of the 1920px design canvas (was 3.6vw) */
   line-height: 1;
   letter-spacing: 0.02em;
   color: #fff;
@@ -911,3 +931,24 @@
   font-size: 1.4rem;
   color: var(--ff-gray);
 }
+
+/* ---- Fullscreen toggle (bottom-right of the real screen, not the frame) ---- */
+.gs-fullscreen-btn {
+  position: fixed;
+  right: max(12px, env(safe-area-inset-right));
+  bottom: max(12px, env(safe-area-inset-bottom));
+  z-index: 60;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.45);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+.gs-fullscreen-btn:hover { opacity: 1; }

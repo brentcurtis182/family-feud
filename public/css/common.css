@@ -17,6 +17,9 @@ html, body {
   font-family: var(--font-body);
   color: var(--ff-white);
   background: var(--ff-bg-gradient);
+  /* Solid color under the gradient: iOS paints notch/overscroll areas with the
+     page's background-COLOR only (gradients don't count → white bars without this). */
+  background-color: #08101e;
   -webkit-font-smoothing: antialiased;
 }
 
