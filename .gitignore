@@ -12,3 +12,4 @@ protoqa_train.jsonl
 # Tuning/reference screenshots dropped in for reference — not game assets
 public/assets/images/players*.png
 public/assets/images/*demo*.png
+public/assets/images/latestNames*.png
