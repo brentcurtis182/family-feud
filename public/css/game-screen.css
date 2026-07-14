@@ -536,14 +536,14 @@
 /* Left side (team 1): plates recede left-to-right */
 .camera-play-left .gs-play-name { transform: translate(-50%, -50%) rotate(-2.5deg); }
 .camera-play-left .gs-play-name:nth-child(1) { left: 266px; top: 857px; font-size: 32px; }
-.camera-play-left .gs-play-name:nth-child(2) { left: 421px; top: 841px; font-size: 31px; }
+.camera-play-left .gs-play-name:nth-child(2) { left: 421px; top: 848px; font-size: 31px; }
 .camera-play-left .gs-play-name:nth-child(3) { left: 560px; top: 840px; font-size: 29px; }
 .camera-play-left .gs-play-name:nth-child(4) { left: 688px; top: 832px; font-size: 27px; }
 .camera-play-left .gs-play-name:nth-child(5) { left: 800px; top: 825px; font-size: 25px; }
 /* Right side (team 2): backdrop is mirrored, so positions mirror too */
 .camera-play-right .gs-play-name { transform: translate(-50%, -50%) rotate(2.5deg); }
 .camera-play-right .gs-play-name:nth-child(1) { left: 1654px; top: 857px; font-size: 32px; }
-.camera-play-right .gs-play-name:nth-child(2) { left: 1499px; top: 841px; font-size: 31px; }
+.camera-play-right .gs-play-name:nth-child(2) { left: 1499px; top: 848px; font-size: 31px; }
 .camera-play-right .gs-play-name:nth-child(3) { left: 1360px; top: 840px; font-size: 29px; }
 .camera-play-right .gs-play-name:nth-child(4) { left: 1232px; top: 832px; font-size: 27px; }
 .camera-play-right .gs-play-name:nth-child(5) { left: 1120px; top: 825px; font-size: 25px; }
