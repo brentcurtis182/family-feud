@@ -456,14 +456,15 @@
 /* ---- Play shot: shrink the board into a corner so the studio set (podiums +
    blue banner of the playing team) shows in the freed space. Tunable. ---- */
 :root {
-  /* Tuned so the ENTIRE board fits inside the 1920x1080 frame (snug top
-     corner, 12px margin) — previously the board's edge hung off-screen,
-     which the strict 16:9 letterbox made obvious on every device.
-     Board is 1802x1014 in the stage; at scale s the corner-fit values are
-     shift-x = (960 - 12 - 901*s)/18.02 %, shift-y = (507*s - 495)/-10.14 %. */
-  --play-scale: 0.7;      /* board size during the play shot */
-  --play-shift-x: 17.6%;  /* into the opposite corner, fully on-screen */
-  --play-shift-y: 13.8%;  /* up into the top corner, fully on-screen */
+  /* Big board propped in the top corner. The image's decorative outer edges
+     (dot wall, oval arc) may hang off-screen, but the YELLOW slot rectangle
+     (ends ~76% into the image) and the total box stay fully in frame.
+     Board is 1802x1014 in the stage (canvas is fixed 1920x1080):
+     at scale s, left edge L = 960 + 18.02*shiftX - 901*s; keep
+     L + 0.78 * 1802*s <= 1920 so the yellow border clears the edge. */
+  --play-scale: 0.9;      /* board size during the play shot (big) */
+  --play-shift-x: 28.1%;  /* toward the corner; yellow rect stays on-screen */
+  --play-shift-y: 5%;     /* up against the scoreboard, no top crop */
 }
 .gs-board { transition: transform var(--transition-camera); }
 /* team1 (podiums left) -> board to the RIGHT corner */
