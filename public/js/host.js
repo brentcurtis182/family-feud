@@ -585,11 +585,23 @@ function initFmCapture() {
   renderFmP1Ref();
 }
 
+// On the last question the bottom button turns into the end-of-turn button, so
+// the host can finish from where their thumb already is instead of scrolling
+// back up to "Done". Jumping back to an earlier slot turns it into Next again.
+function fmCaptureFinished() {
+  return fmTimerStarted && fmCapIndex >= 4;
+}
+
 function updateNextBtn() {
   const b = document.getElementById('fmc-next');
   if (!b) return;
-  if (!fmTimerStarted) b.textContent = '▶ Start Clock (stay on Q1)';
-  else b.textContent = fmCapIndex < 4 ? `▶ Next Question (on Q${fmCapIndex + 1})` : '✓ On Q5 — tap Done above';
+  const done = fmCaptureFinished();
+  b.textContent = !fmTimerStarted
+    ? '▶ Start Clock (stay on Q1)'
+    : done
+      ? '✓ Done — Review →'
+      : `▶ Next Question (on Q${fmCapIndex + 1})`;
+  b.classList.toggle('fmc-next-done', done);
 }
 
 // ---- Cloud STT capture (MediaRecorder → /api/transcribe) ----
@@ -739,7 +751,8 @@ async function fmStartRecording() {
 
 // BOTTOM button:
 //   1st press = start the clock, STAY on Q1 (player answers Q1)
-//   later presses = advance to the next question
+//   middle presses = advance to the next question
+//   press on the last question = end the turn (same as "Done" up top)
 function fmNextQuestion() {
   if (!fmCaptureActive) fmStartRecording(); // safety if they hit Next first
 
@@ -752,11 +765,14 @@ function fmNextQuestion() {
     return; // stay on Q1
   }
 
-  if (fmCapIndex < 4) {
-    fmCapIndex++;
-    if (fmUseCloud) { stopMediaClip(); startMediaClip(); }
-    else { startFmRecognition(); }
+  if (fmCaptureFinished()) {
+    fmSubmitCapture();
+    return;
   }
+
+  fmCapIndex++;
+  if (fmUseCloud) { stopMediaClip(); startMediaClip(); }
+  else { startFmRecognition(); }
   updateNextBtn();
   document.getElementById('fmc-transcript').textContent = fmDrafts[fmCapIndex] || '';
   renderFmDrafts();

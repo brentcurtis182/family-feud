@@ -671,6 +671,12 @@
   box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.4);
 }
 .fmc-next-big:active { transform: scale(0.99); }
+/* Last question: the same button ends the turn — green so it doesn't read as
+   "one more question" and get tapped by reflex. */
+.fmc-next-big.fmc-next-done {
+  background: linear-gradient(180deg, #44ff66 0%, #22cc44 100%);
+  color: var(--ff-blue-dark);
+}
 .fmc-dup-big {
   flex: 1;
   padding: 22px;
