@@ -179,6 +179,17 @@
     <div id="panel-gameplay" class="host-panel hidden">
       <div class="gp-stakes hidden" id="gp-stakes"></div>
       <div class="gp-faceoff-banner hidden" id="gp-faceoff-banner"></div>
+
+      <!-- Play-or-pass prompt. Easy to forget in the room, and forgetting it
+           means the board never actually opens up — so it's a standing call to
+           action for the whole face-off, and escalates if the host starts
+           playing the board without having chosen. -->
+      <div class="gp-playpass hidden" id="gp-playpass">
+        <div class="pp-title" id="pp-title">👉 Ask “play or pass?” — then tap who's playing</div>
+        <div class="pp-sub" id="pp-sub">The board doesn't score until a team is playing.</div>
+        <div class="pp-buttons" id="pp-buttons"></div>
+      </div>
+
       <div class="gp-question" id="gp-question">Question</div>
       <div class="gp-question-tools">
         <button id="btn-toggle-answers" class="btn btn-secondary gp-toggle-answers" onclick="toggleHostAnswers()">👁 Display Answers</button>

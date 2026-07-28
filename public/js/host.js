@@ -315,11 +315,20 @@ function toggleHostAnswers() {
   renderGameplay();
 }
 
+// Face-off strikes clicked this round. Only used to detect that the host has
+// started playing the board without picking a team, so the prompt can escalate.
+let faceOffStrikes = 0;
+
 function addStrike() {
   // During the face-off answer a wrong buzz-in is a transient strike, not a
   // round strike; everywhere else it's a real strike.
-  if (gameState && gameState.phase === 'FACE_OFF_ANSWER') socket.emit('faceoff-strike');
-  else socket.emit('add-strike');
+  if (gameState && gameState.phase === 'FACE_OFF_ANSWER') {
+    faceOffStrikes++;
+    socket.emit('faceoff-strike');
+    renderGameplay(); // escalate the play-or-pass prompt immediately
+  } else {
+    socket.emit('add-strike');
+  }
 }
 
 function choosePlay(team) {
@@ -1228,18 +1237,37 @@ function renderGameplay() {
   // Phase actions (play-or-pass during the face-off answer; Next Round at end).
   // Sudden death has no play-or-pass — the win is decided by the top answer.
   const actions = document.getElementById('gp-actions');
-  if (phase === 'FACE_OFF_ANSWER' && !sd) {
-    actions.innerHTML =
-      `<button class="btn btn-primary" onclick="choosePlay('team1')">${escapeHtml(gameState.teams.team1.name)} plays</button>` +
-      `<button class="btn btn-primary" onclick="choosePlay('team2')">${escapeHtml(gameState.teams.team2.name)} plays</button>`;
-    actions.classList.remove('hidden');
-  } else if (phase === 'ROUND_END') {
+  if (phase === 'ROUND_END') {
     actions.innerHTML =
       `<button class="btn btn-primary" onclick="advanceRound()">${gameState.round >= gameState.totalRounds ? 'Final Tally →' : 'Next Round →'}</button>`;
     actions.classList.remove('hidden');
   } else {
     actions.innerHTML = '';
     actions.classList.add('hidden');
+  }
+
+  // Play-or-pass prompt (regular face-off only — sudden death has no play/pass).
+  // Escalates once the host starts working the board without having picked, which
+  // is the exact drift that leaves a round unable to progress.
+  const pp = document.getElementById('gp-playpass');
+  if (phase === 'FACE_OFF_ANSWER' && !sd) {
+    const revealed = (ap.revealedIndices || []).length;
+    const drifting = revealed >= 2 || faceOffStrikes > 0;
+    pp.classList.remove('hidden');
+    pp.classList.toggle('pp-urgent', drifting);
+    document.getElementById('pp-title').textContent = drifting
+      ? "⚠ Nobody's playing the board yet — tap a team to continue"
+      : "👉 Ask “play or pass?” — then tap who's playing";
+    document.getElementById('pp-sub').textContent = drifting
+      ? 'Answers you already revealed stay on the board and count once you pick.'
+      : "The board doesn't score until a team is playing.";
+    document.getElementById('pp-buttons').innerHTML =
+      `<button class="btn btn-primary" onclick="choosePlay('team1')">${escapeHtml(gameState.teams.team1.name)} plays</button>` +
+      `<button class="btn btn-primary" onclick="choosePlay('team2')">${escapeHtml(gameState.teams.team2.name)} plays</button>`;
+  } else {
+    pp.classList.add('hidden');
+    pp.classList.remove('pp-urgent');
+    faceOffStrikes = 0; // face-off is over — start the next one clean
   }
 
   // Strike button: face-off wrong answer, normal strike, or steal-fail
@@ -1250,7 +1278,9 @@ function renderGameplay() {
     strikeBtn.textContent = `✗ Missed — pass to ${otherName}`;
     strikeBtn.classList.remove('hidden');
   } else if (phase === 'FACE_OFF_ANSWER') {
-    strikeBtn.textContent = '✗ Strike (wrong answer)';
+    // Named so it's obvious these don't accumulate — they're a buzzer + an X on
+    // the TV for a wrong face-off answer, nothing more.
+    strikeBtn.textContent = '✗ Face-off miss (not a round strike)';
     strikeBtn.classList.remove('hidden');
   } else if (phase === 'TEAM_PLAY') {
     strikeBtn.textContent = 'Strike';
