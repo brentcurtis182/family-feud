@@ -13,7 +13,8 @@
     "test:phase7": "node test-phase7.js",
     "test:phase8": "node test-phase8.js",
     "test:reset": "node test-reset.js",
-    "test:fixes": "node test-fixes.js"
+    "test:fixes": "node test-fixes.js",
+    "test:lineup": "node test-lineup.js"
   },
   "keywords": [],
   "author": "Brent Curtis",

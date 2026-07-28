@@ -342,6 +342,7 @@ function renderPhase() {
   if (logo) logo.classList.add('logo-link');
   // Keep the overlay live if it's open while state changes come in.
   if (rosterEditorOpen) renderRosterEditor();
+  renderLineup();
   const camRow = document.getElementById('host-camera');
   if (camRow) camRow.classList.toggle('hidden', gameState.phase === 'LOBBY' || isFM);
 
@@ -1006,10 +1007,12 @@ function renderRoundSetup() {
     if (roster.length === 0) {
       opts.innerHTML = '<div class="faceoff-empty">Add players in the lobby first</div>';
     } else {
+      // Numbered in line-up order; the pointer's pick comes in pre-selected.
       opts.innerHTML = roster
-        .map((name) => {
+        .map((name, i) => {
           const sel = name === selected ? ' selected' : '';
-          return `<button class="faceoff-option${sel}" onclick="selectFaceoff('${teamKey}', '${escapeHtml(name)}')">${escapeHtml(name)}</button>`;
+          return `<button class="faceoff-option${sel}" onclick="lineupPick('${teamKey}', ${i})">` +
+            `<span class="fo-order">${i + 1}</span>${escapeHtml(name)}</button>`;
         })
         .join('');
     }
@@ -1197,27 +1200,113 @@ function renderLobby() {
   }
 }
 
-// Shared editable roster list (lobby + round-setup). Each player gets
-// rename (✎), move-to-other-team (⇄) and remove (✕) controls.
+// ---- Line-up strip ----
+// Sits under the scoreboard in every in-game phase, so mid-round the host can
+// always see both teams' order, who's at the podium and who's up next without
+// digging into the roster editor.
+let lineupCollapsed = false;
+
+function toggleLineup() {
+  lineupCollapsed = !lineupCollapsed;
+  renderLineup();
+}
+
+function renderLineup() {
+  if (!gameState) return;
+  const strip = document.getElementById('host-lineup');
+  if (!strip) return;
+
+  const phase = gameState.phase;
+  const hide = phase === 'LOBBY' || phase === 'GAME_OVER' || phase.startsWith('FAST_MONEY');
+  strip.classList.toggle('hidden', hide);
+  if (hide) return;
+
+  strip.classList.toggle('lu-collapsed', lineupCollapsed);
+  document.getElementById('lu-toggle').textContent = lineupCollapsed ? '▸' : '▾';
+
+  // Only before the buzzers open can the host still swap who's up, so that's
+  // the only time rows are tappable.
+  const pickable = phase === 'ROUND_SETUP' || phase === 'FACE_OFF_READY';
+  document.getElementById('lu-hint').classList.toggle('hidden', !pickable || lineupCollapsed);
+
+  for (const teamKey of ['team1', 'team2']) {
+    const team = gameState.teams[teamKey];
+    const roster = team.roster || [];
+    document.getElementById(`lu-${teamKey}-name`).textContent = team.name;
+
+    const body = document.getElementById(`lu-${teamKey}-list`);
+    if (roster.length === 0) {
+      body.innerHTML = '<div class="lu-empty">No players — add them with 👥 Players</div>';
+      continue;
+    }
+
+    // Who's up = this round's actual face-off pick, falling back to the line-up
+    // pointer (they only differ briefly while a pick is being changed).
+    const pick = (gameState.faceOff || {})[`${teamKey}Player`];
+    const turnIdx = Math.min(team.turnIndex || 0, roster.length - 1);
+    const curIdx = pick ? roster.indexOf(pick.playerName) : turnIdx;
+    const nextIdx = (curIdx + 1 + roster.length) % roster.length;
+
+    body.innerHTML = roster
+      .map((name, i) => {
+        const isCur = i === curIdx;
+        const isNext = !isCur && i === nextIdx && roster.length > 1;
+        const cls =
+          'lu-row' +
+          (isCur ? ' lu-current' : '') +
+          (isNext ? ' lu-next' : '') +
+          (pickable ? ' lu-pickable' : '');
+        const tag = isCur
+          ? '<span class="lu-tag lu-tag-up">UP</span>'
+          : isNext
+            ? '<span class="lu-tag">next</span>'
+            : '';
+        const click = pickable ? ` onclick="lineupPick('${teamKey}', ${i})"` : '';
+        return `<div class="${cls}"${click}>` +
+          `<span class="lu-num">${i + 1}</span>` +
+          `<span class="lu-name">${escapeHtml(name)}</span>${tag}</div>`;
+      })
+      .join('');
+  }
+}
+
+// Index-based so names with quotes/apostrophes can't break the handler.
+function lineupPick(teamKey, index) {
+  const name = ((gameState.teams[teamKey] || {}).roster || [])[index];
+  if (name) selectFaceoff(teamKey, name);
+}
+
+// Shared editable roster list (lobby + roster editor). Rows are numbered in
+// line-up order and get reorder (↑↓), rename (✎), move-to-other-team (⇄) and
+// remove (✕) controls.
 function fillRosterList(list, teamKey, roster) {
   if (!list) return;
   if (roster.length === 0) {
     list.innerHTML = '<li class="player-empty">No players added yet</li>';
     return;
   }
-  list.innerHTML = roster.map((name) => rosterRowHtml(teamKey, name)).join('');
+  list.innerHTML = roster
+    .map((name, i) => rosterRowHtml(teamKey, name, i, roster.length))
+    .join('');
 }
 
-function rosterRowHtml(teamKey, name) {
+function rosterRowHtml(teamKey, name, index, total) {
   const e = escapeHtml(name);
   return `<li class="player-item roster-item">
+      <span class="roster-order">${index + 1}</span>
       <span class="roster-name">${e}</span>
       <span class="roster-actions">
+        <button class="roster-btn" title="Move up in the line" ${index === 0 ? 'disabled' : ''} onclick="reorderRoster('${teamKey}', ${index}, 'up')">↑</button>
+        <button class="roster-btn" title="Move down in the line" ${index === total - 1 ? 'disabled' : ''} onclick="reorderRoster('${teamKey}', ${index}, 'down')">↓</button>
         <button class="roster-btn" title="Rename" onclick="renameRoster('${teamKey}', '${e}')">✎</button>
         <button class="roster-btn" title="Move to other team" onclick="moveRoster('${teamKey}', '${e}')">⇄</button>
         <button class="roster-btn roster-x" title="Remove" onclick="removeRoster('${teamKey}', '${e}')">✕</button>
       </span>
     </li>`;
+}
+
+function reorderRoster(team, index, direction) {
+  socket.emit('roster-reorder', { team, index, direction });
 }
 
 function addRoster(team, inputId) {

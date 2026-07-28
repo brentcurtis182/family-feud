@@ -372,6 +372,9 @@ module.exports = function registerRoundHandlers(io, socket) {
     gameState.resetActivePlay(game);
     gameState.resetFaceOff(game);
     game.phase = PHASES.ROUND_SETUP;
+    // A reset replays the same round, so put the same pair back up rather than
+    // burning their turn.
+    gameState.applyTurnPicks(game);
 
     broadcastEvent(io, game, 'strikes-cleared', {});
     broadcastEvent(io, game, 'phase-changed', {

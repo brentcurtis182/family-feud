@@ -53,9 +53,11 @@ function createGame({ hostSocketId, hostMode, team1Name, team2Name, passcode }) 
 
     teams: {
       // players = connected buzzer devices (team-based, no names needed);
-      // roster = named team members the HOST manages (used for face-off / fast money).
-      team1: { name: team1Name, score: 0, players: [], roster: [] },
-      team2: { name: team2Name, score: 0, players: [], roster: [] },
+      // roster = named team members the HOST manages, in line-up order (used for
+      //   face-off / fast money);
+      // turnIndex = who in that line is up for the next face-off.
+      team1: { name: team1Name, score: 0, players: [], roster: [], turnIndex: 0 },
+      team2: { name: team2Name, score: 0, players: [], roster: [], turnIndex: 0 },
     },
 
     judgeSocketId: null,
@@ -177,6 +179,67 @@ function resetActivePlay(game) {
   };
 }
 
+// ---- Line-up / turn order ----
+// Each team's roster doubles as a line-up: `turnIndex` points at whoever is up
+// for the next face-off and moves one down the line each round (wrapping), so
+// everybody gets a turn at the podium instead of the host guessing.
+
+function turnName(game, teamKey) {
+  const team = game.teams[teamKey];
+  return team.roster[team.turnIndex] || null;
+}
+
+function advanceTurn(game, teamKey) {
+  const team = game.teams[teamKey];
+  team.turnIndex = team.roster.length ? (team.turnIndex + 1) % team.roster.length : 0;
+}
+
+// Point a line-up at a specific player — the host tapped someone out of order,
+// so the rotation should carry on from them next round.
+function setTurnTo(game, teamKey, name) {
+  const idx = game.teams[teamKey].roster.indexOf(name);
+  if (idx !== -1) game.teams[teamKey].turnIndex = idx;
+}
+
+// Pre-fill both face-off picks from the line-ups, so each round opens with the
+// next pair already selected and the host only has to confirm.
+function applyTurnPicks(game) {
+  for (const teamKey of ['team1', 'team2']) {
+    const name = turnName(game, teamKey);
+    game.faceOff[`${teamKey}Player`] = name ? { playerName: name } : null;
+  }
+}
+
+// Mutate a roster (add / remove / move / reorder) without silently changing
+// whose turn it is: the pointer follows the same person across the edit, and
+// falls back to a valid index if that person is gone.
+function editRoster(game, teamKey, mutate) {
+  const team = game.teams[teamKey];
+  const anchor = team.roster[team.turnIndex] || null;
+  mutate(team);
+  const idx = anchor ? team.roster.indexOf(anchor) : -1;
+  team.turnIndex =
+    idx !== -1 ? idx : Math.min(team.turnIndex, Math.max(0, team.roster.length - 1));
+}
+
+// Drop face-off picks for players who are no longer on the team, and — while
+// we're still before the buzzers — refill any empty slot from the line-up, so
+// the host is never left staring at a blank contestant.
+function syncFaceOffPicks(game) {
+  for (const teamKey of ['team1', 'team2']) {
+    const pick = game.faceOff[`${teamKey}Player`];
+    if (pick && !game.teams[teamKey].roster.includes(pick.playerName)) {
+      game.faceOff[`${teamKey}Player`] = null;
+    }
+  }
+  if (game.phase !== PHASES.ROUND_SETUP && game.phase !== PHASES.FACE_OFF_READY) return;
+  for (const teamKey of ['team1', 'team2']) {
+    if (game.faceOff[`${teamKey}Player`]) continue;
+    const name = turnName(game, teamKey);
+    if (name) game.faceOff[`${teamKey}Player`] = { playerName: name };
+  }
+}
+
 function startNextRound(game) {
   game.round += 1;
   game.roundMultiplier = ROUND_MULTIPLIERS[game.round] || 3;
@@ -187,6 +250,12 @@ function startNextRound(game) {
   game.suddenDeathTurn = null; // set on the first buzz of a sudden-death round
   resetFaceOff(game);
   resetActivePlay(game);
+  // Round 1 opens with the top of each line; every round after moves one down.
+  if (game.round > 1) {
+    advanceTurn(game, 'team1');
+    advanceTurn(game, 'team2');
+  }
+  applyTurnPicks(game);
   game.phase = PHASES.ROUND_SETUP;
 }
 
@@ -312,6 +381,8 @@ const WIN_SCORE = 300;
 function resetForNewGame(game) {
   game.teams.team1.score = 0;
   game.teams.team2.score = 0;
+  game.teams.team1.turnIndex = 0; // fresh game → both line-ups back to the top
+  game.teams.team2.turnIndex = 0;
   game.round = 0;
   game.roundMultiplier = 1;
   game.currentQuestion = null;
@@ -388,6 +459,7 @@ function getClientState(game, role) {
         name: game.teams.team1.name,
         score: game.teams.team1.score,
         roster: game.teams.team1.roster,
+        turnIndex: game.teams.team1.turnIndex,
         buzzerCount: game.teams.team1.players.length,
         players: game.teams.team1.players.map((p) => ({
           playerName: p.playerName,
@@ -398,6 +470,7 @@ function getClientState(game, role) {
         name: game.teams.team2.name,
         score: game.teams.team2.score,
         roster: game.teams.team2.roster,
+        turnIndex: game.teams.team2.turnIndex,
         buzzerCount: game.teams.team2.players.length,
         players: game.teams.team2.players.map((p) => ({
           playerName: p.playerName,
@@ -462,6 +535,12 @@ module.exports = {
   setPhase,
   resetFaceOff,
   resetActivePlay,
+  turnName,
+  advanceTurn,
+  setTurnTo,
+  applyTurnPicks,
+  editRoster,
+  syncFaceOffPicks,
   startNextRound,
   calculateRoundBank,
   awardPoints,

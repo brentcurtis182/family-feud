@@ -71,12 +71,15 @@ module.exports = function registerLobbyHandlers(io, socket) {
     });
   });
 
-  // Host manages each team's named roster (used for face-off / fast money picks)
+  // Host manages each team's named roster — an ordered line-up used for the
+  // face-off rotation and fast money picks. Every edit goes through
+  // `editRoster` so shuffling names never silently changes whose turn it is.
   socket.on('roster-add', ({ team, name }) => {
     const game = gameState.getGame(socket.gameId);
     if (!game || socket.id !== game.hostSocketId) return;
     if ((team === 'team1' || team === 'team2') && name && name.trim()) {
-      game.teams[team].roster.push(name.trim());
+      gameState.editRoster(game, team, (t) => t.roster.push(name.trim()));
+      gameState.syncFaceOffPicks(game);
       broadcastState(io, game);
     }
   });
@@ -85,9 +88,32 @@ module.exports = function registerLobbyHandlers(io, socket) {
     const game = gameState.getGame(socket.gameId);
     if (!game || socket.id !== game.hostSocketId) return;
     if (team === 'team1' || team === 'team2') {
-      game.teams[team].roster = game.teams[team].roster.filter((n) => n !== name);
+      gameState.editRoster(game, team, (t) => {
+        t.roster = t.roster.filter((n) => n !== name);
+      });
+      gameState.syncFaceOffPicks(game);
       broadcastState(io, game);
     }
+  });
+
+  // Reorder the line-up (host sets who goes first, second, …).
+  socket.on('roster-reorder', ({ team, index, direction }) => {
+    const game = gameState.getGame(socket.gameId);
+    if (!game || socket.id !== game.hostSocketId) return;
+    if (team !== 'team1' && team !== 'team2') return;
+    const step = direction === 'up' ? -1 : direction === 'down' ? 1 : 0;
+    if (!step) return;
+
+    const roster = game.teams[team].roster;
+    const i = Number(index);
+    const j = i + step;
+    if (!Number.isInteger(i) || i < 0 || i >= roster.length) return;
+    if (j < 0 || j >= roster.length) return;
+
+    gameState.editRoster(game, team, (t) => {
+      [t.roster[i], t.roster[j]] = [t.roster[j], t.roster[i]];
+    });
+    broadcastState(io, game);
   });
 
   // Rename a player in place (host fixing a typo / nickname).
@@ -115,16 +141,16 @@ module.exports = function registerLobbyHandlers(io, socket) {
     if (!game || socket.id !== game.hostSocketId) return;
     if (fromTeam !== 'team1' && fromTeam !== 'team2') return;
     const toTeam = fromTeam === 'team1' ? 'team2' : 'team1';
-    const from = game.teams[fromTeam].roster;
-    const idx = from.indexOf(name);
-    if (idx === -1) return;
-    from.splice(idx, 1);
-    if (!game.teams[toTeam].roster.includes(name)) game.teams[toTeam].roster.push(name);
-    // If this player was a face-off pick for the old team, clear that pick.
-    const fo = game.faceOff || {};
-    if (fo[`${fromTeam}Player`] && fo[`${fromTeam}Player`].playerName === name) {
-      fo[`${fromTeam}Player`] = null;
-    }
+    if (!game.teams[fromTeam].roster.includes(name)) return;
+
+    gameState.editRoster(game, fromTeam, (t) => {
+      t.roster = t.roster.filter((n) => n !== name);
+    });
+    gameState.editRoster(game, toTeam, (t) => {
+      if (!t.roster.includes(name)) t.roster.push(name);
+    });
+    // Drops the stale pick on the old team and refills both from the line-ups.
+    gameState.syncFaceOffPicks(game);
     broadcastState(io, game);
   });
 

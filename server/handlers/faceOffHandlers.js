@@ -12,11 +12,15 @@ module.exports = function registerFaceOffHandlers(io, socket) {
     const game = gameState.getGame(socket.gameId);
     if (!isHostOrJudge(game, socket)) return;
 
+    // Picking someone out of order also moves that team's line-up pointer, so
+    // the rotation carries on from whoever the host actually put up.
     if (team1Player !== undefined) {
       game.faceOff.team1Player = team1Player ? { playerName: team1Player } : null;
+      if (team1Player) gameState.setTurnTo(game, 'team1', team1Player);
     }
     if (team2Player !== undefined) {
       game.faceOff.team2Player = team2Player ? { playerName: team2Player } : null;
+      if (team2Player) gameState.setTurnTo(game, 'team2', team2Player);
     }
 
     // Once both contestants and a question are set, we're ready to buzz.

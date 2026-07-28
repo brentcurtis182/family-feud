@@ -48,6 +48,26 @@
       </div>
     </div>
 
+    <!-- Line-up: both teams in order, who's at the podium and who's next.
+         Visible in every in-game phase so the host never loses track mid-round. -->
+    <div class="host-lineup hidden" id="host-lineup">
+      <div class="lu-head">
+        <span class="lu-title">Line-up</span>
+        <span class="lu-hint hidden" id="lu-hint">Tap a name to change who's up</span>
+        <button class="lu-toggle" id="lu-toggle" onclick="toggleLineup()" title="Collapse / expand">▾</button>
+      </div>
+      <div class="lu-teams">
+        <div class="lu-team">
+          <div class="lu-team-name" id="lu-team1-name">Team 1</div>
+          <div class="lu-list" id="lu-team1-list"></div>
+        </div>
+        <div class="lu-team">
+          <div class="lu-team-name" id="lu-team2-name">Team 2</div>
+          <div class="lu-list" id="lu-team2-list"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Manual camera control (cut the TV to any shot) -->
     <div class="host-camera hidden" id="host-camera">
       <span class="cam-label">🎥</span>
@@ -61,7 +81,8 @@
     <div id="panel-lobby" class="host-panel">
       <h2>Lobby</h2>
       <p class="text-center" style="color:var(--ff-gray); margin-bottom:16px; font-size:0.9rem">
-        Add each team's players below. Phones join as team buzzers (no name needed).
+        Add each team's players below, in the order they'll face off — use ↑↓ to
+        reorder. Phones join as team buzzers (no name needed).
       </p>
       <div class="lobby-teams">
         <div class="lobby-team">
@@ -99,7 +120,7 @@
       <h2>Round <span id="setup-round-num">1</span> — Face-Off</h2>
 
       <div class="setup-section">
-        <h3 class="setup-label">1. Pick a contestant from each team</h3>
+        <h3 class="setup-label">1. Contestants — next up in each line (tap to change)</h3>
         <div class="faceoff-pickers">
           <div class="faceoff-team">
             <div class="faceoff-team-name text-yellow" id="fo-team1-name">Team 1</div>
@@ -318,7 +339,7 @@
           <h2>Edit Players</h2>
           <button class="roster-modal-close" onclick="toggleRosterEditor()" title="Close">✕</button>
         </div>
-        <p class="roster-modal-hint">Add, rename, remove, or ⇄ move players between teams. Changes update everywhere live.</p>
+        <p class="roster-modal-hint">Add, rename, remove, ⇄ move players between teams, or ↑↓ reorder the line-up. Each round the face-off moves one down the line. Changes update everywhere live.</p>
         <div class="lobby-teams">
           <div class="lobby-team">
             <h3 id="editor-team1-name" class="text-yellow">Team 1</h3>

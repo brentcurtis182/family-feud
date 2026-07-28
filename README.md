@@ -42,6 +42,7 @@ Start command: `npm start` (also in `Procfile`). Railway sets `PORT` automatical
 ## Tests
 ```bash
 npm run test:fixes      # passcode / rosters / run-it-back / multipliers / stakes
+npm run test:lineup     # face-off rotation, host override, roster-edit pointer
 npm run test:phase3..8  # reveal, face-off, round loop, AI, judge, fast money
 node test-rejoin.js     # reconnection
 ```

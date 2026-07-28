@@ -971,6 +971,163 @@
   color: var(--ff-white);
 }
 
+/* ---- Line-up strip (who's at the podium, who's next) ---- */
+.host-lineup {
+  background: rgba(0, 0, 0, 0.25);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 8px 20px 10px;
+}
+
+.lu-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.lu-title {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ff-gray);
+}
+
+.lu-hint {
+  font-size: 0.75rem;
+  color: var(--ff-gray);
+  font-style: italic;
+}
+
+.lu-toggle {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--ff-gray);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+.lu-toggle:hover { color: var(--ff-yellow); }
+
+.host-lineup.lu-collapsed .lu-teams { display: none; }
+
+.lu-teams {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.lu-team-name {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  color: var(--ff-yellow);
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.lu-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.lu-pickable { cursor: pointer; }
+.lu-pickable:hover { border-color: rgba(245, 197, 24, 0.5); }
+
+.lu-num {
+  flex-shrink: 0;
+  width: 1.5em;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  color: var(--ff-gray);
+}
+
+.lu-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lu-tag {
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ff-gray);
+}
+
+/* Whose turn it is — the row the host is looking for mid-round. */
+.lu-current {
+  background: rgba(245, 197, 24, 0.16);
+  border-color: var(--ff-yellow);
+  color: var(--ff-white);
+  font-weight: 700;
+}
+.lu-current .lu-num { color: var(--ff-yellow); }
+
+.lu-tag-up {
+  background: var(--ff-yellow);
+  color: #1a1a2e;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.lu-next {
+  border-color: rgba(255, 255, 255, 0.22);
+  color: var(--ff-white);
+}
+
+.lu-empty {
+  font-size: 0.8rem;
+  color: var(--ff-gray);
+  font-style: italic;
+  padding: 4px 0;
+}
+
+/* Line-up order badge on the round-setup contestant buttons */
+.fo-order {
+  display: inline-block;
+  min-width: 1.4em;
+  margin-right: 8px;
+  font-family: var(--font-display);
+  font-size: 0.8em;
+  color: var(--ff-gray);
+}
+.faceoff-option.selected .fo-order { color: var(--ff-yellow); }
+
+/* Line-up position number in the roster editor */
+.roster-order {
+  flex-shrink: 0;
+  width: 1.6em;
+  margin-right: 6px;
+  font-family: var(--font-display);
+  font-size: 0.85em;
+  color: var(--ff-gray);
+}
+
+.roster-btn:disabled { opacity: 0.22; cursor: default; }
+.roster-btn:disabled:hover { background: none; }
+
 /* ---- Bigger fonts for host readability (large iPad) ---- */
 .host-panel { font-size: 1.15rem; }
 .host-panel h2 { font-size: 2rem; }
@@ -998,6 +1155,14 @@
 .topic-chip { font-size: 1rem; padding: 9px 16px; }
 .player-item, .roster-item { font-size: 1.1rem; }
 .lobby-buzzers { font-size: 1rem; }
+
+/* Line-up strip */
+.lu-title { font-size: 0.95rem; }
+.lu-hint { font-size: 0.85rem; }
+.lu-team-name { font-size: 1.15rem; }
+.lu-row { font-size: 1.05rem; padding: 7px 10px; }
+.lu-num { font-size: 0.95rem; }
+.lu-tag { font-size: 0.75rem; }
 
 /* Fast Money reveal + capture */
 .fmr-qtext { font-size: 1.25rem; }
