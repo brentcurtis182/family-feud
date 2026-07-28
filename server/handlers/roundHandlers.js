@@ -1,6 +1,7 @@
 const gameState = require('../gameState');
 const aiQuestions = require('../aiQuestions');
 const questions = require('../questions');
+const flagged = require('../flagged');
 const { resolveQuestion } = require('../questionService');
 const { broadcastState, broadcastEvent } = require('../broadcast');
 
@@ -195,6 +196,61 @@ module.exports = function registerRoundHandlers(io, socket) {
     gameState.resetActivePlay(g);
     broadcastEvent(io, g, 'question-ready', { text: question.text });
     broadcastState(io, g);
+  });
+
+  // Host flags the current question as unplayable — it's out of the rotation
+  // for every future game, not just this one. Before the buzzers open we also
+  // swap in a replacement so the host isn't left with a blank round.
+  socket.on('flag-question', async ({ reason } = {}) => {
+    const game = gameState.getGame(socket.gameId);
+    if (!canControl(game, socket)) return;
+    const q = game.currentQuestion;
+    if (!q) return;
+
+    const entry = flagged.flag({
+      hash: q.hash,
+      text: q.text,
+      topic: q.topic,
+      source: (game.questionRequest && game.questionRequest.source) || 'bank',
+      reason,
+    });
+    console.log(`Game ${game.gameId}: flagged "${q.text}" (${entry && entry.reason})`);
+
+    // Mid-round we only record it — yanking the board out from under a live
+    // round would be worse than finishing on a bad question.
+    const preBuzz = game.phase === PHASES.ROUND_SETUP || game.phase === PHASES.FACE_OFF_READY;
+    if (!preBuzz) {
+      socket.emit('question-flagged', { text: q.text, replaced: false, total: flagged.count() });
+      broadcastState(io, game);
+      return;
+    }
+
+    const request = game.questionRequest || { topic: 'random', source: 'bank' };
+    signalGenerating(io, game, request);
+    const question = await resolveQuestion(game, {
+      ...request, style: 'survey', suddenDeath: game.suddenDeath,
+    });
+
+    const g = gameState.getGame(socket.gameId);
+    if (!g) return;
+    g.currentQuestion = question;
+    g.usedQuestionHashes.add(question.hash);
+    g.recentQuestions.push(question.text);
+    g.roundBank = 0;
+    gameState.resetActivePlay(g);
+    socket.emit('question-flagged', { text: q.text, replaced: true, total: flagged.count() });
+    broadcastEvent(io, g, 'question-ready', { text: question.text });
+    broadcastState(io, g);
+  });
+
+  // Undo a flag (misclick, or a question that turned out to be fine).
+  socket.on('unflag-question', ({ hash } = {}) => {
+    const game = gameState.getGame(socket.gameId);
+    if (!canControl(game, socket)) return;
+    const target = hash || (game.currentQuestion && game.currentQuestion.hash);
+    if (!target) return;
+    const ok = flagged.unflag(target);
+    socket.emit('question-unflagged', { hash: target, ok, total: flagged.count() });
   });
 
   // Host chooses which team plays the board (play-or-pass decision).

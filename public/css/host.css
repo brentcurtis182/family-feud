@@ -1001,6 +1001,39 @@
   color: var(--ff-white);
 }
 
+/* ---- Flag a bad question ---- */
+.btn-flag { border-color: rgba(255, 68, 68, 0.5); color: #ffb3b3; }
+.btn-flag:hover { border-color: var(--ff-red-glow); background: rgba(204, 34, 34, 0.18); }
+
+.gp-question-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.flag-question-text {
+  background: rgba(0, 0, 0, 0.28);
+  border-radius: var(--border-radius);
+  padding: 10px 12px;
+  margin: 8px 0 4px;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--ff-white);
+}
+
+.flag-reasons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.flag-reasons .btn {
+  padding: 12px 10px;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+}
+
 /* ---- Confirm dialog (destructive host actions) ---- */
 .confirm-card { max-width: 470px; }
 .confirm-body {

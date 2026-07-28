@@ -14,7 +14,10 @@
     "test:phase8": "node test-phase8.js",
     "test:reset": "node test-reset.js",
     "test:fixes": "node test-fixes.js",
-    "test:lineup": "node test-lineup.js"
+    "test:lineup": "node test-lineup.js",
+    "test:flag": "node test-flag.js",
+    "flags": "node scripts/flags.js",
+    "flags:prune": "node scripts/flags.js --prune"
   },
   "keywords": [],
   "author": "Brent Curtis",

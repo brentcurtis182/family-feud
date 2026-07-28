@@ -31,6 +31,21 @@ See `.env.example`. All are optional:
 > Note: microphone features (Fast Money voice) require **HTTPS** (or `localhost`).
 > They work on the deployed site and on `localhost`, but not over a plain-HTTP LAN IP.
 
+## Bad questions
+The bank is ~7,600 scraped questions and some don't play well. During a game the
+host can tap **🚩 Bad Question** (on the round-setup screen or mid-round) and pick
+a reason — that question is blocklisted by hash and never served again, from the
+bank *or* AI. Before the buzzers open a replacement is loaded automatically.
+
+```bash
+npm run flags          # list what's been flagged, and why
+npm run flags:prune    # delete them from questionBank.json for good, then commit
+```
+
+Flags live in `server/flagged.json` and survive restarts. **They do not survive a
+Railway redeploy** (the container filesystem is ephemeral), so run `flags:prune`
+and commit the bank to make them permanent.
+
 ## Deploy (Railway)
 1. Push this repo to GitHub.
 2. Railway → New Project → Deploy from GitHub repo.
@@ -43,6 +58,7 @@ Start command: `npm start` (also in `Procfile`). Railway sets `PORT` automatical
 ```bash
 npm run test:fixes      # passcode / rosters / run-it-back / multipliers / stakes
 npm run test:lineup     # face-off rotation, host override, roster-edit pointer
+npm run test:flag       # bad-question flagging + blocklist
 npm run test:phase3..8  # reveal, face-off, round loop, AI, judge, fast money
 node test-rejoin.js     # reconnection
 ```

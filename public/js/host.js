@@ -94,6 +94,38 @@ socket.on('phase-changed', ({ phase, round, roundMultiplier }) => {
   }
 });
 
+// ---- Flag a bad question ----
+// Removes it from the rotation permanently (server-side blocklist keyed on the
+// question hash, so it applies to bank AND AI questions). Before the buzzers
+// open the server also swaps in a replacement.
+function openFlagQuestion() {
+  if (!gameState || !gameState.currentQuestion) return;
+  document.getElementById('flag-q-text').textContent = gameState.currentQuestion.text;
+  document.getElementById('flag-modal').classList.remove('hidden');
+}
+
+function closeFlagQuestion() {
+  document.getElementById('flag-modal').classList.add('hidden');
+}
+
+function flagBackdrop(e) {
+  if (e.target.id === 'flag-modal') closeFlagQuestion();
+}
+
+function flagQuestion(reason) {
+  socket.emit('flag-question', { reason });
+  closeFlagQuestion();
+}
+
+socket.on('question-flagged', ({ replaced, total }) => {
+  showToast(
+    replaced
+      ? `🚩 Flagged — new question loaded (${total} flagged so far)`
+      : `🚩 Flagged — it won't come up again (${total} flagged so far)`,
+    'success'
+  );
+});
+
 // ---- Confirm dialog ----
 // In-app replacement for native confirm(). The point is the ACTION BUTTON:
 // mid-game the host isn't reading paragraphs, so a red "wipe scores" button is
@@ -130,8 +162,10 @@ function confirmBackdrop(e) {
 
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
-  const m = document.getElementById('confirm-modal');
-  if (m && !m.classList.contains('hidden')) closeConfirm();
+  const c = document.getElementById('confirm-modal');
+  if (c && !c.classList.contains('hidden')) { closeConfirm(); return; }
+  const f = document.getElementById('flag-modal');
+  if (f && !f.classList.contains('hidden')) closeFlagQuestion();
 });
 
 // ---- Actions ----
@@ -1116,11 +1150,13 @@ function renderRoundSetup() {
     showQuestionSuggestion('setup-q-suggest', gameState.currentQuestion.text);
     document.getElementById('btn-load-q').classList.add('hidden');
     document.getElementById('btn-reroll-q').classList.remove('hidden');
+    document.getElementById('btn-flag-q').classList.remove('hidden');
   } else {
     qDisplay.classList.add('hidden');
     document.getElementById('setup-q-suggest').classList.add('hidden');
     document.getElementById('btn-load-q').classList.remove('hidden');
     document.getElementById('btn-reroll-q').classList.add('hidden');
+    document.getElementById('btn-flag-q').classList.add('hidden');
   }
 
   // Open-buzzers readiness — keep the button clickable (so it can explain what's

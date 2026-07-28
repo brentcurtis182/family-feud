@@ -150,6 +150,7 @@
         <div class="setup-actions">
           <button class="btn btn-secondary" id="btn-load-q" onclick="loadQuestion()">Pick a Question</button>
           <button class="btn btn-secondary hidden" id="btn-reroll-q" onclick="rerollQuestion()">🔀 Change Question</button>
+          <button class="btn btn-secondary btn-flag hidden" id="btn-flag-q" onclick="openFlagQuestion()">🚩 Bad Question</button>
         </div>
       </div>
 
@@ -179,7 +180,10 @@
       <div class="gp-stakes hidden" id="gp-stakes"></div>
       <div class="gp-faceoff-banner hidden" id="gp-faceoff-banner"></div>
       <div class="gp-question" id="gp-question">Question</div>
-      <button id="btn-toggle-answers" class="btn btn-secondary gp-toggle-answers" onclick="toggleHostAnswers()">👁 Display Answers</button>
+      <div class="gp-question-tools">
+        <button id="btn-toggle-answers" class="btn btn-secondary gp-toggle-answers" onclick="toggleHostAnswers()">👁 Display Answers</button>
+        <button class="btn btn-secondary btn-flag" onclick="openFlagQuestion()" title="Never show this question again">🚩 Bad Question</button>
+      </div>
       <div class="gp-answers" id="gp-answers"></div>
 
       <!-- Phase-specific actions (play-or-pass buttons, etc.) -->
@@ -364,6 +368,30 @@
         <button class="btn btn-primary" onclick="toggleRosterEditor()">Done</button>
       </div>
     </div>
+    <!-- Flag a bad question. One tap per reason: it's gone from the rotation
+         for good, and the reason gives us data on what "bad" actually means. -->
+    <div id="flag-modal" class="qp-modal hidden" onclick="flagBackdrop(event)">
+      <div class="qp-card confirm-card">
+        <div class="qp-head">
+          <h2>🚩 Bad question?</h2>
+          <button class="qp-close" onclick="closeFlagQuestion()" title="Cancel">✕</button>
+        </div>
+        <div class="flag-question-text" id="flag-q-text"></div>
+        <p class="qp-hint">It won't come up again in this or any future game. What's wrong with it?</p>
+        <div class="flag-reasons">
+          <button class="btn btn-secondary" onclick="flagQuestion('duplicate answers')">Duplicate answers</button>
+          <button class="btn btn-secondary" onclick="flagQuestion('confusing or unclear')">Confusing / unclear</button>
+          <button class="btn btn-secondary" onclick="flagQuestion('not english')">Not in English</button>
+          <button class="btn btn-secondary" onclick="flagQuestion('too obscure')">Too obscure</button>
+          <button class="btn btn-secondary" onclick="flagQuestion('inappropriate')">Inappropriate</button>
+          <button class="btn btn-secondary" onclick="flagQuestion('other')">Something else</button>
+        </div>
+        <div class="qp-foot">
+          <button class="btn btn-secondary" onclick="closeFlagQuestion()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Confirm dialog for destructive host actions. Replaces the native
          confirm() so the action button itself carries the warning — at speed
          nobody reads dialog text, but a red "wipe scores" button registers. -->
