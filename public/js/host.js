@@ -933,10 +933,16 @@ function fmrRow(player, i, q) {
   const dup = player === 'p2'
     ? `<button class="fmr-chip fmr-dup" ${dis} onclick="fmPickDup(${i})">Duplicate</button>` : '';
 
-  // Transcript / memory aid — also what "No match" puts on the board (so the
-  // audience sees what the player actually said, even at 0). Editable; wraps.
-  const transcript = `<div class="fmr-said"><span class="fmr-name">they said:</span>
-      <textarea class="input fmr-answer-edit" id="fmr-said-${player}-${i}" rows="2" onchange="fmEdit('${player}',${i},this.value)" placeholder="(type what to show on the board — optional)">${escapeHtml(said)}</textarea>
+  // What the player said (transcript / memory aid) is read-only — it's often a
+  // rambling sentence, and it used to pre-fill the edit box, so writing a clean
+  // board version meant backspacing through the whole thing first. The box now
+  // starts empty: type a short version, or leave it blank to put the transcript
+  // on the board as-is.
+  const heard = said
+    ? `<div class="fmr-heard"><span class="fmr-name">they said:</span> “${escapeHtml(said)}”</div>`
+    : `<div class="fmr-heard fmr-heard-empty"><span class="fmr-name">nothing captured</span></div>`;
+  const transcript = `<div class="fmr-said">${heard}
+      <textarea class="input fmr-answer-edit" id="fmr-said-${player}-${i}" rows="2" onchange="fmEdit('${player}',${i},this.value)" placeholder="${said ? '(optional — type a shorter version for the board)' : '(type what to show on the board)'}"></textarea>
     </div>`;
 
   // 3-beat reveal: ① cursor → ② pick answer (words flip + chase) → ③ score
@@ -970,11 +976,12 @@ function fmPickChip(player, qIndex, ansIndex) {
   socket.emit('fastmoney-pick', { player, index: qIndex, text: a.text, points: a.points, duplicate: false });
 }
 function fmPickNoMatch(player, index) {
-  // Show whatever the host typed/transcribed in the "they said" box (so the
-  // audience sees the player's answer at 0). Falls back to a dash if empty.
+  // Board text: the host's typed version if they wrote one, otherwise the
+  // transcript as-is — so the audience still sees the player's answer at 0.
   const el = document.getElementById(`fmr-said-${player}-${index}`);
-  const text = ((el ? el.value : gameState.fastMoney.input[player][index]) || '').trim();
-  socket.emit('fastmoney-pick', { player, index, text: text || '—', points: 0, duplicate: false });
+  const typed = ((el && el.value) || '').trim();
+  const heard = (gameState.fastMoney.input[player][index] || '').trim();
+  socket.emit('fastmoney-pick', { player, index, text: typed || heard || '—', points: 0, duplicate: false });
 }
 function fmPickDup(index) {
   socket.emit('fastmoney-pick', { player: 'p2', index, text: '—', points: 0, duplicate: true });
@@ -984,7 +991,10 @@ function fmRevealScore(player, index) {
   socket.emit('fastmoney-reveal-score', { player, index });
 }
 
+// Typing in the box replaces the stored answer. An empty box means "no
+// override" (fall back to the transcript), so it must not wipe what's stored.
 function fmEdit(player, index, text) {
+  if (!text || !text.trim()) return;
   socket.emit('fastmoney-edit', { player, index, text });
 }
 

@@ -577,6 +577,14 @@
 }
 
 .fmr-action { width: 100%; margin-top: 6px; }
+/* Read-only transcript line above the board-text box */
+.fmr-heard {
+  line-height: 1.35;
+  word-break: break-word;
+  color: rgba(255, 255, 255, 0.85);
+}
+.fmr-heard-empty { font-style: italic; }
+
 .fmr-answer-edit {
   display: block;
   width: 100%;
