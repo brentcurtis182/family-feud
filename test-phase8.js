@@ -7,7 +7,49 @@ const once = (s, e) => new Promise((res) => s.once(e, res));
 let failures = 0;
 const check = (l, c) => { console.log(`${c ? 'PASS' : 'FAIL'}: ${l}`); if (!c) failures++; };
 
+// In-process check of the transcription-clip guard. Uploads are async, so a
+// clip can land after the host has already ended the turn; it must not
+// overwrite what they typed or corrected. No server/STT needed for this part.
+function transcriptGuardChecks() {
+  const gs = require('./server/gameState');
+  const game = gs.createGame({
+    hostSocketId: 'x', hostMode: 'host-judge', team1Name: 'A', team2Name: 'B', passcode: 'pw',
+  });
+  const q = { text: 'q', answers: [{ text: 'a', points: 10 }] };
+  gs.initFastMoney(game, 'Al', 'Bo', [q, q, q, q, q]);
+  const fm = game.fastMoney;
+
+  // Mid-turn: a re-recorded slot SHOULD replace the earlier clip.
+  check('G1 transcript fills an empty slot mid-turn',
+    gs.applyTranscript(game, 'p1', 0, 'piano') === true && fm.input.p1[0] === 'piano');
+  check('G1 re-record replaces it mid-turn',
+    gs.applyTranscript(game, 'p1', 0, 'guitar') === true && fm.input.p1[0] === 'guitar');
+
+  // Host ends the turn having typed Q5 by hand (mic was flaky).
+  fm.input.p1[4] = 'beach';
+  fm.submitted.p1 = true;
+
+  check('G2 straggler does NOT clobber a typed answer',
+    gs.applyTranscript(game, 'p1', 4, 'uh i dunno') === false && fm.input.p1[4] === 'beach');
+  check('G2 straggler still fills a blank slot (self-heal)',
+    gs.applyTranscript(game, 'p1', 3, 'dog') === true && fm.input.p1[3] === 'dog');
+  check('G2 the other player is unaffected',
+    gs.applyTranscript(game, 'p2', 0, 'coffee') === true && fm.input.p2[0] === 'coffee');
+
+  // Junk from the query string must not write anywhere.
+  check('G3 bad index rejected',
+    gs.applyTranscript(game, 'p1', NaN, 'x') === false &&
+    gs.applyTranscript(game, 'p1', 9, 'x') === false &&
+    gs.applyTranscript(game, 'p1', -1, 'x') === false);
+  check('G3 bad player rejected', gs.applyTranscript(game, 'p3', 0, 'x') === false);
+  check('G3 missing game rejected', gs.applyTranscript(null, 'p1', 0, 'x') === false);
+
+  gs.deleteGame(game.gameId);
+}
+
 (async () => {
+  transcriptGuardChecks();
+
   const host = io(URL), tv = io(URL), p2dev = io(URL);
   await Promise.all([host, tv, p2dev].map((s) => once(s, 'connect')));
   host.emit('create-game', { hostMode: 'host-judge', team1Name: 'A', team2Name: 'B', passcode: 'pw' });

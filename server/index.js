@@ -33,9 +33,9 @@ app.post('/api/transcribe', express.raw({ type: () => true, limit: '15mb' }), as
 
     const { gameId, player, index } = req.query;
     const game = gameState.getGame(gameId);
-    const idx = parseInt(index, 10);
-    if (game && game.fastMoney && (player === 'p1' || player === 'p2') && idx >= 0 && idx < 5) {
-      game.fastMoney.input[player][idx] = text;
+    // Won't clobber an answer the host typed or corrected after ending the turn
+    // — see applyTranscript.
+    if (gameState.applyTranscript(game, player, parseInt(index, 10), text)) {
       broadcastState(io, game);
     }
     res.json({ text });

@@ -329,6 +329,26 @@ function initFastMoney(game, p1Name, p2Name, questionList) {
   };
 }
 
+// Store a transcription clip into a Fast Money slot. Uploads are async, so a
+// clip can land after the host has already ended the turn.
+//
+// Before the turn is submitted, a later clip replacing an earlier one is the
+// point — that's how re-recording a slot with the 🎤 button works. After it's
+// submitted, the host has typed or corrected these answers by hand, so a
+// straggler may only fill a slot that's still blank; otherwise it would
+// silently overwrite their work on the reveal screen.
+//
+// Returns true if the slot changed (so the caller knows to broadcast).
+function applyTranscript(game, player, index, text) {
+  const fm = game && game.fastMoney;
+  if (!fm) return false;
+  if (player !== 'p1' && player !== 'p2') return false;
+  if (!Number.isInteger(index) || index < 0 || index >= FAST_MONEY_SLOTS) return false;
+  if (fm.submitted[player] && fm.input[player][index]) return false;
+  fm.input[player][index] = text;
+  return true;
+}
+
 function recomputeFastMoneyTotal(game) {
   const fm = game.fastMoney;
   if (!fm) return 0;
@@ -551,6 +571,7 @@ module.exports = {
   resetForNewGame,
   computeStakes,
   initFastMoney,
+  applyTranscript,
   recomputeFastMoneyTotal,
   FAST_MONEY_SLOTS,
   FAST_MONEY_TARGET,
