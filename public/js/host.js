@@ -319,12 +319,15 @@ function updateState(state) {
 function renderPhase() {
   if (!gameState) return;
 
-  // Update round info
+  // Update round info (cleared back in the lobby — a restart drops to round 0
+  // and the old label would otherwise stick around)
   if (gameState.suddenDeath) {
     document.getElementById('round-info').textContent = '🟥 Sudden Death';
   } else if (gameState.round > 0) {
     const multiplierText = gameState.roundMultiplier > 1 ? ` (${gameState.roundMultiplier}x)` : '';
     document.getElementById('round-info').textContent = `Round ${gameState.round}${multiplierText}`;
+  } else {
+    document.getElementById('round-info').textContent = '';
   }
 
   const isFM = gameState.phase.startsWith('FAST_MONEY');
@@ -337,6 +340,13 @@ function renderPhase() {
   // Roster editor is reachable in every phase once the game has started.
   const playersBtn = document.getElementById('btn-players');
   if (playersBtn) playersBtn.classList.toggle('hidden', gameState.phase === 'LOBBY');
+  // Full restart is available in any phase once started — e.g. people show up
+  // mid-game and you want to redo the teams from the lobby. GAME_OVER has its
+  // own "Run It Back" button, so it isn't needed there.
+  const restartBtn = document.getElementById('btn-restart-game');
+  if (restartBtn) {
+    restartBtn.classList.toggle('hidden', gameState.phase === 'LOBBY' || gameState.phase === 'GAME_OVER');
+  }
   // Logo is always a link back to the main menu (Resume Hosting gets you back).
   const logo = document.getElementById('host-logo');
   if (logo) logo.classList.add('logo-link');
@@ -1381,10 +1391,25 @@ function renderRosterEditor() {
   }
 }
 
+// Full restart → back to the lobby with scores and rounds wiped, teams, players
+// and connected phones kept. Mid-game this throws away a game in progress, so
+// the confirm spells out exactly what's being discarded.
 function restartGame() {
-  if (confirm('Run it back? Resets scores & rounds but keeps the same teams and players.')) {
-    socket.emit('restart-game');
+  const phase = gameState ? gameState.phase : 'LOBBY';
+  const midGame = phase !== 'LOBBY' && phase !== 'GAME_OVER';
+  let msg;
+  if (midGame) {
+    const t1 = gameState.teams.team1, t2 = gameState.teams.team2;
+    msg =
+      `Restart the whole game?\n\n` +
+      `Round ${gameState.round} is still in progress — it will be discarded and ` +
+      `the score reset to 0 (${t1.name} ${t1.score} — ${t2.name} ${t2.score}).\n\n` +
+      `Teams, players and connected phones are kept. You'll go back to the lobby, ` +
+      `where you can add players before starting again.`;
+  } else {
+    msg = 'Run it back? Resets scores & rounds but keeps the same teams and players.';
   }
+  if (confirm(msg)) socket.emit('restart-game');
 }
 
 function escapeHtml(text) {

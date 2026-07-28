@@ -14,6 +14,8 @@
   padding: 12px 20px;
   background: rgba(0, 0, 0, 0.3);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .host-title {
@@ -35,7 +37,9 @@
 .game-info {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 10px 16px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .game-code {
@@ -71,6 +75,18 @@
   border-color: var(--ff-yellow);
   background: rgba(245, 197, 24, 0.25);
   color: var(--ff-yellow);
+}
+/* Destructive header action — kept visually distinct from the neutral ones so
+   it isn't mistaken for "Reset Round" sitting next to it. */
+.btn-reset.btn-danger {
+  border-color: rgba(255, 68, 68, 0.55);
+  background: rgba(204, 34, 34, 0.18);
+  color: #ffb3b3;
+}
+.btn-reset.btn-danger:hover {
+  border-color: var(--ff-red-glow);
+  background: rgba(204, 34, 34, 0.35);
+  color: var(--ff-white);
 }
 
 /* Scoreboard */
