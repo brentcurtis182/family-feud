@@ -364,6 +364,22 @@
         <button class="btn btn-primary" onclick="toggleRosterEditor()">Done</button>
       </div>
     </div>
+    <!-- Confirm dialog for destructive host actions. Replaces the native
+         confirm() so the action button itself carries the warning — at speed
+         nobody reads dialog text, but a red "wipe scores" button registers. -->
+    <div id="confirm-modal" class="qp-modal hidden" onclick="confirmBackdrop(event)">
+      <div class="qp-card confirm-card">
+        <div class="qp-head">
+          <h2 id="confirm-title">Are you sure?</h2>
+          <button class="qp-close" onclick="closeConfirm()" title="Cancel">✕</button>
+        </div>
+        <div id="confirm-body" class="confirm-body"></div>
+        <div class="qp-foot">
+          <button class="btn btn-secondary" onclick="closeConfirm()">Cancel</button>
+          <button class="btn btn-primary" id="confirm-ok" onclick="acceptConfirm()">Confirm</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>

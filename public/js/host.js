@@ -94,13 +94,59 @@ socket.on('phase-changed', ({ phase, round, roundMultiplier }) => {
   }
 });
 
+// ---- Confirm dialog ----
+// In-app replacement for native confirm(). The point is the ACTION BUTTON:
+// mid-game the host isn't reading paragraphs, so a red "wipe scores" button is
+// what actually distinguishes Restart Game from Reset Round sitting next to it.
+// `body` is HTML — escape anything that came from a user (team names).
+let _confirmAction = null;
+
+function showConfirm({ title, body, okLabel, danger, onConfirm }) {
+  _confirmAction = onConfirm;
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-body').innerHTML = body;
+  const ok = document.getElementById('confirm-ok');
+  ok.textContent = okLabel;
+  ok.classList.toggle('btn-danger', !!danger);
+  ok.classList.toggle('btn-primary', !danger);
+  document.getElementById('confirm-modal').classList.remove('hidden');
+}
+
+function closeConfirm() {
+  _confirmAction = null;
+  document.getElementById('confirm-modal').classList.add('hidden');
+}
+
+function acceptConfirm() {
+  const fn = _confirmAction;
+  closeConfirm();
+  if (fn) fn();
+}
+
+// Tapping the backdrop (but not the card) cancels, same as Escape.
+function confirmBackdrop(e) {
+  if (e.target.id === 'confirm-modal') closeConfirm();
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  const m = document.getElementById('confirm-modal');
+  if (m && !m.classList.contains('hidden')) closeConfirm();
+});
+
 // ---- Actions ----
 // Logo → main menu. Instant from the lobby / game-over; mid-game it confirms
 // first (you can always jump back via "Resume Hosting" on the main menu).
 function goHome() {
   const midGame = gameState && gameState.phase !== 'LOBBY' && gameState.phase !== 'GAME_OVER';
-  if (midGame && !confirm('Go to the main menu? The game keeps running — return any time via "Resume Hosting".')) return;
-  window.location.href = '/';
+  if (!midGame) { window.location.href = '/'; return; }
+  showConfirm({
+    title: 'Go to the main menu?',
+    body: '<p>The game keeps running — you can come back any time via <b>Resume Hosting</b> on the main menu.</p>',
+    okLabel: 'Go to Main Menu',
+    danger: false,
+    onConfirm: () => { window.location.href = '/'; },
+  });
 }
 
 function startGame() {
@@ -267,10 +313,17 @@ function toggleApplause() {
   document.getElementById('btn-applause').classList.toggle('active', applauseOn);
 }
 
+// Mild action — neutral button, since this only redoes the current round.
 function resetRound() {
-  if (confirm('Reset this round? Clears the question, board, strikes and face-off picks (scores stay).')) {
-    socket.emit('reset-round');
-  }
+  showConfirm({
+    title: 'Reset this round?',
+    body:
+      '<p>Clears the question, board, strikes and face-off picks so you can replay this round.</p>' +
+      '<p class="confirm-safe">✓ Scores are kept, and you stay on the same round.</p>',
+    okLabel: '↺ Reset Round',
+    danger: false,
+    onConfirm: () => socket.emit('reset-round'),
+  });
 }
 
 // ---- "We asked 100…" host patter suggestion (host-only reminder) ----
@@ -1397,19 +1450,23 @@ function renderRosterEditor() {
 function restartGame() {
   const phase = gameState ? gameState.phase : 'LOBBY';
   const midGame = phase !== 'LOBBY' && phase !== 'GAME_OVER';
-  let msg;
-  if (midGame) {
-    const t1 = gameState.teams.team1, t2 = gameState.teams.team2;
-    msg =
-      `Restart the whole game?\n\n` +
-      `Round ${gameState.round} is still in progress — it will be discarded and ` +
-      `the score reset to 0 (${t1.name} ${t1.score} — ${t2.name} ${t2.score}).\n\n` +
-      `Teams, players and connected phones are kept. You'll go back to the lobby, ` +
-      `where you can add players before starting again.`;
-  } else {
-    msg = 'Run it back? Resets scores & rounds but keeps the same teams and players.';
-  }
-  if (confirm(msg)) socket.emit('restart-game');
+  const t1 = gameState.teams.team1, t2 = gameState.teams.team2;
+  const scoreline =
+    `<p class="confirm-scores">${escapeHtml(t1.name)} <b>${t1.score}</b>` +
+    `<span>—</span>${escapeHtml(t2.name)} <b>${t2.score}</b></p>`;
+
+  showConfirm({
+    title: midGame ? 'Restart the whole game?' : 'Run it back?',
+    body: midGame
+      ? `<p class="confirm-warn">⚠ Round ${gameState.round} is still in progress. It will be discarded and the score wiped:</p>` +
+        scoreline +
+        `<p>Teams, players and connected phones are kept. You'll go back to the lobby, where you can add players before starting again.</p>`
+      : `<p>Resets scores and rounds back to the lobby.</p>` + scoreline +
+        `<p>Teams, players and connected phones are kept.</p>`,
+    okLabel: midGame ? '🔄 Yes, restart — wipe scores' : '🔄 Run It Back',
+    danger: true,
+    onConfirm: () => socket.emit('restart-game'),
+  });
 }
 
 function escapeHtml(text) {

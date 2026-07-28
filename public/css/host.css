@@ -1001,6 +1001,34 @@
   color: var(--ff-white);
 }
 
+/* ---- Confirm dialog (destructive host actions) ---- */
+.confirm-card { max-width: 470px; }
+.confirm-body {
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.45;
+  font-size: 0.95rem;
+  margin: 6px 0 2px;
+}
+.confirm-body p { margin: 0 0 10px; }
+.confirm-body p:last-child { margin-bottom: 0; }
+.confirm-warn { color: var(--ff-red-glow); font-weight: 600; }
+.confirm-safe { color: var(--ff-green-glow); }
+.confirm-scores {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  letter-spacing: 0.04em;
+  background: rgba(0, 0, 0, 0.28);
+  border-radius: var(--border-radius);
+  padding: 10px 12px;
+}
+.confirm-scores b { color: var(--ff-yellow); }
+.confirm-scores span { color: var(--ff-gray); }
+
 /* ---- Line-up strip (who's at the podium, who's next) ---- */
 .host-lineup {
   background: rgba(0, 0, 0, 0.25);
