@@ -1313,3 +1313,86 @@
 
 /* Buttons a touch bigger everywhere on host */
 .host-container .btn { font-size: 1.2rem; }
+
+/* ---- Desktop / mouse layout ----------------------------------------------
+   Everything above is tuned for hosting on an iPad held at arm's length. On a
+   big monitor those sizes force the host to scroll mid-round just to read the
+   answer list, so on a fine pointer (mouse) at desktop width we scale back to
+   the base type and go two-column, aiming to fit a round on one screen.
+   Keyed on `pointer: fine` rather than width alone so a large iPad in
+   landscape — which is wider than many laptops — keeps the touch sizing.     */
+@media (pointer: fine) and (min-width: 1200px) {
+  /* Undo the iPad type boost */
+  .host-panel { font-size: 1rem; }
+  .host-panel h2 { font-size: 1.4rem; margin-bottom: 12px; }
+  .host-container .btn { font-size: 1rem; padding: 10px 20px; }
+  .score-value { font-size: 2.4rem; }
+  .team-name { font-size: 1rem; }
+  .game-code { font-size: 1.05rem; }
+
+  .gp-question { font-size: 1.25rem; padding: 12px 16px; }
+  .gp-answer { padding: 9px 14px; }
+  .gp-answer-rank { font-size: 1.1rem; }
+  .gp-answer-text { font-size: 1.05rem; }
+  .gp-answer-points { font-size: 1.15rem; }
+  .gp-stakes, .gp-faceoff-banner { font-size: 1rem; }
+  .gp-bank-value { font-size: 1.8rem; }
+  .gp-strikes-display { font-size: 1.7rem; }
+  .btn-strike, .gp-control-buttons .btn { font-size: 1rem; }
+  .setup-label { font-size: 1rem; }
+  .faceoff-option { font-size: 1rem; padding: 9px 12px; }
+  .faceoff-team-name { font-size: 1.1rem; }
+  .topic-chip { font-size: 0.85rem; padding: 6px 12px; }
+  .player-item, .roster-item { font-size: 0.95rem; }
+  .pp-title { font-size: 1.1rem; }
+
+  /* Reclaim vertical space from the chrome above the panel */
+  .host-scoreboard { padding: 8px 20px; gap: 16px; }
+  .host-lineup { padding: 6px 20px 8px; }
+  .lu-row { padding: 3px 8px; font-size: 0.9rem; }
+  .lu-team-name { font-size: 0.95rem; }
+  .lu-title, .lu-hint { font-size: 0.75rem; }
+  .host-camera { padding: 5px 20px; }
+
+  /* --- Gameplay: question + answers on the left, everything else right --- */
+  #panel-gameplay {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+    grid-template-areas:
+      "stakes   stakes"
+      "question banner"
+      "tools    playpass"
+      "answers  actions"
+      "answers  controls"
+      "answers  .";
+    gap: 10px 20px;
+    align-content: start;
+  }
+  #gp-stakes          { grid-area: stakes; margin: 0; }
+  #gp-question        { grid-area: question; margin: 0; }
+  .gp-question-tools  { grid-area: tools; margin: 0; justify-content: flex-start; }
+  #gp-answers         { grid-area: answers; margin: 0; }
+  #gp-faceoff-banner  { grid-area: banner; margin: 0; }
+  #gp-playpass        { grid-area: playpass; margin: 0; }
+  #gp-actions         { grid-area: actions; margin: 0; flex-wrap: wrap; }
+  #panel-gameplay .gp-controls { grid-area: controls; margin: 0; flex-wrap: wrap; }
+
+  /* The face-off duo cells stack in the narrower right column */
+  .gp-faceoff-banner.fo-duo-mode .fo-duo { grid-template-columns: 1fr; }
+  .pp-buttons { flex-direction: column; }
+
+  /* --- Round setup: contestants on the left, question flow on the right --- */
+  #panel-round-setup {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+    gap: 4px 22px;
+    align-content: start;
+  }
+  #panel-round-setup > h2 { grid-column: 1 / -1; }
+  #panel-round-setup > .setup-section:nth-child(2) { grid-column: 1; grid-row: 2 / span 2; }
+  #panel-round-setup > .setup-section:nth-child(3) { grid-column: 2; grid-row: 2; }
+  #panel-round-setup > .setup-section:nth-child(4) { grid-column: 2; grid-row: 3; }
+
+  /* Lobby reads better centred than stretched across a 27" */
+  #panel-lobby, #panel-round-end, #panel-game-over { max-width: 900px; margin: 0 auto; }
+}
